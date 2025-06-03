@@ -27,32 +27,23 @@ import { days } from "app/screens/create-new-habit"
 import { HomeNavProps, HomeStackScreenProps } from "app/navigators/types"
 import { $tabBarStyles } from "app/navigators/styles"
 
-const checkIns = [
-  {
-    emoji: "💧",
-    title: "Water",
-    name: "glass",
-    amount: "3/4",
-    color: colors.palette.accent400,
-    fill: 30,
-  },
-  {
-    emoji: "😴",
-    title: "Sleep",
-    name: "hours",
-    amount: "4/6",
-    color: colors.palette.secondary400,
-    fill: 80,
-  },
-  {
-    emoji: "🧘",
-    title: "Meditation",
-    name: "min",
-    amount: "10/15",
-    color: colors.palette.neutral500,
-    fill: 60,
-  },
-]
+import { habitStore } from "app/models/habit-store"
+
+
+console.log("📋 All Habits in Store:", habitStore.habits.map(h => ({
+  name: h.name,
+  category: h.category,
+  finished: h.finished,
+  current: h.current,
+  target: h.target
+})))
+
+
+
+
+
+
+
 
 interface HabitType {
   id: number
@@ -119,7 +110,30 @@ const DayCard = ({ day, date, progress }: DayCardProps) => (
 interface HomeScreenProps extends HomeStackScreenProps<"Home"> {}
 
 export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ navigation }) {
+
+const checkIns = habitStore.habits
+  .filter((habit) => habit.category === "health") // or however you distinguish health habits
+  .map((habit) => ({
+    emoji: habit.emoji || "💧",
+    title: habit.name,
+    name: habit.unit || "", // you might need to add this field
+    amount: `${habit.current}/${habit.target}`, // e.g., "3/4"
+    color: habit.color || colors.palette.primary300, // optional
+    fill: (habit.current / habit.target) * 100,
+  }))
+
+console.log("🧪 checkIns:", checkIns)
+
+
+
+
   return (
+
+    
+
+
+
+
     <Screen preset="scroll" safeAreaEdges={["top", "bottom"]} contentContainerStyle={$container}>
       <BottomSheetModalProvider>
         <View style={$headerContainer}>
@@ -135,6 +149,9 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
               onPress={() => navigation.navigate("CreateHabit")}
             />
           </View>
+          <TouchableOpacity onPress={() => navigation.navigate("FakeHabit")}>
+  <Text style={{ color: "blue", fontSize: 16 }}>Go to FakeHabit</Text>
+</TouchableOpacity>
         </View>
 
         <View style={$topContainer}>
@@ -203,9 +220,19 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
         <View style={{ gap: spacing.md }}>
           <Text tx="homeScreen.today" preset="subheading" />
           <View style={$bottomContainer}>
-            {tasks.map((task, idx) => (
-              <Habit key={`${task.id}-${idx}`} task={task} navigation={navigation} />
-            ))}
+       {habitStore.habits.map((habit, idx) => {
+  const transformedHabit = {
+    id: habit.id,
+    name: habit.name,
+    emoji: habit.emoji || "🔥",
+    time: habit.time || "08:00",
+    finished: habit.finished ?? false,
+  }
+
+  return <Habit key={`${habit.id}-${idx}`} task={transformedHabit} navigation={navigation} />
+})}
+
+
           </View>
         </View>
       </BottomSheetModalProvider>

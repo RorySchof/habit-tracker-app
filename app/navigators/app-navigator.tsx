@@ -20,6 +20,8 @@ import { $tabBarStyles } from "app/navigators/styles"
 import { PersonalInfosScreen } from "app/screens/profile/personal-infos"
 import { EditPersonalInfosScreen } from "app/screens/profile/edit-personal-infos"
 import { EditPasswordScreen } from "app/screens/profile/edit-password"
+import { FakeHabitScreen } from "app/screens/fakeHabit"
+
 
 /**
  * This type allows TypeScript to know what routes are defined in this navigator
@@ -55,6 +57,9 @@ const HomeStack = observer(function HomeStack() {
       <Stack.Screen name="CreateNewHabit" component={Screens.CreateNewHabitScreen} />
       {/* @ts-expect-error type props error */}
       <Stack.Screen name="EditHabit" component={Screens.EditHabitScreen} />
+      <Stack.Screen name="FakeHabit" component={FakeHabitScreen} />
+
+      
     </Stack.Navigator>
   )
 })

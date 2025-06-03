@@ -6,6 +6,7 @@ export type HomeStackParamList = {
   Home: undefined
   CreateHabit: undefined
   CreateNewHabit: undefined
+  FakeHabit: undefined
   EditHabit: {
     habitId: number
   }
