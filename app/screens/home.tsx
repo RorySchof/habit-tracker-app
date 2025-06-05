@@ -29,6 +29,9 @@ import { $tabBarStyles } from "app/navigators/styles"
 
 import { habitStore } from "app/models/habit-store"
 
+import { Pressable } from "react-native"
+
+
 
 console.log("📋 All Habits in Store:", habitStore.habits.map(h => ({
   name: h.name,
@@ -37,13 +40,6 @@ console.log("📋 All Habits in Store:", habitStore.habits.map(h => ({
   current: h.current,
   target: h.target
 })))
-
-
-
-
-
-
-
 
 interface HabitType {
   id: number
@@ -124,15 +120,7 @@ const checkIns = habitStore.habits
 
 console.log("🧪 checkIns:", checkIns)
 
-
-
-
   return (
-
-    
-
-
-
 
     <Screen preset="scroll" safeAreaEdges={["top", "bottom"]} contentContainerStyle={$container}>
       <BottomSheetModalProvider>
@@ -204,13 +192,26 @@ console.log("🧪 checkIns:", checkIns)
                       )}
                     </AnimatedCircularProgress>
                   }
+                  // FooterComponent={
+                  //   <View style={$footerContainer}>
+                  //     <MaterialCommunityIcons name="minus" color={colors.palette.neutral500} />
+                  //     <Text text="|" style={{ color: colors.palette.neutral500 }} />
+                  //     <MaterialCommunityIcons name="plus" color={colors.palette.neutral500} />
+                  //   </View>
+                  // 
+
                   FooterComponent={
-                    <View style={$footerContainer}>
-                      <MaterialCommunityIcons name="minus" color={colors.palette.neutral500} />
-                      <Text text="|" style={{ color: colors.palette.neutral500 }} />
-                      <MaterialCommunityIcons name="plus" color={colors.palette.neutral500} />
-                    </View>
-                  }
+    <View style={$footerContainer}>
+      <Pressable onPress={() => habitStore.decrementHabit(checkIn.title)}>
+        <MaterialCommunityIcons name="minus" color={colors.palette.neutral500} />
+      </Pressable>
+      <Text text="|" style={{ color: colors.palette.neutral500 }} />
+      <Pressable onPress={() => habitStore.incrementHabit(checkIn.title)}>
+        <MaterialCommunityIcons name="plus" color={colors.palette.neutral500} />
+      </Pressable>
+    </View>
+  }
+
                 />
               ))}
             </ScrollView>
@@ -231,7 +232,6 @@ console.log("🧪 checkIns:", checkIns)
 
   return <Habit key={`${habit.id}-${idx}`} task={transformedHabit} navigation={navigation} />
 })}
-
 
           </View>
         </View>

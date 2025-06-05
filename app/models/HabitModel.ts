@@ -14,9 +14,7 @@ export const HabitModel = types.model("Habit", {
   target: types.optional(types.number, 1),           // target goal
   unit: types.optional(types.string, ""),            // unit for measurement
   color: types.optional(types.string, "#3498db"),
-
-
-
+    frequency: types.optional(types.array(types.string), []),
 
 })
 
