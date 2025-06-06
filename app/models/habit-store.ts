@@ -149,3 +149,6 @@ export const HabitStoreModel = types
   }))
 
 export const habitStore = HabitStoreModel.create({ habits: [] })
+
+console.log("Initial HabitStore:", JSON.stringify(habitStore, null, 2))
+

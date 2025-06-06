@@ -474,7 +474,12 @@ export const CreateNewHabitScreen: FC<CreateNewHabitScreenProps> = observer(
     const [selectedEmoji, setSelectedEmoji] = React.useState("📚")
     const [colorPicked, setColorPicked] = React.useState("#ff0000")
     const [habitTime, setHabitTime] = React.useState(new Date())
-    const [frequency, setFrequency] = React.useState<(typeof days)[0][]>([])
+
+
+    // const [frequency, setFrequency] = React.useState<(typeof days)[0][]>([])
+
+    const [frequency, setFrequency] = React.useState<string[]>([])
+
 
 
     const [name, setName] = React.useState("")
@@ -498,17 +503,46 @@ const [unit, setUnit] = React.useState("times")
       [],
     )
 
-    const handleSelectFrequency = (day: (typeof days)[0]) => {
-      let newFrequency = [...frequency]
-      const found = newFrequency.findIndex((f) => f.day === day.day)
-      if (found === -1) {
-        newFrequency.push(day)
-      } else {
-        newFrequency = newFrequency.filter((f) => f.day !== day.day)
-      }
+    // const handleSelectFrequency = (day: (typeof days)[0]) => {
+    //   let newFrequency = [...frequency]
+    //   const found = newFrequency.findIndex((f) => f.day === day.day)
+    //   if (found === -1) {
+    //     newFrequency.push(day)
+    //   } else {
+    //     newFrequency = newFrequency.filter((f) => f.day !== day.day)
+    //   }
 
-      setFrequency(newFrequency)
-    }
+    //   setFrequency(newFrequency)
+    // }
+
+
+
+    const handleSelectFrequency = (day: (typeof days)[0]) => {
+  if (frequency.includes(day.day)) {
+    setFrequency(frequency.filter((d) => d !== day.day))
+  } else {
+    setFrequency([...frequency, day.day])
+  }
+}
+
+
+// const handleCreateHabit = () => {
+//   habitStore.addHabit({
+//     name,
+//     emoji: selectedEmoji,
+//     time: habitTime.toISOString(),
+//     category,
+//     target,
+//     unit,
+//     color: colorPicked,
+//     frequency: frequency.map(f => f.day),
+
+//     // reminder,
+    
+//   });
+//   navigation.navigate("Home");
+// };
+
 
 const handleCreateHabit = () => {
   habitStore.addHabit({
@@ -519,13 +553,12 @@ const handleCreateHabit = () => {
     target,
     unit,
     color: colorPicked,
-    frequency: frequency.map(f => f.day),
-
+    frequency, // ✅ no .map needed — it's already an array of strings
     // reminder,
-    
-  });
-  navigation.navigate("Home");
-};
+  })
+  navigation.navigate("Home")
+}
+
 
 
 
@@ -580,7 +613,7 @@ const handleCreateHabit = () => {
                 >
 
 
-                  
+
                   <Panel1 />
                   <HueSlider />
                   <Preview />
@@ -620,6 +653,8 @@ const handleCreateHabit = () => {
 />
 
           </View>
+
+
           <View style={$gap}>
             <View style={$frequencyContainer}>
               <Text preset="formLabel" text="Frequency" style={$labelStyle} />
@@ -632,7 +667,9 @@ const handleCreateHabit = () => {
                   style={[
                     $dayContainerStyle,
                     {
-                      backgroundColor: frequency.find((f) => f.day === d.day)
+                      // backgroundColor: frequency.find((f) => f.day === d.day)
+                      backgroundColor: frequency.includes(d.day)
+
                         ? colors.palette.primary600
                         : colors.palette.neutral100,
                     },
@@ -644,7 +681,9 @@ const handleCreateHabit = () => {
                     style={[
                       $dayStyle,
                       {
-                        color: frequency.find((f) => f.day === d.day)
+                        // color: frequency.find((f) => f.day === d.day)
+                        color: frequency.includes(d.day)
+
                           ? colors.palette.neutral100
                           : colors.text,
                       },

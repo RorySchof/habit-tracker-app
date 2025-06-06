@@ -31,6 +31,9 @@ import { habitStore } from "app/models/habit-store"
 
 import { Pressable } from "react-native"
 
+import { useMemo } from "react"
+
+
 
 
 console.log("📋 All Habits in Store:", habitStore.habits.map(h => ({
@@ -120,6 +123,46 @@ const checkIns = habitStore.habits
 
 console.log("🧪 checkIns:", checkIns)
 
+
+//  const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+
+//   const dayProgressData = daysOfWeek.map((day, index) => {
+//     const dayHabits = habitStore.habits.filter(habit => habit.frequency.includes(day))
+
+//     const totalTarget = dayHabits.reduce((sum, h) => sum + h.target, 0)
+//     const totalCurrent = dayHabits.reduce((sum, h) => sum + h.current, 0)
+
+//     const progress = totalTarget === 0 ? 0 : Math.round((totalCurrent / totalTarget) * 100)
+
+//     return {
+//       day,
+//       date: String(index + 1), // You can update this with actual dates later
+//       progress,
+//     }
+//   })
+
+const dayProgressData = useMemo(() => {
+  const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+
+  return daysOfWeek.map((day, index) => {
+    const dayHabits = habitStore.habits.filter(habit => habit.frequency.includes(day))
+    const totalTarget = dayHabits.reduce((sum, h) => sum + h.target, 0)
+    const totalCurrent = dayHabits.reduce((sum, h) => sum + h.current, 0)
+    const progress = totalTarget === 0 ? 0 : Math.round((totalCurrent / totalTarget) * 100)
+
+    return {
+      day,
+      date: String(index + 1),
+      progress,
+    }
+  })
+}, [habitStore.habits.map(h => `${h.name}-${h.current}-${h.target}`).join(",")])
+
+console.log("📆 dayProgressData:", dayProgressData)
+
+    console.log("📆 :", dayProgressData)
+
+
   return (
 
     <Screen preset="scroll" safeAreaEdges={["top", "bottom"]} contentContainerStyle={$container}>
@@ -143,13 +186,23 @@ console.log("🧪 checkIns:", checkIns)
         </View>
 
         <View style={$topContainer}>
-          <DayCard day="Mon" date="1" progress={50} />
+
+
+          {/* <DayCard day="Mon" date="1" progress={50} />
           <DayCard day="Tue" date="2" progress={75} />
           <DayCard day="Wed" date="3" progress={25} />
           <DayCard day="Thu" date="4" progress={100} />
           <DayCard day="Fri" date="5" progress={60} />
           <DayCard day="Sat" date="6" progress={80} />
-          <DayCard day="Sun" date="7" progress={90} />
+          <DayCard day="Sun" date="7" progress={90} /> */}
+
+          {dayProgressData.map((d) => (
+  <DayCard key={d.day} day={d.day} date={d.date} progress={d.progress} />
+))}
+
+
+
+
         </View>
 
         <View style={{ gap: spacing.md }}>
