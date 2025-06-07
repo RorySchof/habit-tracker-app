@@ -2,6 +2,7 @@ import { observer } from "mobx-react-lite"
 import React, { FC } from "react"
 import {
   Image,
+  Switch,
   ImageStyle,
   TextStyle,
   View,
@@ -33,6 +34,11 @@ import { Pressable } from "react-native"
 
 import { useMemo } from "react"
 
+import { format } from "date-fns"
+
+
+import  { useState } from 'react';
+
 
 
 
@@ -50,6 +56,12 @@ interface HabitType {
   name: string
   time: string
   finished: boolean
+  current?: number
+  target?: number
+  unit?: string
+  color?: string
+  frequency?: string[]
+  category?: string
 }
 
 export const tasks: HabitType[] = [
@@ -170,7 +182,9 @@ console.log("📆 dayProgressData:", dayProgressData)
         <View style={$headerContainer}>
           <View style={$imageContainer}>
             <Image source={require("../../assets/images/avatar-2.png")} style={$image} />
-            <Text text="Today" size="xl" weight="bold" />
+            {/* <Text text="Today" size="xl" weight="bold" /> */}
+<Text text={format(new Date(), "EEEE, MMMM d")} size="xl" weight="bold" />
+
           </View>
           <View style={$headerBtn}>
             <MaterialCommunityIcons
@@ -180,9 +194,9 @@ console.log("📆 dayProgressData:", dayProgressData)
               onPress={() => navigation.navigate("CreateHabit")}
             />
           </View>
-          <TouchableOpacity onPress={() => navigation.navigate("FakeHabit")}>
+          {/* <TouchableOpacity onPress={() => navigation.navigate("FakeHabit")}>
   <Text style={{ color: "blue", fontSize: 16 }}>Go to FakeHabit</Text>
-</TouchableOpacity>
+</TouchableOpacity> */}
         </View>
 
         <View style={$topContainer}>
@@ -274,17 +288,69 @@ console.log("📆 dayProgressData:", dayProgressData)
         <View style={{ gap: spacing.md }}>
           <Text tx="homeScreen.today" preset="subheading" />
           <View style={$bottomContainer}>
-       {habitStore.habits.map((habit, idx) => {
+
+
+
+       {/* {habitStore.habits.map((habit, idx) => {
   const transformedHabit = {
-    id: habit.id,
-    name: habit.name,
+id: Number(habit.id), // convert to number   
+  name: habit.name || "Unnamed Habit", // make sure name is defined
+
     emoji: habit.emoji || "🔥",
     time: habit.time || "08:00",
+     current: habit.current || 0,    // add this
+  target: habit.target || 1,
     finished: habit.finished ?? false,
   }
 
+
+  console.log(`Habit ${idx}:`, {
+    id: transformedHabit.id,
+    name: transformedHabit.name,
+    current: transformedHabit.current,
+    target: transformedHabit.target,
+    finished: transformedHabit.finished,
+  });
+
   return <Habit key={`${habit.id}-${idx}`} task={transformedHabit} navigation={navigation} />
+})} */}
+
+
+{habitStore.habits.map((habit, idx) => {
+  const transformedHabit = {
+    id: Number(habit.id), // convert to number   
+    name: habit.name || "Unnamed Habit", // make sure name is defined
+    emoji: habit.emoji || "🔥",
+    time: habit.time || "08:00",
+    current: habit.current || 0,    // add this
+    target: habit.target || 1,
+    finished: habit.finished ?? false,
+  };
+
+  const isCompleted = transformedHabit.current >= transformedHabit.target;
+
+  console.log(`Habit ${idx}:`, {
+    id: transformedHabit.id,
+    name: transformedHabit.name,
+    current: transformedHabit.current,
+    target: transformedHabit.target,
+    finished: transformedHabit.finished,
+    isCompleted,
+  });
+
+  return (
+    <View key={`${habit.id}-${idx}`} style={{ marginBottom: 12 }}>
+      <Habit task={transformedHabit} navigation={navigation} />
+      {isCompleted && (
+        <Text style={{ color: 'green', fontWeight: 'bold', marginTop: 4 }}>
+          ✓ Completed
+        </Text>
+      )}
+    </View>
+  );
 })}
+
+
 
           </View>
         </View>
@@ -337,10 +403,10 @@ function Habit({ task, navigation }: HabitProps) {
 
           <View style={{}}>
             <Text text={task.name} />
-            <Text text={`start at ${task.time}`} size="xs" style={{ color: colors.textDim }} />
+            {/* <Text text={`start at ${task.time}`} size="xs" style={{ color: colors.textDim }} /> */}
           </View>
         </View>
-        <Toggle variant="checkbox" inputOuterStyle={$checkboxInput} value={task.finished} />
+        <Toggle variant="checkbox" inputOuterStyle={$checkboxInput} value={task.target} />
       </TouchableOpacity>
       <BottomSheetModal
         ref={bottomSheetRef}
