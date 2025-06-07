@@ -36,8 +36,11 @@ import { useMemo } from "react"
 
 import { format } from "date-fns"
 
+import { WeekCalendar } from "react-native-calendars"
 
-// import  { useState } from 'react';
+
+
+import  { useState } from 'react';
 
 
 
@@ -153,22 +156,111 @@ console.log("🧪 checkIns:", checkIns)
 //     }
 //   })
 
+// const dayProgressData = useMemo(() => {
+//   const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+
+//   return daysOfWeek.map((day, index) => {
+//     const dayHabits = habitStore.habits.filter(habit => habit.frequency.includes(day))
+//     const totalTarget = dayHabits.reduce((sum, h) => sum + h.target, 0)
+//     const totalCurrent = dayHabits.reduce((sum, h) => sum + h.current, 0)
+//     const progress = totalTarget === 0 ? 0 : Math.round((totalCurrent / totalTarget) * 100)
+
+//     return {
+//       day,
+//       date: String(index + 1),
+//       progress,
+//     }
+//   })
+// }, [habitStore.habits.map(h => `${h.name}-${h.current}-${h.target}`).join(",")])
+
+
+// const dayProgressData = useMemo(() => {
+//   const today = new Date()
+//   const daysArray = []
+
+//   for (let i = 6; i >= 0; i--) {
+//     const date = new Date()
+//     date.setDate(today.getDate() - i)
+
+//     const dayLabel = date.toLocaleDateString("en-US", { weekday: "short" }) // e.g. "Mon"
+//     const dayNumber = date.getDate().toString() // e.g. "7"
+
+//     const dayHabits = habitStore.habits.filter(habit =>
+//       habit.frequency.includes(dayLabel)
+//     )
+
+//     const totalTarget = dayHabits.reduce((sum, h) => sum + h.target, 0)
+//     const totalCurrent = dayHabits.reduce((sum, h) => sum + h.current, 0)
+//     const progress = totalTarget === 0 ? 0 : Math.round((totalCurrent / totalTarget) * 100)
+
+//     daysArray.push({
+//       day: dayLabel,
+//       date: dayNumber,
+//       progress,
+//     })
+//   }
+
+//   return daysArray
+// }, [habitStore.habits.map(h => `${h.name}-${h.current}-${h.target}-${h.frequency}`).join(",")])
+
+
+  // const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0])
+
+const today = new Date()
+const formattedToday = today.toISOString().split("T")[0]
+  const [selected, setSelected] = useState(formattedToday) // from your WeekCalendar example
+
+
+
+// const dayProgressData = useMemo(() => {
+//   const dateObj = new Date(selectedDate)
+//   const dayLabel = dateObj.toLocaleDateString("en-US", { weekday: "short" }) // "Mon", "Tue", etc.
+//   const dayNumber = dateObj.getDate().toString()
+
+//   const dayHabits = habitStore.habits.filter(habit =>
+//     habit.frequency.includes(dayLabel)
+//   )
+
+//   const totalTarget = dayHabits.reduce((sum, h) => sum + h.target, 0)
+//   const totalCurrent = dayHabits.reduce((sum, h) => sum + h.current, 0)
+//   const progress = totalTarget === 0 ? 0 : Math.round((totalCurrent / totalTarget) * 100)
+
+//   return [{
+//     day: dayLabel,
+//     date: dayNumber,
+//     progress,
+//   }]
+// }, [
+//   selectedDate,
+//   habitStore.habits.map(h => `${h.name}-${h.current}-${h.target}-${h.frequency}`).join(",")
+// ])
+
+
 const dayProgressData = useMemo(() => {
-  const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+  const dateObj = new Date(selected)
+  const dayLabel = dateObj.toLocaleDateString("en-US", { weekday: "short" }) // "Mon", "Tue", etc.
+  const dayNumber = dateObj.getDate().toString()
 
-  return daysOfWeek.map((day, index) => {
-    const dayHabits = habitStore.habits.filter(habit => habit.frequency.includes(day))
-    const totalTarget = dayHabits.reduce((sum, h) => sum + h.target, 0)
-    const totalCurrent = dayHabits.reduce((sum, h) => sum + h.current, 0)
-    const progress = totalTarget === 0 ? 0 : Math.round((totalCurrent / totalTarget) * 100)
+  const dayHabits = habitStore.habits.filter(habit =>
+    habit.frequency.includes(dayLabel)
+  )
 
-    return {
-      day,
-      date: String(index + 1),
-      progress,
-    }
-  })
-}, [habitStore.habits.map(h => `${h.name}-${h.current}-${h.target}`).join(",")])
+  const totalTarget = dayHabits.reduce((sum, h) => sum + h.target, 0)
+  const totalCurrent = dayHabits.reduce((sum, h) => sum + h.current, 0)
+  const progress = totalTarget === 0 ? 0 : Math.round((totalCurrent / totalTarget) * 100)
+
+  return [{
+    day: dayLabel,
+    date: dayNumber,
+    progress,
+  }]
+}, [
+  selected,
+  habitStore.habits.map(h => `${h.name}-${h.current}-${h.target}-${h.frequency}`).join(",")
+])
+
+
+
 
 console.log("📆 dayProgressData:", dayProgressData)
 
@@ -194,9 +286,9 @@ console.log("📆 dayProgressData:", dayProgressData)
               onPress={() => navigation.navigate("CreateHabit")}
             />
           </View>
-          {/* <TouchableOpacity onPress={() => navigation.navigate("FakeHabit")}>
+          <TouchableOpacity onPress={() => navigation.navigate("FakeHabit")}>
   <Text style={{ color: "blue", fontSize: 16 }}>Go to FakeHabit</Text>
-</TouchableOpacity> */}
+</TouchableOpacity>
         </View>
 
         <View style={$topContainer}>
