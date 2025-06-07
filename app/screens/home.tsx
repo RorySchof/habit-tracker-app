@@ -2,7 +2,7 @@ import { observer } from "mobx-react-lite"
 import React, { FC } from "react"
 import {
   Image,
-  Switch,
+  // Switch,
   ImageStyle,
   TextStyle,
   View,
@@ -37,7 +37,7 @@ import { useMemo } from "react"
 import { format } from "date-fns"
 
 
-import  { useState } from 'react';
+// import  { useState } from 'react';
 
 
 
@@ -64,36 +64,36 @@ interface HabitType {
   category?: string
 }
 
-export const tasks: HabitType[] = [
-  {
-    id: 1,
-    emoji: "🧘",
-    name: "Meditation",
-    time: "08:00 AM",
-    finished: true,
-  },
-  {
-    id: 2,
-    emoji: "🌱",
-    name: "Plant based diet",
-    time: "10:00 AM",
-    finished: false,
-  },
-  {
-    id: 3,
-    emoji: "💻",
-    name: "Contribute to open source",
-    time: "10:30 AM",
-    finished: false,
-  },
-  {
-    id: 4,
-    emoji: "🏃",
-    name: "Workout",
-    time: "08:00 PM",
-    finished: true,
-  },
-]
+// export const tasks: HabitType[] = [
+//   {
+//     id: 1,
+//     emoji: "🧘",
+//     name: "Meditation",
+//     time: "08:00 AM",
+//     finished: true,
+//   },
+//   {
+//     id: 2,
+//     emoji: "🌱",
+//     name: "Plant based diet",
+//     time: "10:00 AM",
+//     finished: false,
+//   },
+//   {
+//     id: 3,
+//     emoji: "💻",
+//     name: "Contribute to open source",
+//     time: "10:30 AM",
+//     finished: false,
+//   },
+//   {
+//     id: 4,
+//     emoji: "🏃",
+//     name: "Workout",
+//     time: "08:00 PM",
+//     finished: true,
+//   },
+// ]
 
 interface DayCardProps {
   day: string
@@ -214,9 +214,6 @@ console.log("📆 dayProgressData:", dayProgressData)
   <DayCard key={d.day} day={d.day} date={d.date} progress={d.progress} />
 ))}
 
-
-
-
         </View>
 
         <View style={{ gap: spacing.md }}>
@@ -278,8 +275,7 @@ console.log("📆 dayProgressData:", dayProgressData)
       </Pressable>
     </View>
   }
-
-                />
+ />
               ))}
             </ScrollView>
           </View>
@@ -350,8 +346,6 @@ id: Number(habit.id), // convert to number
   );
 })}
 
-
-
           </View>
         </View>
       </BottomSheetModalProvider>
@@ -406,8 +400,26 @@ function Habit({ task, navigation }: HabitProps) {
             {/* <Text text={`start at ${task.time}`} size="xs" style={{ color: colors.textDim }} /> */}
           </View>
         </View>
-        <Toggle variant="checkbox" inputOuterStyle={$checkboxInput} value={task.target} />
+
+
+        {/* <Toggle variant="checkbox" inputOuterStyle={$checkboxInput} value={task.target} /> */}
+
+
+        <Toggle
+  variant="checkbox"
+  inputOuterStyle={$checkboxInput}
+  value={task.current >= task.target}
+/>
+
+
+
+
+
       </TouchableOpacity>
+
+
+
+
       <BottomSheetModal
         ref={bottomSheetRef}
         snapPoints={[500, "70%"]}
