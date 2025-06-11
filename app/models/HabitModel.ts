@@ -15,6 +15,8 @@ export const HabitModel = types.model("Habit", {
   unit: types.optional(types.string, ""),            // unit for measurement
   color: types.optional(types.string, "#3498db"),
     frequency: types.optional(types.array(types.string), []),
+      createdAt: types.optional(types.string, () => new Date().toISOString()), // <== Add this
+
 
 })
 
