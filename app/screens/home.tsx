@@ -866,14 +866,43 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({
   const formattedToday = today.toISOString().split("T")[0]
 
   // Filter habits created today or earlier
-  const filteredHabits = habitStore.habits.filter((habit) => {
-    if (!habit.createdAt) return false
-    const habitDate = habit.createdAt.split("T")[0]
-    return habitDate <= formattedToday
-  })
+
+
+    const [selected, setSelected] = useState(formattedToday)
+
+  const selectedDateObj = new Date(selected)
+
+
+// const selectedDay = selectedDateObj.toLocaleDateString("en-US", { weekday: "short" })
+
+const selectedDay = selectedDateObj.toLocaleDateString("en-US", { weekday: "long" })
+
+console.log("Selected:", selected, "Day:", selectedDay)
+
+
+const filteredHabits = habitStore.habits.filter((habit) => {
+  if (!habit.createdAt || !habit.frequency) return false
+  const habitDate = habit.createdAt.split("T")[0]
+  return habitDate <= selected && habit.frequency.includes(selectedDay)
+
+  console.log("Habit:", habit.name, "Freq:", habit.frequency, "Includes?", habit.frequency.includes(selectedDay))
+
+})
+
+// 🔍 Debug logs
+console.log("Selected Date:", selected)
+console.log("Selected Day:", selectedDay)
+console.log("Filtered Habits for this day:", filteredHabits.map(h => h.name))
+
+
+
+  // const filteredHabits = habitStore.habits.filter((habit) => {
+  //   if (!habit.createdAt) return false
+  //   const habitDate = habit.createdAt.split("T")[0]
+  //   return habitDate <= formattedToday
+  // })
 
   // Calendar marked dates from filteredHabits
-  const [selected, setSelected] = useState(formattedToday)
 
   const markedDates: Record<string, any> = {}
   filteredHabits.forEach((habit) => {
