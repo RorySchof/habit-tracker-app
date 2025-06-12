@@ -870,7 +870,24 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({
 
     const [selected, setSelected] = useState(formattedToday)
 
-  const selectedDateObj = new Date(selected)
+  // const selectedDateObj = new Date(selected)
+
+//   const parsed = new Date(selected); // selected is likely "2025-06-12"
+
+
+// const selectedDateObj = new Date(
+//   parsed.getFullYear(),
+//   parsed.getMonth(),
+//   parsed.getDate()
+// ); // ✅ forces local midnight
+
+
+function parseLocalDate(dateString: string): Date {
+  const [year, month, day] = dateString.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+const selectedDateObj = parseLocalDate(selected);
 
 
 // const selectedDay = selectedDateObj.toLocaleDateString("en-US", { weekday: "short" })
@@ -880,13 +897,60 @@ const selectedDay = selectedDateObj.toLocaleDateString("en-US", { weekday: "long
 console.log("Selected:", selected, "Day:", selectedDay)
 
 
+// const filteredHabits = habitStore.habits.filter((habit) => {
+//   if (!habit.createdAt || !habit.frequency) return false
+//   const habitDate = habit.createdAt.split("T")[0]
+//   return habitDate <= selected && habit.frequency.includes(selectedDay)
+
+//   console.log("Habit:", habit.name, "Freq:", habit.frequency, "Includes?", habit.frequency.includes(selectedDay))
+
+// })
+
+function getLocalDateString(date: Date) {
+  const year = date.getFullYear()
+  const month = (date.getMonth() + 1).toString().padStart(2, '0')
+  const day = date.getDate().toString().padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+const selectedLocalDateStr = getLocalDateString(selectedDateObj)
+
+console.log('selectedDateObj (ISO):', selectedDateObj.toISOString())
+console.log('selectedLocalDateStr:', selectedLocalDateStr)
+console.log('selected (from later log):', selected)  // if `selected` is in scope here, or else log it where it is
+
+
 const filteredHabits = habitStore.habits.filter((habit) => {
   if (!habit.createdAt || !habit.frequency) return false
-  const habitDate = habit.createdAt.split("T")[0]
-  return habitDate <= selected && habit.frequency.includes(selectedDay)
 
-  console.log("Habit:", habit.name, "Freq:", habit.frequency, "Includes?", habit.frequency.includes(selectedDay))
+  const habitCreatedAtDate = new Date(habit.createdAt)
+  const habitLocalDateStr = getLocalDateString(habitCreatedAtDate)
 
+  console.log(`- habit.frequency:`, habit.frequency)
+console.log(`- selectedDay:`, selectedDay)
+console.log(`- includesDay:`, habit.frequency.includes(selectedDay))
+
+
+  const includesDay = habit.frequency.includes(selectedDay)
+  // const isBeforeOrOnSelectedDate = habitLocalDateStr <= selectedLocalDateStr
+  // const isBeforeOrOnSelectedDate = habitCreatedAtDate <= selectedDateObj
+  const isBeforeOrOnSelectedDate = habitLocalDateStr <= selectedLocalDateStr
+
+
+   const shouldInclude = isBeforeOrOnSelectedDate && includesDay
+
+  // 🔍 Debug logs inside filter
+  console.log(`🧪 Habit: ${habit.name}`)
+  console.log(`- createdAt: ${habit.createdAt}`)
+  console.log(`- habitLocalDateStr: ${habitLocalDateStr}`)
+  console.log(`- selectedLocalDateStr: ${selectedLocalDateStr}`)
+  console.log(`- includesDay: ${includesDay}`)
+  console.log(`- isBeforeOrOnSelectedDate: ${isBeforeOrOnSelectedDate}`)
+  console.log(`- ✅ included in filter? ${shouldInclude}`)
+
+  return shouldInclude
+
+  // return isBeforeOrOnSelectedDate && includesDay
 })
 
 // 🔍 Debug logs
