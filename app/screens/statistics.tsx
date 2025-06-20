@@ -10,6 +10,10 @@ import layout from "app/utils/layout"
 import { colors, spacing } from "../theme"
 import { StatisticsScreenProps } from "app/navigators/types"
 
+import { habitStore } from "../models/habit-store"
+import { getSummaryByPeriod } from "app/models/helpers/statsHelpers" // adjust path if needed
+
+
 const filters = [
   { title: "Day", abbr: "D", id: 1 },
   { title: "Week", abbr: "W", id: 2 },
@@ -20,52 +24,22 @@ const filters = [
 ]
 
 export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function StatisticsScreen() {
-  const [filter, setFilter] = React.useState("D")
+  const [filter, setFilter] = React.useState("W")
 
-  const data: barDataItem[] = [
-    {
-      value: 200,
-      frontColor: colors.palette.primary600,
-      gradientColor: colors.palette.primary100,
-      label: "S",
-    },
-    {
-      value: 450,
-      frontColor: colors.palette.primary600,
-      gradientColor: colors.palette.primary100,
-      label: "M",
-    },
-    {
-      value: 600,
-      frontColor: colors.palette.primary600,
-      gradientColor: colors.palette.primary100,
-      label: "T",
-    },
-    {
-      value: 990,
-      frontColor: colors.palette.primary600,
-      gradientColor: colors.palette.primary100,
-      label: "W",
-    },
-    {
-      value: 820,
-      frontColor: colors.palette.primary600,
-      gradientColor: colors.palette.primary100,
-      label: "T",
-    },
-    {
-      value: 480,
-      frontColor: colors.palette.primary600,
-      gradientColor: colors.palette.primary100,
-      label: "F",
-    },
-    {
-      value: 1000,
-      frontColor: colors.palette.primary600,
-      // gradientColor: colors.palette.primary100,
-      label: "S",
-    },
-  ]
+  const summary = getSummaryByPeriod(habitStore.habits, habitStore.activityLog, filter)
+
+  const totalCompleted = summary.reduce((acc, day) => acc + day.completed, 0)
+const totalTarget = summary.reduce((acc, day) => acc + day.target, 0)
+const percentage = totalTarget > 0 ? Math.round((totalCompleted / totalTarget) * 100) : 0
+
+
+  const data: barDataItem[] = summary.map(day => ({
+  value: day.completed,
+  label: day.date.slice(-2), // show just day number e.g. "05"
+  frontColor: colors.palette.primary600,
+  gradientColor: colors.palette.primary100,
+}))
+
 
   const pieData: pieDataItem[] = [
     {
@@ -226,7 +200,9 @@ export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function Sta
       <View>
         <View style={$barChartOverviewContainer}>
           <Text text="Total Activities" preset="formLabel" />
-          <Text text="87%" preset="heading" />
+          {/* <Text text="87%" preset="heading" /> */}
+<Text text={`${percentage}%`} preset="heading" />
+
         </View>
         <View style={$barChartContainer}>
           <BarChart

@@ -8,7 +8,7 @@ export type HomeStackParamList = {
   CreateNewHabit: undefined
   FakeHabit: undefined
   EditHabit: {
-    habitId: number
+    habitId: string // used to be number
   }
 }
 

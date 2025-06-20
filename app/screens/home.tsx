@@ -1132,6 +1132,8 @@ console.log("Filtered Habits for this day:", filteredHabits.map(h => h.name))
             {filteredHabits.map((habit, idx) => {
               const transformedHabit = {
                 id: Number(habit.id),
+                  // id: habit.id,  // ✅ leave it as string
+
                 name: habit.name || "Unnamed Habit",
                 emoji: habit.emoji || "🔥",
                 time: habit.time || "08:00",
