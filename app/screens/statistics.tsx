@@ -26,19 +26,37 @@ const filters = [
 export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function StatisticsScreen() {
   const [filter, setFilter] = React.useState("W")
 
-  const summary = getSummaryByPeriod(habitStore.habits, habitStore.activityLog, filter)
+//   const summary = getSummaryByPeriod(habitStore.habits, habitStore.activityLog, filter)
 
-  const totalCompleted = summary.reduce((acc, day) => acc + day.completed, 0)
-const totalTarget = summary.reduce((acc, day) => acc + day.target, 0)
+//   const totalCompleted = summary.reduce((acc, day) => acc + day.completed, 0)
+// const totalTarget = summary.reduce((acc, day) => acc + day.target, 0)
+// const percentage = totalTarget > 0 ? Math.round((totalCompleted / totalTarget) * 100) : 0
+
+const filteredHabits = habitStore.habits.filter(habit => {
+  // You can add more logic here if needed (e.g. frequency/day match)
+  return true
+})
+
+const totalCompleted = filteredHabits.reduce((acc, habit) => acc + habit.current, 0)
+const totalTarget = filteredHabits.reduce((acc, habit) => acc + habit.target, 0)
 const percentage = totalTarget > 0 ? Math.round((totalCompleted / totalTarget) * 100) : 0
 
 
-  const data: barDataItem[] = summary.map(day => ({
-  value: day.completed,
-  label: day.date.slice(-2), // show just day number e.g. "05"
+
+//   const data: barDataItem[] = summary.map(day => ({
+//   value: day.completed,
+//   label: day.date.slice(-2), // show just day number e.g. "05"
+//   frontColor: colors.palette.primary600,
+//   gradientColor: colors.palette.primary100,
+// }))
+
+const data: barDataItem[] = filteredHabits.map(habit => ({
+  value: habit.current,
+  label: habit.name, // or habit.createdAt.slice(-2) if you want the date suffix
   frontColor: colors.palette.primary600,
   gradientColor: colors.palette.primary100,
 }))
+
 
 
   const pieData: pieDataItem[] = [
@@ -182,7 +200,7 @@ const percentage = totalTarget > 0 ? Math.round((totalCompleted / totalTarget) *
         <MaterialCommunityIcons name="export-variant" size={24} />
       </View>
       <View style={$filtersContainer}>
-        {filters.map((f, idx) => (
+        {/* {filters.map((f, idx) => (
           <>
             <TouchableOpacity
               key={`${f.id}-${f.abbr}`}
@@ -195,7 +213,22 @@ const percentage = totalTarget > 0 ? Math.round((totalCompleted / totalTarget) *
               <Text key={`${f.id}-${f.abbr}-${idx}`} text="•" preset="bold" />
             )}
           </>
-        ))}
+        ))} */}
+
+        {filters.map((f, idx) => (
+  <View key={`${f.id}-${f.abbr}`} style={{ flexDirection: "row", alignItems: "center" }}>
+    <TouchableOpacity
+      style={filter === f.abbr ? $activeFilter : {}}
+      onPress={() => setFilter(f.abbr)}
+    >
+      <Text text={f.abbr} preset="bold" style={filter === f.abbr ? $activeText : {}} />
+    </TouchableOpacity>
+    {filters.length > idx + 1 && (
+      <Text text="•" preset="bold" style={{ marginHorizontal: 4 }} />
+    )}
+  </View>
+))}
+
       </View>
       <View>
         <View style={$barChartOverviewContainer}>

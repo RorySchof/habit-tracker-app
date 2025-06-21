@@ -77,9 +77,18 @@ export function getSummaryByPeriod(
     }, 0)
 
     // Sum completed counts from activityLog for this date
+
+
+    // const totalCompleted = activityLog
+    //   .filter((entry) => entry.date === dateStr)
+    //   .reduce((acc, entry) => acc + entry.count, 0)
+
     const totalCompleted = activityLog
-      .filter((entry) => entry.date === dateStr)
-      .reduce((acc, entry) => acc + entry.count, 0)
+  .filter((entry) => entry.date?.slice(0, 10) === dateStr)
+  .reduce((acc, entry) => acc + entry.count, 0)
+
+
+
         // 🔍 Add your debug logs right before pushing the summary
   console.log("🔍 For date:", dateStr)
   console.log(
@@ -88,6 +97,22 @@ export function getSummaryByPeriod(
   )
   console.log("  Total completed:", totalCompleted)
   console.log("  Total target:", totalTarget)
+
+  console.log(`🔎 Summary for ${dateStr}`);
+console.log(`✅ Day of week: ${dayOfWeek}`);
+console.log(`📌 Matching habits:`);
+habits.forEach(habit => {
+  const matches = habit.frequency.includes(dayOfWeek);
+  console.log(` - ${habit.name}: freq=${habit.frequency.join(", ")} | target=${habit.target} | matches=${matches}`);
+});
+console.log(`📝 Completed entries:`);
+activityLog
+  .filter(entry => entry.date === dateStr)
+  .forEach(entry => {
+    console.log(` - habitId=${entry.habitId} | count=${entry.count}`);
+  });
+console.log(`🎯 Total target: ${totalTarget}, Total completed: ${totalCompleted}`);
+
 
     summaries.push({
       date: dateStr,
