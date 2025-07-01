@@ -267,20 +267,41 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
 
   const selectedDateObj = parseLocalDate(selected)
 
+  // just added this
+
+
+function getLocalDateString(date: Date) {
+  const year = date.getFullYear()
+  const month = (date.getMonth() + 1).toString().padStart(2, "0")
+  const day = date.getDate().toString().padStart(2, "0")
+  return `${year}-${month}-${day}`
+}
+
+const selectedLocalDateStr = getLocalDateString(selectedDateObj)
+
+const getTodayCount = (habitId: string) => {
+  const today = selectedLocalDateStr
+  const logEntry = habitStore.activityLog.find(
+    (entry) => entry.habitId === habitId && entry.date === today
+  )
+  return logEntry ? logEntry.count : 0
+}
+
+
+
+
   // const selectedDay = selectedDateObj.toLocaleDateString("en-US", { weekday: "short" })
 
   const selectedDay = selectedDateObj.toLocaleDateString("en-US", { weekday: "long" })
 
-  function getLocalDateString(date: Date) {
-    const year = date.getFullYear()
-    const month = (date.getMonth() + 1).toString().padStart(2, "0")
-    const day = date.getDate().toString().padStart(2, "0")
-    return `${year}-${month}-${day}`
-  }
+ 
 
-  const selectedLocalDateStr = getLocalDateString(selectedDateObj)
+  // const selectedLocalDateStr = getLocalDateString(selectedDateObj)
 
-  const filteredHabits = habitStore.habits.filter((habit) => {
+  const { habits, activityLog } = habitStore
+
+
+  const filteredHabits = habits.filter((habit) => {
     if (!habit.createdAt || !habit.frequency) return false
 
     const habitCreatedAtDate = new Date(habit.createdAt)
@@ -316,40 +337,85 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
   }
 
   // Check-ins for health category habits
-  const checkIns = filteredHabits
-    .filter((habit) => habit.category === "health")
-    .map((habit) => ({
+  // const checkIns = filteredHabits
+  //   .filter((habit) => habit.category === "health")
+  //   .map((habit) => ({
+  //     emoji: habit.emoji || "💧",
+  //     title: habit.name,
+  //     name: habit.unit || "",
+  //     // amount: `${habit.current}/${habit.target}`,
+  //     amount: `${habit.current}/${habit.target}`,
+
+  //     color: habit.color || colors.palette.primary300,
+  //     // fill: (habit.current / habit.target) * 100,
+  //     fill: (habit.current / habit.target) * 100,
+
+  //   }))
+
+const checkIns = filteredHabits
+  .filter((habit) => habit.category === "health")
+  .map((habit) => {
+    const todayCount = getTodayCount(habit.id)
+    return {
       emoji: habit.emoji || "💧",
       title: habit.name,
       name: habit.unit || "",
-      amount: `${habit.current}/${habit.target}`,
+      amount: `${todayCount}/${habit.target}`,
       color: habit.color || colors.palette.primary300,
-      fill: (habit.current / habit.target) * 100,
-    }))
+      fill: (todayCount / habit.target) * 100,
+    }
+  })
+    
+
 
   // Day progress data based on selected day and frequency
+
+
+  // const dayProgressData = useMemo(() => {
+  //   const dateObj = new Date(selected)
+  //   const dayLabel = dateObj.toLocaleDateString("en-US", { weekday: "short" })
+  //   const dayNumber = dateObj.getDate().toString()
+
+  //   const dayHabits = filteredHabits.filter((habit) => habit.frequency?.includes(dayLabel))
+
+  //   const totalTarget = dayHabits.reduce((sum, h) => sum + h.target!, 0)
+  //   const totalCurrent = dayHabits.reduce((sum, h) => sum + h.current!, 0)
+  //   const progress = totalTarget === 0 ? 0 : Math.round((totalCurrent / totalTarget) * 100)
+
+  //   return [
+  //     {
+  //       day: dayLabel,
+  //       date: dayNumber,
+  //       progress,
+  //     },
+  //   ]
+  // }, [
+  //   selected,
+  //   filteredHabits.map((h) => `${h.name}-${h.current}-${h.target}-${h.frequency}`).join(","),
+  // ])
+
   const dayProgressData = useMemo(() => {
-    const dateObj = new Date(selected)
-    const dayLabel = dateObj.toLocaleDateString("en-US", { weekday: "short" })
-    const dayNumber = dateObj.getDate().toString()
+  const dateObj = new Date(selected)
+  const dayLabel = dateObj.toLocaleDateString("en-US", { weekday: "short" })
+  const dayNumber = dateObj.getDate().toString()
 
-    const dayHabits = filteredHabits.filter((habit) => habit.frequency?.includes(dayLabel))
+  const dayHabits = filteredHabits.filter((habit) => habit.frequency?.includes(dayLabel))
 
-    const totalTarget = dayHabits.reduce((sum, h) => sum + h.target!, 0)
-    const totalCurrent = dayHabits.reduce((sum, h) => sum + h.current!, 0)
-    const progress = totalTarget === 0 ? 0 : Math.round((totalCurrent / totalTarget) * 100)
+  const totalTarget = dayHabits.reduce((sum, h) => sum + h.target!, 0)
+  const totalCurrent = dayHabits.reduce((sum, h) => sum + getTodayCount(h.id), 0)
+  const progress = totalTarget === 0 ? 0 : Math.round((totalCurrent / totalTarget) * 100)
 
-    return [
-      {
-        day: dayLabel,
-        date: dayNumber,
-        progress,
-      },
-    ]
-  }, [
-    selected,
-    filteredHabits.map((h) => `${h.name}-${h.current}-${h.target}-${h.frequency}`).join(","),
-  ])
+  return [
+    {
+      day: dayLabel,
+      date: dayNumber,
+      progress,
+    },
+  ]
+}, [
+  selected,
+  filteredHabits.map((h) => `${h.name}-${getTodayCount(h.id)}-${h.target}-${h.frequency}`).join(","),
+])
 
   return (
     <Screen preset="scroll" safeAreaEdges={["top", "bottom"]} contentContainerStyle={$container}>
@@ -427,17 +493,66 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
                       )}
                     </AnimatedCircularProgress>
                   }
-                  FooterComponent={
-                    <View style={$footerContainer}>
-                      <Pressable onPress={() => habitStore.decrementHabit(checkIn.title)}>
-                        <MaterialCommunityIcons name="minus" color={colors.palette.neutral500} />
-                      </Pressable>
-                      <Text text="|" style={{ color: colors.palette.neutral500 }} />
-                      <Pressable onPress={() => habitStore.incrementHabit(checkIn.title)}>
-                        <MaterialCommunityIcons name="plus" color={colors.palette.neutral500} />
-                      </Pressable>
-                    </View>
-                  }
+                  // FooterComponent={
+                  //   <View style={$footerContainer}>
+                  //     <Pressable onPress={() => habitStore.decrementHabit(checkIn.title)}>
+                  //       <MaterialCommunityIcons name="minus" color={colors.palette.neutral500} />
+                  //     </Pressable>
+                  //     <Text text="|" style={{ color: colors.palette.neutral500 }} />
+                  //     <Pressable onPress={() => habitStore.incrementHabit(checkIn.title)}>
+                  //       <MaterialCommunityIcons name="plus" color={colors.palette.neutral500} />
+                  //     </Pressable>
+                  //   </View>
+                  // }
+
+FooterComponent={
+  <View style={$footerContainer}>
+    {(() => {
+      // Find the matching habit by name from filteredHabits
+      const matchedHabit = filteredHabits.find(h => h.name === checkIn.title)
+      if (!matchedHabit) return null // avoid crashing if not found
+
+      const todayCount = getTodayCount(matchedHabit.id)
+      const isAtMax = todayCount >= matchedHabit.target
+      const isAtMin = todayCount <= 0
+
+      return (
+
+        
+        <>
+          <Pressable
+  disabled={isAtMin}
+  onPress={() => habitStore.decrementHabit(matchedHabit.id, selected)}
+>
+  <MaterialCommunityIcons
+    name="minus"
+    color={isAtMin ? "gray" : colors.palette.neutral500}
+    size={24}
+  />
+</Pressable>
+<Text text="|" style={{ color: colors.palette.neutral500 }} />
+<Pressable
+  disabled={isAtMax}
+  onPress={() => habitStore.incrementHabit(matchedHabit.id, selected)}
+>
+  <MaterialCommunityIcons
+    name="plus"
+    color={isAtMax ? "gray" : colors.palette.neutral500}
+    size={24}
+  />
+</Pressable>
+
+        </>
+      )
+    })()}
+  </View>
+}
+
+
+
+
+
+
                 />
               ))}
             </ScrollView>
@@ -446,6 +561,8 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
 
         <View style={{ gap: spacing.md }}>
           <Text tx="homeScreen.today" preset="subheading" />
+
+{/*           
           <View style={$bottomContainer}>
             {filteredHabits.map((habit, idx) => {
               const transformedHabit = {
@@ -458,9 +575,27 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
                 current: habit.current || 0,
                 target: habit.target || 1,
                 finished: habit.finished ?? false,
-              }
+              } */}
 
-              const isCompleted = transformedHabit.current >= transformedHabit.target
+              <View style={$bottomContainer}>
+  {filteredHabits.map((habit, idx) => {
+    const todayCount = getTodayCount(habit.id)  // get today's count from activity log
+
+    const transformedHabit = {
+      id: habit.id, // keep as string
+      name: habit.name || "Unnamed Habit",
+      emoji: habit.emoji || "🔥",
+      time: habit.time || "08:00",
+      current: todayCount,              // replaced habit.current with today's count
+      target: habit.target || 1,
+      finished: habit.finished ?? false,
+    }
+
+    const isCompleted = transformedHabit.current >= transformedHabit.target
+
+              // const isCompleted = transformedHabit.current >= transformedHabit.target
+              // const totalCurrent = dayHabits.reduce((sum, h) => sum + getTodayCount(h.id), 0)
+
 
               return (
                 <View key={`${habit.id}-${idx}`} style={{ marginBottom: 12 }}>
