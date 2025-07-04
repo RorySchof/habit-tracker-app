@@ -1,3 +1,5 @@
+//Home.tsx
+
 import { observer } from "mobx-react-lite"
 import React, { FC, useMemo, useState, useCallback, useEffect, useRef } from "react"
 import {
@@ -267,39 +269,26 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
 
   const selectedDateObj = parseLocalDate(selected)
 
-  // just added this
+  function getLocalDateString(date: Date) {
+    const year = date.getFullYear()
+    const month = (date.getMonth() + 1).toString().padStart(2, "0")
+    const day = date.getDate().toString().padStart(2, "0")
+    return `${year}-${month}-${day}`
+  }
 
+  const selectedLocalDateStr = getLocalDateString(selectedDateObj)
 
-function getLocalDateString(date: Date) {
-  const year = date.getFullYear()
-  const month = (date.getMonth() + 1).toString().padStart(2, "0")
-  const day = date.getDate().toString().padStart(2, "0")
-  return `${year}-${month}-${day}`
-}
-
-const selectedLocalDateStr = getLocalDateString(selectedDateObj)
-
-const getTodayCount = (habitId: string) => {
-  const today = selectedLocalDateStr
-  const logEntry = habitStore.activityLog.find(
-    (entry) => entry.habitId === habitId && entry.date === today
-  )
-  return logEntry ? logEntry.count : 0
-}
-
-
-
-
-  // const selectedDay = selectedDateObj.toLocaleDateString("en-US", { weekday: "short" })
+  const getTodayCount = (habitId: string) => {
+    const today = selectedLocalDateStr
+    const logEntry = habitStore.activityLog.find(
+      (entry) => entry.habitId === habitId && entry.date === today,
+    )
+    return logEntry ? logEntry.count : 0
+  }
 
   const selectedDay = selectedDateObj.toLocaleDateString("en-US", { weekday: "long" })
 
- 
-
-  // const selectedLocalDateStr = getLocalDateString(selectedDateObj)
-
   const { habits, activityLog } = habitStore
-
 
   const filteredHabits = habits.filter((habit) => {
     if (!habit.createdAt || !habit.frequency) return false
@@ -314,8 +303,6 @@ const getTodayCount = (habitId: string) => {
     const shouldInclude = isBeforeOrOnSelectedDate && includesDay
 
     return shouldInclude
-
-    // return isBeforeOrOnSelectedDate && includesDay
   })
 
   // Calendar marked dates from filteredHabits
@@ -330,92 +317,54 @@ const getTodayCount = (habitId: string) => {
   })
 
   // Ensure selected date is marked as selected
+
   markedDates[selected] = {
     ...(markedDates[selected] || {}),
     selected: true,
     selectedColor: "#3399ff",
   }
 
-  // Check-ins for health category habits
-  // const checkIns = filteredHabits
-  //   .filter((habit) => habit.category === "health")
-  //   .map((habit) => ({
-  //     emoji: habit.emoji || "💧",
-  //     title: habit.name,
-  //     name: habit.unit || "",
-  //     // amount: `${habit.current}/${habit.target}`,
-  //     amount: `${habit.current}/${habit.target}`,
-
-  //     color: habit.color || colors.palette.primary300,
-  //     // fill: (habit.current / habit.target) * 100,
-  //     fill: (habit.current / habit.target) * 100,
-
-  //   }))
-
-const checkIns = filteredHabits
-  .filter((habit) => habit.category === "health")
-  .map((habit) => {
-    const todayCount = getTodayCount(habit.id)
-    return {
-      emoji: habit.emoji || "💧",
-      title: habit.name,
-      name: habit.unit || "",
-      amount: `${todayCount}/${habit.target}`,
-      color: habit.color || colors.palette.primary300,
-      fill: (todayCount / habit.target) * 100,
-    }
-  })
-    
-
+  const checkIns = filteredHabits
+    .filter((habit) => habit.category === "health")
+    .map((habit) => {
+      const todayCount = getTodayCount(habit.id)
+      return {
+        emoji: habit.emoji || "💧",
+        title: habit.name,
+        name: habit.unit || "",
+        amount: `${todayCount}/${habit.target}`,
+        color: habit.color || colors.palette.primary300,
+        fill: (todayCount / habit.target) * 100,
+      }
+    })
 
   // Day progress data based on selected day and frequency
 
 
-  // const dayProgressData = useMemo(() => {
-  //   const dateObj = new Date(selected)
-  //   const dayLabel = dateObj.toLocaleDateString("en-US", { weekday: "short" })
-  //   const dayNumber = dateObj.getDate().toString()
-
-  //   const dayHabits = filteredHabits.filter((habit) => habit.frequency?.includes(dayLabel))
-
-  //   const totalTarget = dayHabits.reduce((sum, h) => sum + h.target!, 0)
-  //   const totalCurrent = dayHabits.reduce((sum, h) => sum + h.current!, 0)
-  //   const progress = totalTarget === 0 ? 0 : Math.round((totalCurrent / totalTarget) * 100)
-
-  //   return [
-  //     {
-  //       day: dayLabel,
-  //       date: dayNumber,
-  //       progress,
-  //     },
-  //   ]
-  // }, [
-  //   selected,
-  //   filteredHabits.map((h) => `${h.name}-${h.current}-${h.target}-${h.frequency}`).join(","),
-  // ])
-
   const dayProgressData = useMemo(() => {
-  const dateObj = new Date(selected)
-  const dayLabel = dateObj.toLocaleDateString("en-US", { weekday: "short" })
-  const dayNumber = dateObj.getDate().toString()
+    const dateObj = new Date(selected)
+    const dayLabel = dateObj.toLocaleDateString("en-US", { weekday: "short" })
+    const dayNumber = dateObj.getDate().toString()
 
-  const dayHabits = filteredHabits.filter((habit) => habit.frequency?.includes(dayLabel))
+    const dayHabits = filteredHabits.filter((habit) => habit.frequency?.includes(dayLabel))
 
-  const totalTarget = dayHabits.reduce((sum, h) => sum + h.target!, 0)
-  const totalCurrent = dayHabits.reduce((sum, h) => sum + getTodayCount(h.id), 0)
-  const progress = totalTarget === 0 ? 0 : Math.round((totalCurrent / totalTarget) * 100)
+    const totalTarget = dayHabits.reduce((sum, h) => sum + h.target!, 0)
+    const totalCurrent = dayHabits.reduce((sum, h) => sum + getTodayCount(h.id), 0)
+    const progress = totalTarget === 0 ? 0 : Math.round((totalCurrent / totalTarget) * 100)
 
-  return [
-    {
-      day: dayLabel,
-      date: dayNumber,
-      progress,
-    },
-  ]
-}, [
-  selected,
-  filteredHabits.map((h) => `${h.name}-${getTodayCount(h.id)}-${h.target}-${h.frequency}`).join(","),
-])
+    return [
+      {
+        day: dayLabel,
+        date: dayNumber,
+        progress,
+      },
+    ]
+  }, [
+    selected,
+    filteredHabits
+      .map((h) => `${h.name}-${getTodayCount(h.id)}-${h.target}-${h.frequency}`)
+      .join(","),
+  ])
 
   return (
     <Screen preset="scroll" safeAreaEdges={["top", "bottom"]} contentContainerStyle={$container}>
@@ -493,66 +442,46 @@ const checkIns = filteredHabits
                       )}
                     </AnimatedCircularProgress>
                   }
-                  // FooterComponent={
-                  //   <View style={$footerContainer}>
-                  //     <Pressable onPress={() => habitStore.decrementHabit(checkIn.title)}>
-                  //       <MaterialCommunityIcons name="minus" color={colors.palette.neutral500} />
-                  //     </Pressable>
-                  //     <Text text="|" style={{ color: colors.palette.neutral500 }} />
-                  //     <Pressable onPress={() => habitStore.incrementHabit(checkIn.title)}>
-                  //       <MaterialCommunityIcons name="plus" color={colors.palette.neutral500} />
-                  //     </Pressable>
-                  //   </View>
-                  // }
 
-FooterComponent={
-  <View style={$footerContainer}>
-    {(() => {
-      // Find the matching habit by name from filteredHabits
-      const matchedHabit = filteredHabits.find(h => h.name === checkIn.title)
-      if (!matchedHabit) return null // avoid crashing if not found
+                  FooterComponent={
+                    <View style={$footerContainer}>
+                      {(() => {
+                        // Find the matching habit by name from filteredHabits
+                        const matchedHabit = filteredHabits.find((h) => h.name === checkIn.title)
+                        if (!matchedHabit) return null // avoid crashing if not found
 
-      const todayCount = getTodayCount(matchedHabit.id)
-      const isAtMax = todayCount >= matchedHabit.target
-      const isAtMin = todayCount <= 0
+                        const todayCount = getTodayCount(matchedHabit.id)
+                        const isAtMax = todayCount >= matchedHabit.target
+                        const isAtMin = todayCount <= 0
 
-      return (
-
-        
-        <>
-          <Pressable
-  disabled={isAtMin}
-  onPress={() => habitStore.decrementHabit(matchedHabit.id, selected)}
->
-  <MaterialCommunityIcons
-    name="minus"
-    color={isAtMin ? "gray" : colors.palette.neutral500}
-    size={24}
-  />
-</Pressable>
-<Text text="|" style={{ color: colors.palette.neutral500 }} />
-<Pressable
-  disabled={isAtMax}
-  onPress={() => habitStore.incrementHabit(matchedHabit.id, selected)}
->
-  <MaterialCommunityIcons
-    name="plus"
-    color={isAtMax ? "gray" : colors.palette.neutral500}
-    size={24}
-  />
-</Pressable>
-
-        </>
-      )
-    })()}
-  </View>
-}
-
-
-
-
-
-
+                        return (
+                          <>
+                            <Pressable
+                              disabled={isAtMin}
+                              onPress={() => habitStore.decrementHabit(matchedHabit.id, selected)}
+                            >
+                              <MaterialCommunityIcons
+                                name="minus"
+                                color={isAtMin ? "gray" : colors.palette.neutral500}
+                                size={24}
+                              />
+                            </Pressable>
+                            <Text text="|" style={{ color: colors.palette.neutral500 }} />
+                            <Pressable
+                              disabled={isAtMax}
+                              onPress={() => habitStore.incrementHabit(matchedHabit.id, selected)}
+                            >
+                              <MaterialCommunityIcons
+                                name="plus"
+                                color={isAtMax ? "gray" : colors.palette.neutral500}
+                                size={24}
+                              />
+                            </Pressable>
+                          </>
+                        )
+                      })()}
+                    </View>
+                  }
                 />
               ))}
             </ScrollView>
@@ -561,41 +490,21 @@ FooterComponent={
 
         <View style={{ gap: spacing.md }}>
           <Text tx="homeScreen.today" preset="subheading" />
-
-{/*           
           <View style={$bottomContainer}>
             {filteredHabits.map((habit, idx) => {
-              const transformedHabit = {
-                // id: Number(habit.id),
-                id: habit.id, // ✅ leave it as string
+              const todayCount = getTodayCount(habit.id) // get today's count from activity log
 
+              const transformedHabit = {
+                id: habit.id, // keep as string
                 name: habit.name || "Unnamed Habit",
                 emoji: habit.emoji || "🔥",
                 time: habit.time || "08:00",
-                current: habit.current || 0,
+                current: todayCount, // replaced habit.current with today's count
                 target: habit.target || 1,
                 finished: habit.finished ?? false,
-              } */}
+              }
 
-              <View style={$bottomContainer}>
-  {filteredHabits.map((habit, idx) => {
-    const todayCount = getTodayCount(habit.id)  // get today's count from activity log
-
-    const transformedHabit = {
-      id: habit.id, // keep as string
-      name: habit.name || "Unnamed Habit",
-      emoji: habit.emoji || "🔥",
-      time: habit.time || "08:00",
-      current: todayCount,              // replaced habit.current with today's count
-      target: habit.target || 1,
-      finished: habit.finished ?? false,
-    }
-
-    const isCompleted = transformedHabit.current >= transformedHabit.target
-
-              // const isCompleted = transformedHabit.current >= transformedHabit.target
-              // const totalCurrent = dayHabits.reduce((sum, h) => sum + getTodayCount(h.id), 0)
-
+              const isCompleted = transformedHabit.current >= transformedHabit.target
 
               return (
                 <View key={`${habit.id}-${idx}`} style={{ marginBottom: 12 }}>
@@ -620,7 +529,9 @@ interface HabitProps {
   navigation: HomeNavProps
 }
 
-function Habit({ task, navigation }: HabitProps) {
+// function Habit({ task, navigation }: HabitProps) {
+
+export const Habit = observer(function Habit({ task, navigation }: HabitProps) {
   const bottomSheetRef = useRef<BottomSheetModal>(null)
   const [isSheetOpen, setIsSheetOpen] = useState(false)
 
@@ -667,6 +578,25 @@ function Habit({ task, navigation }: HabitProps) {
           inputOuterStyle={$checkboxInput}
           value={task.current >= task.target}
         />
+
+        {/* ✅ Pause button */}
+
+        <TouchableOpacity
+          onPress={() => habitStore.togglePauseHabit(task.id)}
+          style={{
+            marginLeft: 12,
+            padding: 4,
+            borderRadius: 6,
+            // backgroundColor: task.paused ? colors.palette.accent100 : "transparent",
+            backgroundColor: task.paused ? "lightgreen" : "transparent",
+          }}
+        >
+          <MaterialCommunityIcons
+            name={task.paused ? "pause-circle" : "pause-circle-outline"}
+            size={24}
+            color={task.paused ? colors.palette.accent500 : colors.palette.neutral500}
+          />
+        </TouchableOpacity>
 
         {/* Trash icon button */}
         <TouchableOpacity
@@ -756,4 +686,4 @@ function Habit({ task, navigation }: HabitProps) {
       </BottomSheetModal>
     </>
   )
-}
+})

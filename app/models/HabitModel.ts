@@ -10,6 +10,9 @@ export const HabitModel = types.model("Habit", {
 
   finished: types.boolean,
 
+  paused: types.optional(types.boolean, false),
+
+
   category: types.optional(types.string, "health"), // add category, default to "health"
   current: types.optional(types.number, 0), // current progress
   target: types.optional(types.number, 1), // target goal
