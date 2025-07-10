@@ -342,7 +342,7 @@ const handleCreateHabit = () => {
                 <Icon icon="caretRight" />
               </TouchableOpacity>
             )}
-            <BottomSheetModal
+            {/* <BottomSheetModal
               ref={bottomSheetReminderRef}
               snapPoints={[200, "50%"]}
               backdropComponent={renderBackdrop}
@@ -362,7 +362,31 @@ const handleCreateHabit = () => {
                   </TouchableOpacity>
                 ))}
               </BottomSheetView>
-            </BottomSheetModal>
+            </BottomSheetModal> */}
+
+
+            <BottomSheetModal
+  ref={bottomSheetColorRef}
+  snapPoints={[200,"50%"]} // Replace [300, "50%"] with ["50%"]
+  backdropComponent={renderBackdrop}
+>
+  <BottomSheetView style={$bottomSheet}>
+    <ColorPicker
+      style={$colorPicker}
+      value={colorPicked}
+      onComplete={({ hex }) => setColorPicked(hex)}
+    >
+      <Panel1 />
+      <HueSlider />
+      <Preview />
+    </ColorPicker>
+  </BottomSheetView>
+</BottomSheetModal>
+
+
+
+
+
           </View>
 
 {/* 

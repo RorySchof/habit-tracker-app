@@ -47,11 +47,41 @@ export const HabitStoreModel = types
       self.habits.push(newHabit)
     },
 
-    incrementHabit(id: string, dateStr: string) {
+//     incrementHabit(id: string, dateStr: string) {
+//   const habit = self.habits.find((h) => h.id === id);
+//   if (!habit) return;
+
+//   const today = dateStr; // <-- use passed-in date
+//   let logEntry = self.activityLog.find(
+//     (entry) => entry.habitId === id && entry.date === today
+//   );
+
+//   const currentCount = logEntry ? logEntry.count : 0;
+
+//   if (currentCount < habit.target) {
+//     if (logEntry) {
+//       logEntry.count += 1;
+//     } else {
+//       self.activityLog.push({
+//         habitId: id,
+//         date: today,
+//         count: 1,
+//       });
+//     }
+//   }
+// },
+
+incrementHabit(id: string, dateStr: string) {
   const habit = self.habits.find((h) => h.id === id);
   if (!habit) return;
 
-  const today = dateStr; // <-- use passed-in date
+  // ✅ Prevent incrementing if paused
+  if (habit.paused) {
+    console.log(`Habit "${habit.name}" is paused; skipping increment.`);
+    return;
+  }
+
+  const today = dateStr;
   let logEntry = self.activityLog.find(
     (entry) => entry.habitId === id && entry.date === today
   );
@@ -71,11 +101,18 @@ export const HabitStoreModel = types
   }
 },
 
+
 decrementHabit(id: string, dateStr: string) {
   const habit = self.habits.find((h) => h.id === id);
   if (!habit) return;
 
-  const today = dateStr; // <-- use passed-in date
+  // ✅ Prevent decrementing if paused
+  if (habit.paused) {
+    console.log(`Habit "${habit.name}" is paused; skipping decrement.`);
+    return;
+  }
+
+  const today = dateStr;
   let logEntry = self.activityLog.find(
     (entry) => entry.habitId === id && entry.date === today
   );
@@ -89,6 +126,26 @@ decrementHabit(id: string, dateStr: string) {
     }
   }
 },
+
+
+// decrementHabit(id: string, dateStr: string) {
+//   const habit = self.habits.find((h) => h.id === id);
+//   if (!habit) return;
+
+//   const today = dateStr; // <-- use passed-in date
+//   let logEntry = self.activityLog.find(
+//     (entry) => entry.habitId === id && entry.date === today
+//   );
+
+//   if (logEntry && logEntry.count > 0) {
+//     logEntry.count -= 1;
+
+//     if (logEntry.count === 0) {
+//       const idx = self.activityLog.findIndex((e) => e === logEntry);
+//       if (idx !== -1) self.activityLog.splice(idx, 1);
+//     }
+//   }
+// },
 
 togglePauseHabit(habitId: string) {
   const habit = self.habits.find(h => h.id === habitId);
@@ -153,6 +210,17 @@ calculateHabitStreak(habit: Habit) {
         self.habits.splice(index, 1)
       }
     },
+
+    updateHabit(id: string, updates: Partial<HabitData & {paused?: boolean}>) {
+  const habit = self.habits.find(h => h.id === id)
+  if (habit) {
+    Object.entries(updates).forEach(([key, value]) => {
+      // @ts-ignore
+      habit[key] = value
+    })
+  }
+},
+
   }))
 
 export const habitStore = HabitStoreModel.create({ habits: [], activityLog: [] })

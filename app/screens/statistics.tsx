@@ -27,6 +27,7 @@ export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function Sta
 
   // Weekly completion progress calculation
 
+
 const weeklyCompletionData = useMemo(() => {
   if (!habitStore.habits.length || !habitStore.activityLog.length) return [];
 
@@ -47,7 +48,9 @@ const weeklyCompletionData = useMemo(() => {
     }
   }
 
-  return habitStore.habits.map(habit => {
+  const activeHabits = habitStore.habits.filter(h => !h.paused); // ✅ Skip paused
+
+  return activeHabits.map(habit => {
     const totalCount = activityMap.get(habit.id) || 0;
     const avgProgress = Math.min((totalCount / habit.target) * 100, 100);
     return {
@@ -60,6 +63,7 @@ const weeklyCompletionData = useMemo(() => {
   habitStore.habits.map(h => h.id + h.target).join(","), // depend only on ids and targets
   habitStore.activityLog.length,                        // depend on log changes
 ]);
+
 
 const completionSummary = useMemo(() => {
   if (!habitStore.habits.length) return { complete: 0, partial: 0, missed: 0 };
@@ -74,8 +78,8 @@ const completionSummary = useMemo(() => {
     const formattedDate = format(date, "yyyy-MM-dd");
     const dayOfWeek = format(date, "EEEE");
 
-    const scheduledHabits = habitStore.habits.filter(habit =>
-      habit.frequency.includes(dayOfWeek)
+    const scheduledHabits = habitStore.habits.filter(
+      habit => habit.frequency.includes(dayOfWeek) && !habit.paused // ✅ skip paused habits
     );
 
     if (scheduledHabits.length === 0) {
@@ -113,6 +117,7 @@ const completionSummary = useMemo(() => {
   return { complete, partial, missed };
 }, [habitStore.habits, habitStore.activityLog]);
 
+
 const habitWeeklyStatus = useMemo(() => {
   const today = new Date();
   const days = Array.from({ length: 7 }).map((_, idx) => {
@@ -124,7 +129,7 @@ const habitWeeklyStatus = useMemo(() => {
     };
   });
 
-  return habitStore.habits.map(habit => {
+  return habitStore.habits.filter(habit => !habit.paused).map(habit => {
     const dayStatuses = days.map(day => {
       if (!habit.frequency.includes(day.dayOfWeek)) {
         return "grey"; // not scheduled
@@ -155,7 +160,7 @@ const habitWeeklyStatus = useMemo(() => {
 const habitStreaks = useMemo(() => {
   const streaks: Record<string, number> = {};
 
-  habitStore.habits.forEach(habit => {
+  habitStore.habits.filter(habit => !habit.paused).forEach(habit => {
     // Call your store's helper function instead of inline logic
     streaks[habit.id] = habitStore.calculateHabitStreak(habit);
   });
@@ -177,7 +182,7 @@ const habitWeeklyTotals = useMemo(() => {
 
   const totals: Record<string, number> = {};
 
-  habitStore.habits.forEach(habit => {
+  habitStore.habits.filter(habit => !habit.paused).forEach(habit => {
     const totalCount = habitStore.activityLog
       .filter(log => log.habitId === habit.id && weekDatesSet.has(log.date))
       .reduce((acc, log) => acc + log.count, 0);
@@ -197,7 +202,7 @@ const habitWeeklyBreakdown = useMemo(() => {
 
   const breakdown: Record<string, { completed: number; partial: number; missed: number }> = {};
 
-  habitStore.habits.forEach(habit => {
+  habitStore.habits.filter(habit => !habit.paused).forEach(habit => {
     let completed = 0;
     let partial = 0;
     let missed = 0;
@@ -233,7 +238,10 @@ const habitWeeklyBreakdown = useMemo(() => {
   return breakdown;
 }, [habitStore.habits, habitStore.activityLog]);
 
-  const filteredHabits = habitStore.habits
+  // const filteredHabits = habitStore.habits
+
+  const filteredHabits = habitStore.habits.filter(habit => !habit.paused);
+
 
   const totalCompleted = filteredHabits.reduce((acc, habit) => acc + habit.current, 0)
   const totalTarget = filteredHabits.reduce((acc, habit) => acc + habit.target, 0)

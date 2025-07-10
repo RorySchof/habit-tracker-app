@@ -502,13 +502,21 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
                 current: todayCount, // replaced habit.current with today's count
                 target: habit.target || 1,
                 finished: habit.finished ?? false,
+                paused: habit.paused,         // ✅ Add this line
+
               }
 
               const isCompleted = transformedHabit.current >= transformedHabit.target
 
               return (
                 <View key={`${habit.id}-${idx}`} style={{ marginBottom: 12 }}>
-                  <Habit task={transformedHabit} navigation={navigation} />
+
+                  {/* <Habit task={transformedHabit} navigation={navigation} /> */}
+
+                  <Habit task={habit} navigation={navigation} />
+
+
+
                   {isCompleted && (
                     <Text style={{ color: "green", fontWeight: "bold", marginTop: 4 }}>
                       ✓ Completed
