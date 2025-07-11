@@ -334,7 +334,7 @@ const habitWeeklyBreakdown = useMemo(() => {
         </View>
       </View>
 
-      <View style={{ marginVertical: 16 }}>
+      {/* <View style={{ marginVertical: 16 }}>
         <Text preset="subheading">Weekly Completion %</Text>
         {weeklyCompletionData.map((habit, idx) => (
           <View key={`${habit.habitName}-${idx}`} style={{ marginVertical: 8 }}>
@@ -362,9 +362,112 @@ const habitWeeklyBreakdown = useMemo(() => {
             </View>
           </View>
         ))}
+      </View> */}
+{/* 
+      <View style={{
+  marginHorizontal: 16,
+  borderWidth: 1,
+  borderColor: '#ccc',
+  borderRadius: 8,
+  backgroundColor: '#fff',
+  padding: 16,
+  elevation: 2,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.1,
+  shadowRadius: 2,
+}}>
+
+<View style={{
+  flexDirection: 'column',
+  borderWidth: 1,
+  borderColor: '#ccc',
+  borderRadius: 8,
+  backgroundColor: '#fff',
+  padding: 16,
+  marginTop: 16,
+  elevation: 2, // Android
+  shadowColor: '#000', // iOS
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.1,
+  shadowRadius: 2,
+}}></View>
+  
+  <Text preset="subheading" style={{ marginBottom: 12 }}>Weekly Completion %</Text>
+
+  {weeklyCompletionData.map((habit, idx) => (
+    <View key={`${habit.habitName}-${idx}`} style={{ marginVertical: 8 }}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Text text={habit.emoji} style={{ fontSize: 18, marginRight: 8 }} />
+        <Text text={habit.habitName} style={{ flex: 1 }} />
+        <Text text={`${habit.avgProgress}%`} />
       </View>
 
-      <View style={{ flexDirection: "row", justifyContent: "space-around", marginVertical: 16 }}>
+      <View style={{
+        height: 8,
+        backgroundColor: "#ddd",
+        borderRadius: 4,
+        overflow: "hidden",
+        marginTop: 4,
+      }}>
+        <View style={{
+          width: `${habit.avgProgress}%`,
+          backgroundColor: "#304FFE", // Indigo A700 💙
+          height: "100%",
+        }} />
+      </View>
+    </View>
+  ))}
+</View> */}
+
+<View style={{
+  flexDirection: 'column',
+  flex: 1,
+  borderWidth: 1,
+  borderColor: '#ccc',
+  borderRadius: 8,
+  backgroundColor: '#fff',
+  paddingVertical: 16,
+  marginTop: 16,
+  elevation: 2, // Android
+  shadowColor: '#000', // iOS
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.1,
+  shadowRadius: 2,
+}}>
+  <Text preset="subheading" style={{ marginBottom: 12, textAlign: 'center' }}>
+    Weekly Completion %
+  </Text>
+
+  {weeklyCompletionData.map((habit, idx) => (
+    <View key={`${habit.habitName}-${idx}`} style={{ marginVertical: 12, paddingHorizontal: 16 }}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        {/* <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: '#304FFE', marginRight: 8 }} /> */}
+        <Text text={habit.emoji} style={{ fontSize: 18, marginRight: 8 }} />
+        <Text text={habit.habitName} style={{ flex: 1, fontSize: 16, color: '#444' }} />
+        <Text text={`${habit.avgProgress}%`} style={{ fontWeight: '600', color: '#000' }} />
+      </View>
+
+      <View style={{
+        height: 8,
+        backgroundColor: "#ddd",
+        borderRadius: 4,
+        overflow: "hidden",
+        marginTop: 4,
+      }}>
+        <View style={{
+          width: `${habit.avgProgress}%`,
+          backgroundColor: "#304FFE",
+          height: "100%",
+        }} />
+      </View>
+    </View>
+  ))}
+</View>
+
+
+
+      {/* <View style={{ flexDirection: "row", justifyContent: "space-around", marginVertical: 16 }}>
   <View style={{ alignItems: "center", padding: 12, backgroundColor: "#4CAF50", borderRadius: 12, flex: 1, marginHorizontal: 4 }}>
     <Text style={{ color: "white", fontWeight: "bold" }}>Complete</Text>
     <Text style={{ color: "white", fontSize: 18 }}>{completionSummary.complete} days</Text>
@@ -377,73 +480,212 @@ const habitWeeklyBreakdown = useMemo(() => {
     <Text style={{ color: "white", fontWeight: "bold" }}>Missed</Text>
     <Text style={{ color: "white", fontSize: 18 }}>{completionSummary.missed} days</Text>
   </View>
+
+
+  
+</View> */}
+
+{/* <View style={{ flexDirection: "row", justifyContent: "space-between", marginVertical: 24 }}>
+  <View style={{ flex: 1, alignItems: "center" }}>
+    <Text style={{ fontSize: 16, fontWeight: "600", color: "#444" }}>Perfect</Text>
+    <Text style={{ fontSize: 24, fontWeight: "700", color: "#304FFE", marginTop: 4 }}>
+      {completionSummary.complete} days
+    </Text>
+  </View>
+  <View style={{ flex: 1, alignItems: "center" }}>
+    <Text style={{ fontSize: 16, fontWeight: "600", color: "#444" }}>Partial</Text>
+    <Text style={{ fontSize: 24, fontWeight: "700", color: "#304FFE", marginTop: 4 }}>
+      {completionSummary.partial} days
+    </Text>
+  </View>
+  <View style={{ flex: 1, alignItems: "center" }}>
+    <Text style={{ fontSize: 16, fontWeight: "600", color: "#444" }}>Missed</Text>
+    <Text style={{ fontSize: 24, fontWeight: "700", color: "#304FFE", marginTop: 4 }}>
+      {completionSummary.missed} days
+    </Text>
+  </View>
+</View> */}
+
+<View style={{
+  flexDirection: 'row',
+  flex: 1,
+  borderWidth: 1,
+  borderColor: '#ccc',
+  borderRadius: 8,
+  backgroundColor: '#fff',
+  paddingVertical: 16,
+  marginTop: 16,
+
+    // 👇 Drop shadow styling
+  elevation: 2, // Android
+  shadowColor: '#000', // iOS
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.1,
+  shadowRadius: 2,
+}}>
+
+ 
+
+  {/* Perfect */}
+   <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+    <View style={{
+      width: 12,
+      height: 12,
+      borderRadius: 6,
+      backgroundColor: '#304FFE',
+      marginBottom: 8,
+    }} />
+    <Text style={{ fontSize: 16, fontWeight: '500', color: '#444' }}>Complete</Text>
+    <Text style={{ fontSize: 24, fontWeight: '700', color: '#000', marginTop: 4 }}>
+      {completionSummary.complete} days
+    </Text>
+  </View>
+
+  {/* Divider */}
+  <View style={{ width: 1, backgroundColor: '#ccc' }} />
+
+
+  {/* Partial */}
+  <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+    <View style={{
+      width: 12,
+      height: 12,
+      borderRadius: 6,
+      backgroundColor: '#8C9EFF',
+      marginBottom: 8,
+    }} />
+    <Text style={{ fontSize: 16, fontWeight: '500', color: '#444' }}>Partial</Text>
+    <Text style={{ fontSize: 24, fontWeight: '700', color: '#000', marginTop: 4 }}>
+      {completionSummary.partial} days
+    </Text>
+  </View>
+
+  {/* Divider */}
+  <View style={{ width: 1, backgroundColor: '#ccc' }} />
+
+  {/* Missed */}
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+    <View style={{
+      width: 12,
+      height: 12,
+      borderRadius: 6,
+      backgroundColor: '#BDBDBD',
+      marginBottom: 8,
+    }} />
+    <Text style={{ fontSize: 16, fontWeight: '500', color: '#444' }}>Missed</Text>
+    <Text style={{ fontSize: 24, fontWeight: '700', color: '#000', marginTop: 4 }}>
+      {completionSummary.missed} days
+    </Text>
+  </View>
 </View>
 
 
-<View style={{ marginVertical: 16 }}>
-  <Text preset="subheading">Weekly Habit Progress</Text>
-  {habitWeeklyStatus.map((habit, idx) => (
-    <View key={`${habit.habitName}-${idx}`} style={{ marginVertical: 12 }}>
-      <Text style={{ fontWeight: "bold", fontSize: 16 }}>{habit.habitName}</Text>
-      <Text style={{ color: "#666", marginBottom: 6 }}>{habit.targetText}</Text>
-      <View style={{ flexDirection: "row", justifyContent: "flex-start" }}>
-        {habit.dayStatuses.map((status, dayIdx) => (
-          <View
-            key={dayIdx}
-            style={{
-              width: 24,
-              height: 24,
-              marginRight: 6,
-              borderRadius: 4,
-              backgroundColor:
-                status === "green"
-                  ? "#4CAF50"
-                  : status === "yellow"
-                  ? "#FFC107"
-                  : status === "red"
-                  ? "#F44336"
-                  : "#BDBDBD",
-            }}
-          />
-        ))}
-      </View>
-        <Text style={{ color: "#444", marginTop: 4 }}>
+{habitWeeklyStatus.map((habit, idx) => (
+  <View
+    key={`${habit.habitName}-${idx}`}
+    style={{
+      flex: 1,
+      borderWidth: 1,
+      borderColor: "#ccc",
+      borderRadius: 8,
+      backgroundColor: "#fff",
+      paddingVertical: 16,
+      marginTop: 16,
+      elevation: 2,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+      paddingHorizontal: 16,
+    }}
+  >
+    {/* Habit content goes here */}
+    <Text style={{ fontWeight: "700", fontSize: 16, marginBottom: 2 }}>{habit.habitName}</Text>
+    <Text style={{ color: "#666", marginBottom: 6 }}>{habit.targetText}</Text>
+
+    <View style={{ flexDirection: "row", justifyContent: "flex-start", marginBottom: 4 }}>
+      {habit.dayStatuses.map((status, dayIdx) => (
+        <View
+          key={dayIdx}
+          style={{
+            width: 24,
+            height: 24,
+            marginRight: 6,
+            borderRadius: 4,
+            backgroundColor:
+  status === "green"
+    ? "#304FFE"
+    : status === "yellow"
+    ? "#8C9EFF"
+    : "#BDBDBD",
+          }}
+        />
+      ))}
+    </View>
+
+    {/* Stats */}
+
+    
+    {/* <Text style={{ color: "#444", marginTop: 4 }}>
       Longest Streak: {habitStreaks[habitStore.habits[idx]?.id] || 0} days
     </Text>
     <Text style={{ color: "#444", marginTop: 2 }}>
-  Total this week: {habitWeeklyTotals[habitStore.habits[idx]?.id ?? ""] ?? 0} times
-</Text>
-<Text style={{ color: "#444", marginTop: 2 }}>
-  ✅ Completed: {habitWeeklyBreakdown[habitStore.habits[idx]?.id ?? ""]?.completed ?? 0} days
-</Text>
-<Text style={{ color: "#444", marginTop: 2 }}>
-  🟡 Partial: {habitWeeklyBreakdown[habitStore.habits[idx]?.id ?? ""]?.partial ?? 0} days
-</Text>
-<Text style={{ color: "#444", marginTop: 2 }}>
-  ❌ Missed: {habitWeeklyBreakdown[habitStore.habits[idx]?.id ?? ""]?.missed ?? 0} days
-</Text>
-    </View>
-  ))}
+      Total this week: {habitWeeklyTotals[habitStore.habits[idx]?.id ?? ""] ?? 0} times
+    </Text>
+    <Text style={{ color: "#444", marginTop: 2 }}>
+      ✅ Completed: {habitWeeklyBreakdown[habitStore.habits[idx]?.id ?? ""]?.completed ?? 0} days
+    </Text>
+    <Text style={{ color: "#444", marginTop: 2 }}>
+      🟡 Partial: {habitWeeklyBreakdown[habitStore.habits[idx]?.id ?? ""]?.partial ?? 0} days
+    </Text>
+    <Text style={{ color: "#444", marginTop: 2 }}>
+      ❌ Missed: {habitWeeklyBreakdown[habitStore.habits[idx]?.id ?? ""]?.missed ?? 0} days
+    </Text> */}
+
+<View style={{ flexDirection: "row", alignItems: "center", marginTop: 2 }}>
+  <View style={{
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#304FFE", // Indigo A700 for Completed
+    marginRight: 8,
+  }} />
+  <Text style={{ color: "#444" }}>
+    Completed: {habitWeeklyBreakdown[habitStore.habits[idx]?.id ?? ""]?.completed ?? 0} days
+  </Text>
 </View>
 
-      <View style={{ alignItems: "center", marginVertical: spacing.xl }}>
-        <PieChart
-          data={pieData}
-          donut
-          showGradient
-          sectionAutoFocus
-          radius={90}
-          innerRadius={60}
-          innerCircleColor={colors.palette.secondary500}
-          centerLabelComponent={() => (
-            <View style={$pieChartLabelContainer}>
-              <Text text="80%" preset="subheading" style={{ color: colors.palette.neutral100 }} />
-              <Text text="Excellent" preset="formLabel" style={{ color: colors.palette.neutral100 }} />
-            </View>
-          )}
-        />
-        {renderLegendComponent()}
-      </View>
+<View style={{ flexDirection: "row", alignItems: "center", marginTop: 2 }}>
+  <View style={{
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#8C9EFF", // Light Indigo for Partial
+    marginRight: 8,
+  }} />
+  <Text style={{ color: "#444" }}>
+    Partial: {habitWeeklyBreakdown[habitStore.habits[idx]?.id ?? ""]?.partial ?? 0} days
+  </Text>
+</View>
+
+<View style={{ flexDirection: "row", alignItems: "center", marginTop: 2 }}>
+  <View style={{
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#BDBDBD", // Grey for Missed
+    marginRight: 8,
+  }} />
+  <Text style={{ color: "#444" }}>
+    Missed: {habitWeeklyBreakdown[habitStore.habits[idx]?.id ?? ""]?.missed ?? 0} days
+  </Text>
+</View>
+
+
+  </View>
+  
+))}
+
     </Screen>
   )
 })
