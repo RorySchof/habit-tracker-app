@@ -58,78 +58,73 @@ interface DayCardProps {
   progress: number
 }
 
-const $dayCard: ViewStyle = { gap: 8 }
+// const $dayCard: ViewStyle = { gap: 8 }
+
+// // const DayCard = ({ day, date, progress }: DayCardProps) => (
+// //   <View style={$dayCard}>
+// //     <Text text={day} />
+// //     <AnimatedCircularProgress
+// //       size={32}
+// //       width={3}
+// //       fill={progress}
+// //       tintColor={colors.palette.primary400}
+// //       backgroundColor={colors.palette.neutral100}
+// //     >
+// //       {() => <Text text={date} size="xs" />}
+// //     </AnimatedCircularProgress>
+// //   </View>
+// // )
 
 // const DayCard = ({ day, date, progress }: DayCardProps) => (
-//   <View style={$dayCard}>
-//     <Text text={day} />
-//     <AnimatedCircularProgress
-//       size={32}
-//       width={3}
-//       fill={progress}
-//       tintColor={colors.palette.primary400}
-//       backgroundColor={colors.palette.neutral100}
-//     >
-//       {() => <Text text={date} size="xs" />}
-//     </AnimatedCircularProgress>
+//   <View style={[$dayCard, {
+//     // backgroundColor: "#fff",
+//     // borderRadius: 12,
+//     // padding: spacing.sm,
+//     // alignItems: "center",
+//     // shadowColor: "#000",
+//     // shadowOpacity: 0.05,
+//     // shadowRadius: 4,
+//     // elevation: 2,
+//     // width: 64,
+//   }]}>
+//     {/* <Text style={{ fontSize: 14, fontWeight: "600", color: colors.text }}>
+//       {day}
+//     </Text> */}
+
+//  {/* <Text
+//   style={{
+//     fontSize: 14,
+//     fontWeight: "600",
+//     color: colors.text,
+//     textAlign: "center",
+//     flexShrink: 1,
+//     maxWidth: "100%",
+//   }}
+//   numberOfLines={2}
+//   adjustsFontSizeToFit
+// >
+//   {day}
+// </Text> */}
+
+//     <View style={$circularProgressContainer}>
+//       {/* <AnimatedCircularProgress
+//         size={42}
+//         width={4}
+//         fill={progress}
+//         tintColor={colors.palette.primary600}
+//         backgroundColor={colors.palette.neutral100}
+//       >
+//         {() => (
+//           <View style={$circularProgressChildren}>
+//             <Text style={{ fontSize: 10, color: colors.textDim }}>
+//               {date}
+//             </Text>
+//           </View>
+//         )}
+//       </AnimatedCircularProgress> */}
+//     </View>
 //   </View>
 // )
-
-const DayCard = ({ day, date, progress }: DayCardProps) => (
-  <View style={[$dayCard, {
-    // backgroundColor: "#fff",
-    // borderRadius: 12,
-    // padding: spacing.sm,
-    // alignItems: "center",
-    // shadowColor: "#000",
-    // shadowOpacity: 0.05,
-    // shadowRadius: 4,
-    // elevation: 2,
-    // width: 64,
-  }]}>
-    {/* <Text style={{ fontSize: 14, fontWeight: "600", color: colors.text }}>
-      {day}
-    </Text> */}
-
- {/* <Text
-  style={{
-    fontSize: 14,
-    fontWeight: "600",
-    color: colors.text,
-    textAlign: "center",
-    flexShrink: 1,
-    maxWidth: "100%",
-  }}
-  numberOfLines={2}
-  adjustsFontSizeToFit
->
-  {day}
-</Text> */}
-
-
-
-    <View style={$circularProgressContainer}>
-      {/* <AnimatedCircularProgress
-        size={42}
-        width={4}
-        fill={progress}
-        tintColor={colors.palette.primary600}
-        backgroundColor={colors.palette.neutral100}
-      >
-        {() => (
-          <View style={$circularProgressChildren}>
-            <Text style={{ fontSize: 10, color: colors.textDim }}>
-              {date}
-            </Text>
-          </View>
-        )}
-      </AnimatedCircularProgress> */}
-    </View>
-  </View>
-)
-
-
-
 
 // === Your Provided Styles ===
 const $container: ViewStyle = {
@@ -218,8 +213,8 @@ const $taskContainer: ViewStyle = {
   justifyContent: "space-between",
   backgroundColor: "#fff", // Matches stats screen
   borderWidth: 1,
-  borderColor: "#ccc",     // Matches stats screen
-  borderRadius: 8,         // Matches stats screen
+  borderColor: "#ccc", // Matches stats screen
+  borderRadius: 8, // Matches stats screen
   paddingVertical: 16,
   paddingHorizontal: spacing.md,
   marginTop: spacing.md,
@@ -232,10 +227,18 @@ const $taskContainer: ViewStyle = {
   shadowRadius: 2,
 }
 
+// const $taskLeftContainer: ViewStyle = {
+//   flexDirection: "row",
+//   gap: 15,
+// }
 
 const $taskLeftContainer: ViewStyle = {
   flexDirection: "row",
-  gap: 15,
+  alignItems: "center",
+  gap: spacing.sm,
+  flexShrink: 1,
+  flexGrow: 1,
+  flexBasis: "auto",
 }
 
 const $taskEmojiContainer: ViewStyle = {
@@ -407,7 +410,6 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
 
   // Day progress data based on selected day and frequency
 
-
   const dayProgressData = useMemo(() => {
     const dateObj = new Date(selected)
     const dayLabel = dateObj.toLocaleDateString("en-US", { weekday: "short" })
@@ -433,26 +435,25 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
       .join(","),
   ])
 
-const $checkInCardStyle: ViewStyle = {
-  backgroundColor: colors.palette.neutral100,
-  borderRadius: 12,
-  padding: spacing.sm, // Smaller padding to keep size tight
-  marginRight: spacing.sm,
-  borderWidth: 1,
-  borderColor: colors.palette.neutral200,
-  elevation: 4,
-  shadowColor: "#000",
-  shadowOpacity: 0.08,
-  shadowRadius: 4,      // Slightly smaller shadow
-  shadowOffset: { width: 0, height: 1 },
-  width: layout.window.width * 0.5, // Re-introduce fixed width if needed
-  height: layout.window.height * 0.32, // Matches your original $cardContainer
- 
-  overflow: "hidden",
+  const $checkInCardStyle: ViewStyle = {
+    backgroundColor: colors.palette.neutral100,
+    borderRadius: 12,
+    padding: spacing.sm, // Smaller padding to keep size tight
+    marginRight: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.palette.neutral200,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 4, // Slightly smaller shadow
+    shadowOffset: { width: 0, height: 1 },
+    width: layout.window.width * 0.5, // Re-introduce fixed width if needed
+    height: layout.window.height * 0.32, // Matches your original $cardContainer
 
-  justifyContent: "space-between",
-}
+    overflow: "hidden",
 
+    justifyContent: "space-between",
+  }
 
   return (
     <Screen preset="scroll" safeAreaEdges={["top", "bottom"]} contentContainerStyle={$container}>
@@ -480,25 +481,16 @@ const $checkInCardStyle: ViewStyle = {
                 onDayPress={(day) => setSelected(day.dateString)}
                 markedDates={markedDates}
                 firstDay={1}
-                style={{ width: "100%" }}
+                calendarWidth={layout.window.width} // 👈 explicitly set width
+                theme={{
+                  textSectionTitleColor: "#304FFE",
+                  textDayHeaderFontSize: 12,
+                  textDayFontSize: 16,
+                }}
               />
             </CalendarProvider>
-          </View >
-
-          {/* {dayProgressData.map((d) => (
-            <DayCard key={d.day} day={d.day} date={d.date} progress={d.progress} />
-          ))} */}
-
-          {/* <View style={{ backgroundColor: "pink", padding: 20 }}>
-  {dayProgressData.map((d) => (
-    <DayCard key={d.day} day={d.day} date={d.date} progress={d.progress} />
-  ))}
-</View> */}
-
+          </View>
         </View>
-
-        
-
         <View style={{ gap: spacing.md }}>
           <Text tx="homeScreen.check_in" preset="subheading" />
           <View>
@@ -511,11 +503,10 @@ const $checkInCardStyle: ViewStyle = {
                 <Card
                   key={`${checkIn.title}-${i}`}
                   // style={$cardContainer}
-                    style={$checkInCardStyle}
+                  style={$checkInCardStyle}
                   verticalAlignment="space-between"
                   // wrapperStyle={{ padding: spacing.sm }}
-                    wrapperStyle={{ padding: spacing.sm }}
-                  
+                  wrapperStyle={{ padding: spacing.sm }}
                   HeadingComponent={
                     <View style={$headingContainer}>
                       <View style={$emojiContainer}>
@@ -523,12 +514,12 @@ const $checkInCardStyle: ViewStyle = {
                       </View>
                       {/* <Text text={checkIn.title} size="md" /> */}
                       <Text
-  text={checkIn.title}
-  size="md"
-  numberOfLines={2}
-  ellipsizeMode="tail"
-  style={{ flexShrink: 1, textAlign: "center" }}
-/>
+                        text={checkIn.title}
+                        size="md"
+                        numberOfLines={2}
+                        ellipsizeMode="tail"
+                        style={{ flexShrink: 1, textAlign: "center" }}
+                      />
                     </View>
                   }
                   ContentComponent={
@@ -549,7 +540,6 @@ const $checkInCardStyle: ViewStyle = {
                       )}
                     </AnimatedCircularProgress>
                   }
-
                   FooterComponent={
                     <View style={$footerContainer}>
                       {(() => {
@@ -609,28 +599,14 @@ const $checkInCardStyle: ViewStyle = {
                 current: todayCount, // replaced habit.current with today's count
                 target: habit.target || 1,
                 finished: habit.finished ?? false,
-                paused: habit.paused,         // ✅ Add this line
-
+                paused: habit.paused, // ✅ Add this line
               }
 
               const isCompleted = transformedHabit.current >= transformedHabit.target
 
               return (
                 <View key={`${habit.id}-${idx}`} style={{ marginBottom: 12 }}>
-
-                  {/* <Habit task={transformedHabit} navigation={navigation} /> */}
-
-                  {/* <Habit task={habit} navigation={navigation} /> */}
-
                   <Habit task={transformedHabit} navigation={navigation} />
-
-
-
-                  {isCompleted && (
-                    <Text style={{ color: "green", fontWeight: "bold", marginTop: 4 }}>
-                      ✓ Completed
-                    </Text>
-                  )}
                 </View>
               )
             })}
@@ -645,8 +621,6 @@ interface HabitProps {
   task: HabitType
   navigation: HomeNavProps
 }
-
-// function Habit({ task, navigation }: HabitProps) {
 
 export const Habit = observer(function Habit({ task, navigation }: HabitProps) {
   const bottomSheetRef = useRef<BottomSheetModal>(null)
@@ -668,93 +642,91 @@ export const Habit = observer(function Habit({ task, navigation }: HabitProps) {
     })
   }, [isSheetOpen])
 
-const isCompleted = Number(task.current ?? 0) >= Number(task.target ?? 1)
+  const isCompleted = Number(task.current ?? 0) >= Number(task.target ?? 1)
 
-console.log("task.name:", task.name)
-console.log("task.current:", task.current)
-console.log("task.target:", task.target)
-console.log("isCompleted:", isCompleted)
+  console.log("task.name:", task.name)
+  console.log("task.current:", task.current)
+  console.log("task.target:", task.target)
+  console.log("isCompleted:", isCompleted)
 
   return (
     <>
       <TouchableOpacity
-        style={[
-          $taskContainer,
-          {
-            opacity: task.finished ? 0.6 : 1,
-          },
-        ]}
+        style={[$taskContainer, { opacity: task.finished ? 0.6 : 1 }]}
         onPress={handleOpenSheet}
       >
+        {/* Left side: emoji + name */}
         <View style={$taskLeftContainer}>
           <View style={$taskEmojiContainer}>
             <Text text={task.emoji} size="lg" style={$emojiText} />
           </View>
-
           <View>
-            <Text text={task.name} />
-            {/* <Text text={`start at ${task.time}`} size="xs" style={{ color: colors.textDim }} /> */}
+            <Text
+              text={task.name}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              style={{ maxWidth: layout.window.width * 0.4 }}
+            />
           </View>
         </View>
 
-        {/* <Toggle
-          variant="checkbox"
-          inputOuterStyle={$checkboxInput}
-          value={task.current >= task.target}
-        /> */}
-
-{isCompleted ? (
-  <MaterialCommunityIcons name="check-circle" size={24} color="#304FFE" />
-) : (
-  <MaterialCommunityIcons name="checkbox-blank-circle-outline" size={24} color="#ccc" />
-)}
-
-
-
-        {/* ✅ Pause button */}
-
-        <TouchableOpacity
-          onPress={() => habitStore.togglePauseHabit(task.id)}
+        {/* ✅ Right side: icons wrapped together */}
+        <View
           style={{
-            marginLeft: 12,
-            padding: 4,
-            borderRadius: 6,
-            // backgroundColor: task.paused ? colors.palette.accent100 : "transparent",
-            backgroundColor: task.paused ? "lightgreen" : "transparent",
+            flexDirection: "row",
+            alignItems: "center",
+            flexShrink: 0,
+            gap: 12,
           }}
         >
-          <MaterialCommunityIcons
-            name={task.paused ? "pause-circle" : "pause-circle-outline"}
-            size={24}
-            color={task.paused ? colors.palette.accent500 : colors.palette.neutral500}
-          />
-        </TouchableOpacity>
+          {/* Checkmark */}
+          {isCompleted ? (
+            <MaterialCommunityIcons name="check-circle" size={24} color="#304FFE" />
+          ) : (
+            <MaterialCommunityIcons name="checkbox-blank-circle-outline" size={24} color="#ccc" />
+          )}
 
-        {/* Trash icon button */}
-        <TouchableOpacity
-          onPress={() => {
-            Alert.alert(
-              "Delete Habit",
-              `Are you sure you want to delete "${task.name}"?`,
-              [
-                { text: "Cancel", style: "cancel" },
-                {
-                  text: "Delete",
-                  style: "destructive",
-                  onPress: () => habitStore.removeHabit(task.id),
-                },
-              ],
-              { cancelable: true },
-            )
-          }}
-          style={{ marginLeft: 12 }}
-        >
-          <MaterialCommunityIcons
-            name="trash-can-outline"
-            size={24}
-            color={colors.palette.neutral500}
-          />
-        </TouchableOpacity>
+          {/* Pause button */}
+          <TouchableOpacity
+            onPress={() => habitStore.togglePauseHabit(task.id)}
+            style={{
+              padding: 4,
+              borderRadius: 6,
+              backgroundColor: task.paused ? "lightgreen" : "transparent",
+            }}
+          >
+            <MaterialCommunityIcons
+              name={task.paused ? "pause-circle" : "pause-circle-outline"}
+              size={24}
+              color={task.paused ? colors.palette.accent500 : colors.palette.neutral500}
+            />
+          </TouchableOpacity>
+
+          {/* Trash button */}
+          <TouchableOpacity
+            onPress={() =>
+              Alert.alert(
+                "Delete Habit",
+                `Are you sure you want to delete "${task.name}"?`,
+                [
+                  { text: "Cancel", style: "cancel" },
+                  {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: () => habitStore.removeHabit(task.id),
+                  },
+                ],
+                { cancelable: true },
+              )
+            }
+          >
+            <MaterialCommunityIcons
+              name="trash-can-outline"
+              size={24}
+              color={colors.palette.neutral500}
+            />
+          </TouchableOpacity>
+        </View>
       </TouchableOpacity>
 
       <BottomSheetModal
@@ -819,7 +791,3 @@ console.log("isCompleted:", isCompleted)
     </>
   )
 })
-
-
-
-
