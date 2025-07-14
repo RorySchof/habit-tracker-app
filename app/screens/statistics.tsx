@@ -27,7 +27,6 @@ export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function Sta
 
   // Weekly completion progress calculation
 
-
 const weeklyCompletionData = useMemo(() => {
   if (!habitStore.habits.length || !habitStore.activityLog.length) return [];
 
@@ -144,7 +143,6 @@ const habitWeeklyStatus = useMemo(() => {
         if (logEntry.count > 0) return "yellow";
         return "red";
       }
-
       return "red"; // scheduled but no activity
     });
 
@@ -270,6 +268,36 @@ const habitWeeklyBreakdown = useMemo(() => {
     </View>
   )
 
+  const dailyPercentageData = Array.from({ length: 7 }).map((_, idx) => {
+  const date = subDays(new Date(), 6 - idx); // oldest to newest
+  const formattedDate = format(date, "yyyy-MM-dd");
+  const dayOfWeek = format(date, "EEEE");
+  const label = format(date, "EEE"); // "Mon", "Tue", ...
+
+  // Habits scheduled that day
+
+  const scheduledHabits = habitStore.habits.filter(
+    habit => habit.frequency.includes(dayOfWeek) && !habit.paused
+  );
+
+  const totalScheduled = scheduledHabits.length;
+
+  const completedCount = scheduledHabits.reduce((sum, habit) => {
+    const logEntry = habitStore.activityLog.find(
+      entry => entry.habitId === habit.id && entry.date === formattedDate
+    );
+    if (logEntry && logEntry.count >= habit.target) {
+      return sum + 1;
+    }
+    return sum;
+  }, 0);
+
+  const percentage = totalScheduled > 0 ? Math.round((completedCount / totalScheduled) * 100) : 0;
+
+  return { label, value: percentage, frontColor: "#304FFE", };
+});
+
+
   console.log("habits", getSnapshot(habitStore.habits))
   console.log("activityLog", getSnapshot(habitStore.activityLog))
   console.log("weeklyCompletionData", weeklyCompletionData)
@@ -299,126 +327,38 @@ const habitWeeklyBreakdown = useMemo(() => {
         ))}
       </View>
 
-      <View>
-        <View style={$barChartOverviewContainer}>
-          <Text text="Total Activities" preset="formLabel" />
-          <Text text={`${percentage}%`} preset="heading" />
-        </View>
-        <View style={$barChartContainer}>
-          <BarChart
-            data={data}
-            barWidth={20}
-            width={layout.window.width * 0.77}
-            height={layout.window.height * 0.3}
-            initialSpacing={spacing.xs}
-            spacing={spacing.lg}
-            barBorderRadius={spacing.sm}
-            yAxisThickness={0}
-            noOfSections={5}
-            xAxisType="dashed"
-            xAxisColor={colors.palette.neutral400}
-            yAxisTextStyle={{ color: colors.textDim }}
-            stepValue={100}
-            maxValue={1000}
-            yAxisLabelSuffix="%"
-            xAxisLabelTextStyle={$xAxisLabelText}
-            showLine
-            lineConfig={{
-              color: colors.palette.accent500,
-              thickness: 3,
-              curved: true,
-              hideDataPoints: true,
-              shiftY: 20,
-            }}
-          />
-        </View>
-      </View>
-
-      {/* <View style={{ marginVertical: 16 }}>
-        <Text preset="subheading">Weekly Completion %</Text>
-        {weeklyCompletionData.map((habit, idx) => (
-          <View key={`${habit.habitName}-${idx}`} style={{ marginVertical: 8 }}>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Text text={habit.emoji} style={{ fontSize: 18, marginRight: 8 }} />
-              <Text text={habit.habitName} style={{ flex: 1 }} />
-              <Text text={`${habit.avgProgress}%`} />
-            </View>
-            <View
-              style={{
-                height: 8,
-                backgroundColor: "#ddd",
-                borderRadius: 4,
-                overflow: "hidden",
-                marginTop: 4,
-              }}
-            >
-              <View
-                style={{
-                  width: `${habit.avgProgress}%`,
-                  backgroundColor: "#4caf50",
-                  height: "100%",
-                }}
-              />
-            </View>
-          </View>
-        ))}
-      </View> */}
-{/* 
       <View style={{
-  marginHorizontal: 16,
   borderWidth: 1,
-  borderColor: '#ccc',
+  borderColor: "#E0E0E0",
   borderRadius: 8,
-  backgroundColor: '#fff',
+  backgroundColor: "#fff",
   padding: 16,
-  elevation: 2,
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 1 },
-  shadowOpacity: 0.1,
-  shadowRadius: 2,
+  marginTop: 24,
 }}>
+  <View style={{ marginBottom: 12 }}>
+    <Text style={{ fontSize: 14, color: "#666", fontWeight: "500" }}>Total Activities</Text>
+    <Text style={{ fontSize: 20, fontWeight: "700", color: "#304FFE" }}>{percentage}%</Text>
+  </View>
 
-<View style={{
-  flexDirection: 'column',
-  borderWidth: 1,
-  borderColor: '#ccc',
-  borderRadius: 8,
-  backgroundColor: '#fff',
-  padding: 16,
-  marginTop: 16,
-  elevation: 2, // Android
-  shadowColor: '#000', // iOS
-  shadowOffset: { width: 0, height: 1 },
-  shadowOpacity: 0.1,
-  shadowRadius: 2,
-}}></View>
-  
-  <Text preset="subheading" style={{ marginBottom: 12 }}>Weekly Completion %</Text>
-
-  {weeklyCompletionData.map((habit, idx) => (
-    <View key={`${habit.habitName}-${idx}`} style={{ marginVertical: 8 }}>
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <Text text={habit.emoji} style={{ fontSize: 18, marginRight: 8 }} />
-        <Text text={habit.habitName} style={{ flex: 1 }} />
-        <Text text={`${habit.avgProgress}%`} />
-      </View>
-
-      <View style={{
-        height: 8,
-        backgroundColor: "#ddd",
-        borderRadius: 4,
-        overflow: "hidden",
-        marginTop: 4,
-      }}>
-        <View style={{
-          width: `${habit.avgProgress}%`,
-          backgroundColor: "#304FFE", // Indigo A700 💙
-          height: "100%",
-        }} />
-      </View>
-    </View>
-  ))}
-</View> */}
+  <BarChart
+    data={dailyPercentageData}
+    barWidth={20}
+    spacing={10}
+    width={layout.window.width * 0.85}
+    height={180}
+    maxValue={100}
+    stepValue={20}
+    barBorderRadius={6}
+    yAxisLabelSuffix="%"
+    yAxisThickness={0}
+    xAxisColor="#E0E0E0"
+    xAxisType="solid"
+    xAxisLabelTextStyle={{ color: "#666", fontSize: 12 }}
+    yAxisTextStyle={{ color: "#999", fontSize: 10 }}
+    noOfSections={5}
+    showLine={false}
+  />
+</View>
 
 <View style={{
   flexDirection: 'column',
@@ -464,47 +404,6 @@ const habitWeeklyBreakdown = useMemo(() => {
     </View>
   ))}
 </View>
-
-
-
-      {/* <View style={{ flexDirection: "row", justifyContent: "space-around", marginVertical: 16 }}>
-  <View style={{ alignItems: "center", padding: 12, backgroundColor: "#4CAF50", borderRadius: 12, flex: 1, marginHorizontal: 4 }}>
-    <Text style={{ color: "white", fontWeight: "bold" }}>Complete</Text>
-    <Text style={{ color: "white", fontSize: 18 }}>{completionSummary.complete} days</Text>
-  </View>
-  <View style={{ alignItems: "center", padding: 12, backgroundColor: "#FFC107", borderRadius: 12, flex: 1, marginHorizontal: 4 }}>
-    <Text style={{ color: "white", fontWeight: "bold" }}>Partial</Text>
-    <Text style={{ color: "white", fontSize: 18 }}>{completionSummary.partial} days</Text>
-  </View>
-  <View style={{ alignItems: "center", padding: 12, backgroundColor: "#F44336", borderRadius: 12, flex: 1, marginHorizontal: 4 }}>
-    <Text style={{ color: "white", fontWeight: "bold" }}>Missed</Text>
-    <Text style={{ color: "white", fontSize: 18 }}>{completionSummary.missed} days</Text>
-  </View>
-
-
-  
-</View> */}
-
-{/* <View style={{ flexDirection: "row", justifyContent: "space-between", marginVertical: 24 }}>
-  <View style={{ flex: 1, alignItems: "center" }}>
-    <Text style={{ fontSize: 16, fontWeight: "600", color: "#444" }}>Perfect</Text>
-    <Text style={{ fontSize: 24, fontWeight: "700", color: "#304FFE", marginTop: 4 }}>
-      {completionSummary.complete} days
-    </Text>
-  </View>
-  <View style={{ flex: 1, alignItems: "center" }}>
-    <Text style={{ fontSize: 16, fontWeight: "600", color: "#444" }}>Partial</Text>
-    <Text style={{ fontSize: 24, fontWeight: "700", color: "#304FFE", marginTop: 4 }}>
-      {completionSummary.partial} days
-    </Text>
-  </View>
-  <View style={{ flex: 1, alignItems: "center" }}>
-    <Text style={{ fontSize: 16, fontWeight: "600", color: "#444" }}>Missed</Text>
-    <Text style={{ fontSize: 24, fontWeight: "700", color: "#304FFE", marginTop: 4 }}>
-      {completionSummary.missed} days
-    </Text>
-  </View>
-</View> */}
 
 <View style={{
   flexDirection: 'row',
@@ -600,10 +499,13 @@ const habitWeeklyBreakdown = useMemo(() => {
     }}
   >
     {/* Habit content goes here */}
+
     <Text style={{ fontWeight: "700", fontSize: 16, marginBottom: 2 }}>{habit.habitName}</Text>
     <Text style={{ color: "#666", marginBottom: 6 }}>{habit.targetText}</Text>
 
-    <View style={{ flexDirection: "row", justifyContent: "flex-start", marginBottom: 4 }}>
+    <View style={{ height: 1, backgroundColor: "#E0E0E0", marginVertical: 8 }} />
+
+    {/* <View style={{ flexDirection: "row", justifyContent: "flex-start", marginBottom: 4 }}>
       {habit.dayStatuses.map((status, dayIdx) => (
         <View
           key={dayIdx}
@@ -621,26 +523,46 @@ const habitWeeklyBreakdown = useMemo(() => {
           }}
         />
       ))}
-    </View>
 
-    {/* Stats */}
+    </View> */}
 
-    
-    {/* <Text style={{ color: "#444", marginTop: 4 }}>
-      Longest Streak: {habitStreaks[habitStore.habits[idx]?.id] || 0} days
-    </Text>
-    <Text style={{ color: "#444", marginTop: 2 }}>
-      Total this week: {habitWeeklyTotals[habitStore.habits[idx]?.id ?? ""] ?? 0} times
-    </Text>
-    <Text style={{ color: "#444", marginTop: 2 }}>
-      ✅ Completed: {habitWeeklyBreakdown[habitStore.habits[idx]?.id ?? ""]?.completed ?? 0} days
-    </Text>
-    <Text style={{ color: "#444", marginTop: 2 }}>
-      🟡 Partial: {habitWeeklyBreakdown[habitStore.habits[idx]?.id ?? ""]?.partial ?? 0} days
-    </Text>
-    <Text style={{ color: "#444", marginTop: 2 }}>
-      ❌ Missed: {habitWeeklyBreakdown[habitStore.habits[idx]?.id ?? ""]?.missed ?? 0} days
-    </Text> */}
+    <View style={{
+  flexDirection: "row",
+  justifyContent: "space-between", // evenly spread the boxes
+  marginBottom: 12,
+}}>
+  {habit.dayStatuses.map((status, dayIdx) => (
+    <View
+      key={dayIdx}
+      style={{
+        width: 43,
+        height: 43,
+        // marginHorizontal: 0,
+        // borderRadius: 4,
+        //  marginRight: dayIdx < 6 ? 4 : 0, // tiny margin between boxes, none after last
+        backgroundColor:
+          status === "green"
+            ? "#304FFE"
+            : status === "yellow"
+            ? "#8C9EFF"
+            : "#BDBDBD",
+      }}
+    />
+  ))}
+</View>
+
+
+    {/* Habit Stats */}
+
+
+    <View style={{ height: 1, backgroundColor: "#E0E0E0", marginVertical: 8 }} /> 
+
+     <Text style={{ color: "#444" }}>
+    Longest streak: to be coded
+  </Text>
+
+      <View style={{ height: 1, backgroundColor: "#E0E0E0", marginVertical: 8 }} /> 
+
 
 <View style={{ flexDirection: "row", alignItems: "center", marginTop: 2 }}>
   <View style={{
@@ -650,10 +572,17 @@ const habitWeeklyBreakdown = useMemo(() => {
     backgroundColor: "#304FFE", // Indigo A700 for Completed
     marginRight: 8,
   }} />
+
+
+ 
+
   <Text style={{ color: "#444" }}>
     Completed: {habitWeeklyBreakdown[habitStore.habits[idx]?.id ?? ""]?.completed ?? 0} days
   </Text>
 </View>
+
+  <View style={{ height: 1, backgroundColor: "#E0E0E0", marginVertical: 8 }} />
+
 
 <View style={{ flexDirection: "row", alignItems: "center", marginTop: 2 }}>
   <View style={{
@@ -667,6 +596,8 @@ const habitWeeklyBreakdown = useMemo(() => {
     Partial: {habitWeeklyBreakdown[habitStore.habits[idx]?.id ?? ""]?.partial ?? 0} days
   </Text>
 </View>
+
+<View style={{ height: 1, backgroundColor: "#E0E0E0", marginVertical: 8 }} /> 
 
 <View style={{ flexDirection: "row", alignItems: "center", marginTop: 2 }}>
   <View style={{

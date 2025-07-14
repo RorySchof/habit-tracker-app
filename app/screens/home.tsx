@@ -60,20 +60,76 @@ interface DayCardProps {
 
 const $dayCard: ViewStyle = { gap: 8 }
 
+// const DayCard = ({ day, date, progress }: DayCardProps) => (
+//   <View style={$dayCard}>
+//     <Text text={day} />
+//     <AnimatedCircularProgress
+//       size={32}
+//       width={3}
+//       fill={progress}
+//       tintColor={colors.palette.primary400}
+//       backgroundColor={colors.palette.neutral100}
+//     >
+//       {() => <Text text={date} size="xs" />}
+//     </AnimatedCircularProgress>
+//   </View>
+// )
+
 const DayCard = ({ day, date, progress }: DayCardProps) => (
-  <View style={$dayCard}>
-    <Text text={day} />
-    <AnimatedCircularProgress
-      size={32}
-      width={3}
-      fill={progress}
-      tintColor={colors.palette.primary400}
-      backgroundColor={colors.palette.neutral100}
-    >
-      {() => <Text text={date} size="xs" />}
-    </AnimatedCircularProgress>
+  <View style={[$dayCard, {
+    // backgroundColor: "#fff",
+    // borderRadius: 12,
+    // padding: spacing.sm,
+    // alignItems: "center",
+    // shadowColor: "#000",
+    // shadowOpacity: 0.05,
+    // shadowRadius: 4,
+    // elevation: 2,
+    // width: 64,
+  }]}>
+    {/* <Text style={{ fontSize: 14, fontWeight: "600", color: colors.text }}>
+      {day}
+    </Text> */}
+
+ {/* <Text
+  style={{
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.text,
+    textAlign: "center",
+    flexShrink: 1,
+    maxWidth: "100%",
+  }}
+  numberOfLines={2}
+  adjustsFontSizeToFit
+>
+  {day}
+</Text> */}
+
+
+
+    <View style={$circularProgressContainer}>
+      {/* <AnimatedCircularProgress
+        size={42}
+        width={4}
+        fill={progress}
+        tintColor={colors.palette.primary600}
+        backgroundColor={colors.palette.neutral100}
+      >
+        {() => (
+          <View style={$circularProgressChildren}>
+            <Text style={{ fontSize: 10, color: colors.textDim }}>
+              {date}
+            </Text>
+          </View>
+        )}
+      </AnimatedCircularProgress> */}
+    </View>
   </View>
 )
+
+
+
 
 // === Your Provided Styles ===
 const $container: ViewStyle = {
@@ -157,14 +213,25 @@ const $footerContainer: ViewStyle = {
 }
 
 const $taskContainer: ViewStyle = {
-  backgroundColor: colors.palette.neutral100,
   flexDirection: "row",
-  justifyContent: "space-between",
   alignItems: "center",
+  justifyContent: "space-between",
+  backgroundColor: "#fff", // Matches stats screen
+  borderWidth: 1,
+  borderColor: "#ccc",     // Matches stats screen
+  borderRadius: 8,         // Matches stats screen
+  paddingVertical: 16,
   paddingHorizontal: spacing.md,
-  paddingVertical: spacing.sm,
-  borderRadius: spacing.sm,
+  marginTop: spacing.md,
+
+  // Drop shadow styling
+  elevation: 2,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.1,
+  shadowRadius: 2,
 }
+
 
 const $taskLeftContainer: ViewStyle = {
   flexDirection: "row",
@@ -366,6 +433,27 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
       .join(","),
   ])
 
+const $checkInCardStyle: ViewStyle = {
+  backgroundColor: colors.palette.neutral100,
+  borderRadius: 12,
+  padding: spacing.sm, // Smaller padding to keep size tight
+  marginRight: spacing.sm,
+  borderWidth: 1,
+  borderColor: colors.palette.neutral200,
+  elevation: 4,
+  shadowColor: "#000",
+  shadowOpacity: 0.08,
+  shadowRadius: 4,      // Slightly smaller shadow
+  shadowOffset: { width: 0, height: 1 },
+  width: layout.window.width * 0.5, // Re-introduce fixed width if needed
+  height: layout.window.height * 0.32, // Matches your original $cardContainer
+ 
+  overflow: "hidden",
+
+  justifyContent: "space-between",
+}
+
+
   return (
     <Screen preset="scroll" safeAreaEdges={["top", "bottom"]} contentContainerStyle={$container}>
       <BottomSheetModalProvider>
@@ -395,12 +483,21 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
                 style={{ width: "100%" }}
               />
             </CalendarProvider>
-          </View>
+          </View >
 
-          {dayProgressData.map((d) => (
+          {/* {dayProgressData.map((d) => (
             <DayCard key={d.day} day={d.day} date={d.date} progress={d.progress} />
-          ))}
+          ))} */}
+
+          {/* <View style={{ backgroundColor: "pink", padding: 20 }}>
+  {dayProgressData.map((d) => (
+    <DayCard key={d.day} day={d.day} date={d.date} progress={d.progress} />
+  ))}
+</View> */}
+
         </View>
+
+        
 
         <View style={{ gap: spacing.md }}>
           <Text tx="homeScreen.check_in" preset="subheading" />
@@ -413,15 +510,25 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
               {checkIns.map((checkIn, i) => (
                 <Card
                   key={`${checkIn.title}-${i}`}
-                  style={$cardContainer}
+                  // style={$cardContainer}
+                    style={$checkInCardStyle}
                   verticalAlignment="space-between"
-                  wrapperStyle={{ padding: spacing.sm }}
+                  // wrapperStyle={{ padding: spacing.sm }}
+                    wrapperStyle={{ padding: spacing.sm }}
+                  
                   HeadingComponent={
                     <View style={$headingContainer}>
                       <View style={$emojiContainer}>
                         <Text text={checkIn.emoji} size="xl" style={$emojiText} />
                       </View>
-                      <Text text={checkIn.title} size="md" />
+                      {/* <Text text={checkIn.title} size="md" /> */}
+                      <Text
+  text={checkIn.title}
+  size="md"
+  numberOfLines={2}
+  ellipsizeMode="tail"
+  style={{ flexShrink: 1, textAlign: "center" }}
+/>
                     </View>
                   }
                   ContentComponent={
@@ -513,7 +620,9 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
 
                   {/* <Habit task={transformedHabit} navigation={navigation} /> */}
 
-                  <Habit task={habit} navigation={navigation} />
+                  {/* <Habit task={habit} navigation={navigation} /> */}
+
+                  <Habit task={transformedHabit} navigation={navigation} />
 
 
 
@@ -559,6 +668,13 @@ export const Habit = observer(function Habit({ task, navigation }: HabitProps) {
     })
   }, [isSheetOpen])
 
+const isCompleted = Number(task.current ?? 0) >= Number(task.target ?? 1)
+
+console.log("task.name:", task.name)
+console.log("task.current:", task.current)
+console.log("task.target:", task.target)
+console.log("isCompleted:", isCompleted)
+
   return (
     <>
       <TouchableOpacity
@@ -581,11 +697,19 @@ export const Habit = observer(function Habit({ task, navigation }: HabitProps) {
           </View>
         </View>
 
-        <Toggle
+        {/* <Toggle
           variant="checkbox"
           inputOuterStyle={$checkboxInput}
           value={task.current >= task.target}
-        />
+        /> */}
+
+{isCompleted ? (
+  <MaterialCommunityIcons name="check-circle" size={24} color="#304FFE" />
+) : (
+  <MaterialCommunityIcons name="checkbox-blank-circle-outline" size={24} color="#ccc" />
+)}
+
+
 
         {/* ✅ Pause button */}
 
@@ -695,3 +819,7 @@ export const Habit = observer(function Habit({ task, navigation }: HabitProps) {
     </>
   )
 })
+
+
+
+
