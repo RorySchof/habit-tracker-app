@@ -11,12 +11,20 @@ const palette = {
   neutral800: "#191015",
   neutral900: "#000000",
 
-  primary100: "#F4E0D9",
-  primary200: "#E8C1B4",
-  primary300: "#DDA28E",
-  primary400: "#D28468",
-  primary500: "#C76542",
-  primary600: "#A54F31",
+  // primary100: "#F4E0D9",
+  // primary200: "#E8C1B4",
+  // primary300: "#DDA28E",
+  // primary400: "#D28468",
+  // primary500: "#C76542",
+  // primary600: "#A54F31",
+
+  primary100: "#E8EAF6", // light indigo
+primary200: "#C5CAE9",
+primary300: "#9FA8DA",
+primary400: "#7986CB",
+primary500: "#304FFE", // Indigo A700
+primary600: "#1E40FF", // deeper indigo
+
 
   secondary100: "#DCDDE9",
   secondary200: "#BCC0D6",

@@ -155,11 +155,14 @@ const $headerContainer: ViewStyle = {
 const $imageContainer: ViewStyle = {
   flexDirection: "row",
   alignItems: "center",
+  justifyContent: "center", // 👈 optional: centers vertically if needed
   gap: 20,
 }
 
+colors.palette.primaryCompleted = "#304FFE"
+
 const $headerBtn: ViewStyle = {
-  backgroundColor: colors.palette.primary600,
+  backgroundColor: colors.palette.primaryCompleted,
   width: 40,
   height: 40,
   alignItems: "center",
@@ -215,10 +218,9 @@ const $taskContainer: ViewStyle = {
   borderWidth: 1,
   borderColor: "#ccc", // Matches stats screen
   borderRadius: 8, // Matches stats screen
-  paddingVertical: 16,
+  paddingVertical: 12,
   paddingHorizontal: spacing.md,
-  marginTop: spacing.md,
-
+// marginTop: spacing.xs,
   // Drop shadow styling
   elevation: 2,
   shadowColor: "#000",
@@ -455,18 +457,28 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
     justifyContent: "space-between",
   }
 
+  const calendarSafeWidth = layout.window.width - spacing.md * 2
+
   return (
     <Screen preset="scroll" safeAreaEdges={["top", "bottom"]} contentContainerStyle={$container}>
       <BottomSheetModalProvider>
         <View style={$headerContainer}>
           <View style={$imageContainer}>
-            <Image source={require("../../assets/images/avatar-2.png")} style={$image} />
-            <Text text={format(new Date(), "EEEE, MMMM d")} size="xl" weight="bold" />
+            {/* <Image source={require("../../assets/images/avatar-2.png")} style={$image} /> */}
+            {/* <Text text={format(new Date(), "EEEE, MMMM d")} size="xl" weight="bold"  style={{ textAlign: "center" }}  /> */}
+            <Text
+              text={format(new Date(), "EEEE, MMMM d")}
+              weight="bold"
+              style={{
+                fontSize: 20, // 👈 try 20–22 for a nice in-between
+                textAlign: "center",
+              }}
+            />
           </View>
           <View style={$headerBtn}>
             <MaterialCommunityIcons
               name="plus"
-              color={colors.palette.neutral100}
+              color="#FFFFFF"
               size={28}
               onPress={() => navigation.navigate("CreateHabit")}
             />
@@ -476,16 +488,38 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
         <View style={$topContainer}>
           <View style={{ width: "100%", height: 100 }}>
             <CalendarProvider date={selected} onDateChanged={setSelected}>
+
+
+
+
               <WeekCalendar
                 current={selected}
                 onDayPress={(day) => setSelected(day.dateString)}
                 markedDates={markedDates}
                 firstDay={1}
-                calendarWidth={layout.window.width} // 👈 explicitly set width
-                theme={{
-                  textSectionTitleColor: "#304FFE",
-                  textDayHeaderFontSize: 12,
-                  textDayFontSize: 16,
+                calendarWidth={calendarSafeWidth} // stays as your current quick fix
+                disableWeekScroll={true} // keeps the view steady
+               theme={{
+  textSectionTitleColor: "#304FFE",       // weekday headers
+  todayTextColor: "#304FFE",              // highlight today's date
+  selectedDayBackgroundColor: "#FF69B4",  // selected day circle
+  selectedDayTextColor: "#FFFFFF",        // white text on selected day
+  dayTextColor: "#333",                   // default day text
+  textDayHeaderFontSize: 12,
+  textDayFontSize: 16,
+  textDayStyle: {
+    textAlign: "center",
+    fontSize: 14,
+    color: "#333",
+  },
+}}
+                style={{
+                  width: "100%",
+                  height: 100,
+                  backgroundColor: "#fff", // 💅 clean look
+                  borderRadius: 12,
+                  paddingHorizontal: 4,
+                  paddingVertical: 8,
                 }}
               />
             </CalendarProvider>
