@@ -13,6 +13,8 @@ import { habitStore } from "../models/habit-store"
 import { eachDayOfInterval, subDays, format } from "date-fns"
 import { getSnapshot } from "mobx-state-tree"
 
+import { Picker } from "@react-native-picker/picker";
+
 const filters = [
   { title: "Day", abbr: "D", id: 1 },
   { title: "Week", abbr: "W", id: 2 },
@@ -24,6 +26,66 @@ const filters = [
 
 export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function StatisticsScreen() {
   const [filter, setFilter] = React.useState("W")
+
+  // Longest streak
+
+  const { activityLog } = habitStore
+
+  console.log("📊 Habit count:", habitStore.habits.length)
+  console.log("📄 Activity log size:", activityLog.length)
+
+  function calculateStreaks(dates: string[]): {
+    currentStreak: number
+    longestStreak: number
+  } {
+    if (!dates.length) return { currentStreak: 0, longestStreak: 0 }
+
+    const sortedDates = dates
+      .map((date) => new Date(date))
+      .sort((a, b) => a.getTime() - b.getTime())
+
+    let longestStreak = 1
+    let currentStreak = 1
+    let tempStreak = 1
+
+    for (let i = 1; i < sortedDates.length; i++) {
+      const prev = sortedDates[i - 1]
+      const curr = sortedDates[i]
+
+      const diffInDays = Math.floor((curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24))
+
+      if (diffInDays === 1) {
+        tempStreak++
+      } else if (diffInDays > 1) {
+        tempStreak = 1
+      }
+
+      longestStreak = Math.max(longestStreak, tempStreak)
+    }
+
+    // Check if the last date is today or yesterday
+    const lastDate = sortedDates[sortedDates.length - 1]
+    const today = new Date()
+    const diffFromToday = Math.floor((today.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24))
+
+    currentStreak = diffFromToday <= 1 ? tempStreak : 0
+
+    return { currentStreak, longestStreak }
+  }
+
+  // streaks
+
+  const streaksByHabit: Record<string, { currentStreak: number; longestStreak: number }> = {}
+
+  habitStore.habits.forEach((habit) => {
+    const checkInDates = activityLog
+      .filter((log) => log.habitId === habit.id)
+      .map((log) => log.date)
+
+    streaksByHabit[habit.id] = calculateStreaks(checkInDates)
+  })
+
+  console.log("🔥 Streaks by Habit:", streaksByHabit)
 
   // Weekly completion progress calculation
 
@@ -309,6 +371,19 @@ export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function Sta
   console.log("weeklyCompletionData", weeklyCompletionData)
   console.log("completionSummary", completionSummary)
 
+  habitStore.habits.forEach((habit) => {
+    const checkInDates = habitStore.activityLog
+      .filter((log) => log.habitId === habit.id)
+      .map((log) => log.date)
+
+    streaksByHabit[habit.id] = calculateStreaks(checkInDates)
+  })
+
+
+
+
+
+
   return (
     <Screen preset="scroll" safeAreaEdges={["top", "bottom"]} contentContainerStyle={$container}>
       <View style={$topContainer}>
@@ -316,6 +391,7 @@ export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function Sta
         <MaterialCommunityIcons name="export-variant" size={24} />
       </View>
 
+      
       <View style={$filtersContainer}>
         {filters.map((f, idx) => (
           <View key={`${f.id}-${f.abbr}`} style={{ flexDirection: "row", alignItems: "center" }}>
@@ -334,12 +410,20 @@ export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function Sta
 
       <View
         style={{
+          flexDirection: "column",
+          flex: 1,
           borderWidth: 1,
-          borderColor: "#E0E0E0",
+          borderColor: "#ccc",
           borderRadius: 8,
           backgroundColor: "#fff",
-          padding: 16,
+          paddingVertical: 16,
+          paddingHorizontal: 16,
           marginTop: 24,
+          elevation: 2,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.1,
+          shadowRadius: 2,
         }}
       >
         <View style={{ marginBottom: 12 }}>
@@ -347,24 +431,28 @@ export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function Sta
           <Text style={{ fontSize: 20, fontWeight: "700", color: "#304FFE" }}>{percentage}%</Text>
         </View>
 
-        <BarChart
-          data={dailyPercentageData}
-          barWidth={20}
-          spacing={10}
-          width={layout.window.width * 0.85}
-          height={180}
-          maxValue={100}
-          stepValue={20}
-          barBorderRadius={6}
-          yAxisLabelSuffix="%"
-          yAxisThickness={0}
-          xAxisColor="#E0E0E0"
-          xAxisType="solid"
-          xAxisLabelTextStyle={{ color: "#666", fontSize: 12 }}
-          yAxisTextStyle={{ color: "#999", fontSize: 10 }}
-          noOfSections={5}
-          showLine={false}
-        />
+        {/* 👇 Add this container for alignment */}
+
+        <View style={{ overflow: "hidden", width: "100%" }}>
+          <BarChart
+            data={dailyPercentageData}
+            barWidth={20}
+            spacing={10}
+            width={layout.window.width * 0.75}
+            height={180}
+            maxValue={100}
+            stepValue={20}
+            barBorderRadius={6}
+            yAxisLabelSuffix="%"
+            yAxisThickness={0}
+            xAxisColor="#E0E0E0"
+            xAxisType="solid"
+            xAxisLabelTextStyle={{ color: "#666", fontSize: 12 }}
+            yAxisTextStyle={{ color: "#999", fontSize: 10 }}
+            noOfSections={5}
+            showLine={false}
+          />
+        </View>
       </View>
 
       <View
@@ -498,7 +586,9 @@ export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function Sta
         </View>
       </View>
 
+
       {habitWeeklyStatus.map((habit, idx) => (
+        
         <View
           key={`${habit.habitName}-${idx}`}
           style={{
@@ -526,27 +616,6 @@ export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function Sta
 
           <View style={{ height: 1, backgroundColor: "#E0E0E0", marginVertical: 8 }} />
 
-          {/* <View style={{ flexDirection: "row", justifyContent: "flex-start", marginBottom: 4 }}>
-      {habit.dayStatuses.map((status, dayIdx) => (
-        <View
-          key={dayIdx}
-          style={{
-            width: 24,
-            height: 24,
-            marginRight: 6,
-            borderRadius: 4,
-            backgroundColor:
-  status === "green"
-    ? "#304FFE"
-    : status === "yellow"
-    ? "#8C9EFF"
-    : "#BDBDBD",
-          }}
-        />
-      ))}
-
-    </View> */}
-
           <View
             style={{
               flexDirection: "row",
@@ -554,6 +623,7 @@ export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function Sta
               marginBottom: 12,
             }}
           >
+
             {habit.dayStatuses.map((status, dayIdx) => (
               <View
                 key={dayIdx}
@@ -563,9 +633,17 @@ export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function Sta
                   // marginHorizontal: 0,
                   // borderRadius: 4,
                   //  marginRight: dayIdx < 6 ? 4 : 0, // tiny margin between boxes, none after last
-                  backgroundColor:
-                    status === "green" ? "#304FFE" : status === "yellow" ? "#8C9EFF" : "#BDBDBD",
-                }}
+        //           backgroundColor:
+        // status === "green"
+        //   ? habitColor
+        //   : status === "yellow"
+        //   ? `${habitColor}80` // 50% opacity for partial
+        //   : "#BDBDBD",
+
+        backgroundColor: status === "green" ? "#304FFE" : status === "yellow" ? "#8C9EFF" : "#BDBDBD",
+
+
+    }}
               />
             ))}
           </View>
@@ -573,8 +651,16 @@ export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function Sta
           {/* Habit Stats */}
 
           <View style={{ height: 1, backgroundColor: "#E0E0E0", marginVertical: 8 }} />
+          <Text style={{ color: "#444" }}>
+            🔥 Current Streak:{" "}
+            {streaksByHabit[habitStore.habits[idx]?.id ?? ""]?.currentStreak ?? 0} days
+          </Text>
+          <View style={{ height: 1, backgroundColor: "#E0E0E0", marginVertical: 8 }} />
 
-          <Text style={{ color: "#444" }}>Longest streak: to be coded</Text>
+          <Text style={{ color: "#444", marginTop: 2 }}>
+            🏆 Longest Streak:{" "}
+            {streaksByHabit[habitStore.habits[idx]?.id ?? ""]?.longestStreak ?? 0} days
+          </Text>
 
           <View style={{ height: 1, backgroundColor: "#E0E0E0", marginVertical: 8 }} />
 
