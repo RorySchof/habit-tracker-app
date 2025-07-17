@@ -14,6 +14,7 @@ import {
   endOfMonth,
   format,
   addDays,
+  subDays,
 } from "date-fns"
 
 
@@ -48,6 +49,14 @@ export function getSummaryByPeriod(
       startDate = startOfMonth(today)
       endDate = endOfMonth(today)
       break
+      case "30":
+  startDate = subDays(today, 29);
+  endDate = today;
+  break;
+case "90":
+  startDate = subDays(today, 89);
+  endDate = today;
+  break;
     default:
       startDate = startOfWeek(today, { weekStartsOn: 1 })
       endDate = endOfWeek(today, { weekStartsOn: 1 })

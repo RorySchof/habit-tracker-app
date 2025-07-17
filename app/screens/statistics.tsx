@@ -1,7 +1,7 @@
 // Statistics.tsx
 
 import { observer } from "mobx-react-lite"
-import React, { FC, useMemo } from "react"
+import React, { FC, useMemo, useState } from "react"
 import { View, ViewStyle, TouchableOpacity, TextStyle } from "react-native"
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons"
 import { BarChart, barDataItem, PieChart, pieDataItem } from "react-native-gifted-charts"
@@ -15,6 +15,8 @@ import { getSnapshot } from "mobx-state-tree"
 
 import { Picker } from "@react-native-picker/picker";
 
+// Time Range picker
+
 const filters = [
   { title: "Day", abbr: "D", id: 1 },
   { title: "Week", abbr: "W", id: 2 },
@@ -24,8 +26,22 @@ const filters = [
   { title: "Year", abbr: "Y", id: 6 },
 ]
 
+
+// const chartLength = filter === "M" ? 30 : 7;
+// const [filter, setFilter] = useState<"D" | "W" | "M" | "3M" | "6M" | "Y">("D");
+
+
+
 export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function StatisticsScreen() {
+
   const [filter, setFilter] = React.useState("W")
+
+  const chartLength =
+    filter === "M" ? 30 :
+    filter === "3M" ? 90 :
+    filter === "6M" ? 180 :
+    filter === "Y" ? 365 :
+    filter === "W" ? 7 : 1; // fallback for "D"
 
   // Longest streak
 
@@ -64,6 +80,7 @@ export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function Sta
     }
 
     // Check if the last date is today or yesterday
+
     const lastDate = sortedDates[sortedDates.length - 1]
     const today = new Date()
     const diffFromToday = Math.floor((today.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24))
@@ -73,7 +90,7 @@ export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function Sta
     return { currentStreak, longestStreak }
   }
 
-  // streaks
+  // streaks cont...
 
   const streaksByHabit: Record<string, { currentStreak: number; longestStreak: number }> = {}
 
@@ -179,7 +196,7 @@ export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function Sta
 
   const habitWeeklyStatus = useMemo(() => {
     const today = new Date()
-    const days = Array.from({ length: 7 }).map((_, idx) => {
+    const days = Array.from({ length: chartLength }).map((_, idx) => {
       const date = subDays(today, 6 - idx) // oldest to newest
       return {
         date,
@@ -337,11 +354,12 @@ export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function Sta
     </View>
   )
 
-  const dailyPercentageData = Array.from({ length: 7 }).map((_, idx) => {
+  const dailyPercentageData = Array.from({ length: chartLength }).map((_, idx) => {
     const date = subDays(new Date(), 6 - idx) // oldest to newest
     const formattedDate = format(date, "yyyy-MM-dd")
     const dayOfWeek = format(date, "EEEE")
     const label = format(date, "EEE") // "Mon", "Tue", ...
+
 
     // Habits scheduled that day
 
@@ -379,11 +397,6 @@ export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function Sta
     streaksByHabit[habit.id] = calculateStreaks(checkInDates)
   })
 
-
-
-
-
-
   return (
     <Screen preset="scroll" safeAreaEdges={["top", "bottom"]} contentContainerStyle={$container}>
       <View style={$topContainer}>
@@ -391,8 +404,14 @@ export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function Sta
         <MaterialCommunityIcons name="export-variant" size={24} />
       </View>
 
+{/* range selction 37/30/90 */}
       
       <View style={$filtersContainer}>
+
+        {/* // const chartLength = filter === "M" ? 30 : 7;
+// const [filter, setFilter] = useState<"D" | "W" | "M" | "3M" | "6M" | "Y">("D"); */}
+
+
         {filters.map((f, idx) => (
           <View key={`${f.id}-${f.abbr}`} style={{ flexDirection: "row", alignItems: "center" }}>
             <TouchableOpacity
