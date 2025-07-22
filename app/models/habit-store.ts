@@ -1,6 +1,5 @@
 // // habit store ts
 
-
 import { types, onSnapshot, applySnapshot } from "mobx-state-tree"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { HabitModel } from "../models/HabitModel"
