@@ -27,9 +27,9 @@ const filters = [
 ]
 
 function isScheduledForDate(habit, date) {
-  const dayOfWeek = format(date, "EEEE")
-  const createdAt = new Date(habit.createdAt)
-  return habit.frequency.includes(dayOfWeek) && date >= createdAt
+  const dayOfWeek = format(date, "EEEE");
+  const createdAt = new Date(habit.createdAt);
+  return habit.frequency.includes(dayOfWeek) && date >= createdAt;
 }
 
 // const chartLength = filter === "M" ? 30 : 7;
@@ -54,9 +54,6 @@ export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function Sta
   // Longest streak
 
   const { activityLog } = habitStore
-
-  console.log("📊 Habit count:", habitStore.habits.length)
-  console.log("📄 Activity log size:", activityLog.length)
 
   function calculateStreaks(dates: string[]): {
     currentStreak: number
@@ -110,7 +107,6 @@ export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function Sta
     streaksByHabit[habit.id] = calculateStreaks(checkInDates)
   })
 
-  console.log("🔥 Streaks by Habit:", streaksByHabit)
 
   // Weekly completion progress calculation
 
@@ -239,16 +235,6 @@ export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function Sta
             (entry) => entry.habitId === habit.id && entry.date === formattedDate,
           )
 
-          console.log(`[${habit.name}] ${formattedDate} (${dayOfWeek})`)
-          // console.log(`  Scheduled: ${isScheduled}`);
-          console.log(`  Log Entry: ${logEntry ? logEntry.count : "None"}`)
-          console.log(`  Target: ${habit.target}`)
-          console.log(
-            `  Status: ${
-              logEntry ? (logEntry.count >= habit.target ? "Complete" : "Partial") : "Missed"
-            }`,
-          )
-
           if (logEntry) {
             if (logEntry.count >= habit.target) {
               completed += 1
@@ -267,6 +253,9 @@ export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function Sta
 
     return breakdown
   }, [habitStore.habits, habitStore.activityLog])
+
+
+  // Completion Summary
 
   const completionSummary = useMemo(() => {
     let complete = 0
@@ -333,6 +322,64 @@ export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function Sta
         }
       })
   }, [habitStore.habits, habitStore.activityLog])
+
+
+
+//   const completionSummary = useMemo(() => {
+//   let complete = 0;
+//   let partial = 0;
+//   let missed = 0;
+
+//   const today = new Date();
+//   const days = Array.from({ length: chartLength }).map((_, idx) =>
+//     subDays(today, chartLength - 1 - idx)
+//   );
+
+//   days.forEach((date) => {
+//     const formattedDate = format(date, "yyyy-MM-dd");
+
+//     // Get all habits scheduled for this day
+//     const scheduledHabits = habitStore.habits.filter((habit) => {
+//       const dayOfWeek = format(date, "EEEE");
+//       const createdAt = new Date(habit.createdAt);
+//       return (
+//         !habit.paused &&
+//         habit.frequency.includes(dayOfWeek) &&
+//         date >= createdAt
+//       );
+//     });
+
+//     if (scheduledHabits.length === 0) return; // skip days with no scheduled habits
+
+//     let completedCount = 0;
+//     let partialCount = 0;
+
+//     scheduledHabits.forEach((habit) => {
+//       const logEntry = habitStore.activityLog.find(
+//         (entry) => entry.habitId === habit.id && entry.date === formattedDate
+//       );
+
+//       if (logEntry) {
+//         if (logEntry.count >= habit.target) {
+//           completedCount += 1;
+//         } else if (logEntry.count > 0) {
+//           partialCount += 1;
+//         }
+//       }
+//     });
+
+//     if (completedCount === scheduledHabits.length) {
+//       complete += 1;
+//     } else if (completedCount > 0 || partialCount > 0) {
+//       partial += 1;
+//     } else {
+//       missed += 1;
+//     }
+//   });
+
+//   return { complete, partial, missed };
+// }, [chartLength, habitStore.habits, habitStore.activityLog]);
+
 
   const habitStreaks = useMemo(() => {
     const streaks: Record<string, number> = {}
@@ -437,10 +484,7 @@ export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function Sta
     return { label, value: percentage, frontColor: "#304FFE" }
   })
 
-  console.log("habits", getSnapshot(habitStore.habits))
-  console.log("activityLog", getSnapshot(habitStore.activityLog))
-  console.log("weeklyCompletionData", weeklyCompletionData)
-  console.log("completionSummary", completionSummary)
+ // what does this do? 
 
   habitStore.habits.forEach((habit) => {
     const checkInDates = habitStore.activityLog

@@ -475,14 +475,25 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
               }}
             />
           </View>
-          <View style={$headerBtn}>
-            <MaterialCommunityIcons
-              name="plus"
-              color="#FFFFFF"
-              size={28}
-              onPress={() => navigation.navigate("CreateHabit")}
-            />
-          </View>
+          
+        <View style={$headerBtn}>
+  {/* 🔧 Dev-only button to access FakeHabitScreen */}
+  <MaterialCommunityIcons
+    name="test-tube"
+    color="#FFFFFF"
+    size={28}
+    onPress={() => navigation.navigate("FakeHabit")}
+    style={{ marginRight: 12 }}
+  />
+
+  {/* Existing plus icon */}
+  <MaterialCommunityIcons
+    name="plus"
+    color="#FFFFFF"
+    size={28}
+    onPress={() => navigation.navigate("CreateHabit")}
+  />
+</View>
         </View>
 
         <View style={$topContainer}>
@@ -677,11 +688,6 @@ export const Habit = observer(function Habit({ task, navigation }: HabitProps) {
   }, [isSheetOpen])
 
   const isCompleted = Number(task.current ?? 0) >= Number(task.target ?? 1)
-
-  console.log("task.name:", task.name)
-  console.log("task.current:", task.current)
-  console.log("task.target:", task.target)
-  console.log("isCompleted:", isCompleted)
 
   return (
     <>

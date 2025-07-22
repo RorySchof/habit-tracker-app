@@ -47,29 +47,6 @@ export const HabitStoreModel = types
       self.habits.push(newHabit)
     },
 
-//     incrementHabit(id: string, dateStr: string) {
-//   const habit = self.habits.find((h) => h.id === id);
-//   if (!habit) return;
-
-//   const today = dateStr; // <-- use passed-in date
-//   let logEntry = self.activityLog.find(
-//     (entry) => entry.habitId === id && entry.date === today
-//   );
-
-//   const currentCount = logEntry ? logEntry.count : 0;
-
-//   if (currentCount < habit.target) {
-//     if (logEntry) {
-//       logEntry.count += 1;
-//     } else {
-//       self.activityLog.push({
-//         habitId: id,
-//         date: today,
-//         count: 1,
-//       });
-//     }
-//   }
-// },
 
 incrementHabit(id: string, dateStr: string) {
   const habit = self.habits.find((h) => h.id === id);
@@ -127,26 +104,6 @@ decrementHabit(id: string, dateStr: string) {
   }
 },
 
-
-// decrementHabit(id: string, dateStr: string) {
-//   const habit = self.habits.find((h) => h.id === id);
-//   if (!habit) return;
-
-//   const today = dateStr; // <-- use passed-in date
-//   let logEntry = self.activityLog.find(
-//     (entry) => entry.habitId === id && entry.date === today
-//   );
-
-//   if (logEntry && logEntry.count > 0) {
-//     logEntry.count -= 1;
-
-//     if (logEntry.count === 0) {
-//       const idx = self.activityLog.findIndex((e) => e === logEntry);
-//       if (idx !== -1) self.activityLog.splice(idx, 1);
-//     }
-//   }
-// },
-
 togglePauseHabit(habitId: string) {
   const habit = self.habits.find(h => h.id === habitId);
   if (habit) {
@@ -171,6 +128,7 @@ calculateHabitStreak(habit: Habit) {
     }
 
     // ✅ Skip paused habits in streak calculations
+
     if (habit.paused) {
       continue;
     }
@@ -195,12 +153,9 @@ calculateHabitStreak(habit: Habit) {
         if (snapshotStr) {
           const snapshot = JSON.parse(snapshotStr)
           applySnapshot(self, snapshot)
-          // console.log("Loaded HabitStore snapshot:", snapshot)
         } else {
-          // console.log("No HabitStore snapshot found in AsyncStorage.")
         }
       } catch (error) {
-        // console.error("Failed to load HabitStore snapshot", error)
       }
     },
 
@@ -230,9 +185,7 @@ habitStore.load()
 onSnapshot(habitStore, (snapshot) => {
   AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot))
     .then(() => {
-      // console.log("Saved HabitStore snapshot:", snapshot)
     })
     .catch((error) => {
-      // console.error("Failed to save HabitStore snapshot", error)
     })
 })
