@@ -1,6 +1,5 @@
 // edit habit modal screen
 
-
 import { observer } from "mobx-react-lite"
 import React, { FC } from "react"
 import { View, ViewStyle, TouchableOpacity, TextStyle } from "react-native"
@@ -37,42 +36,40 @@ export const EditHabitScreen: FC<EditHabitScreenProps> = observer(function EditH
   navigation,
   route,
 }) {
-
   console.log("route.params:", route.params)
-  console.log("habitStore.habits ids:", habitStore.habits.map(h => h.id))
+  console.log(
+    "habitStore.habits ids:",
+    habitStore.habits.map((h) => h.id),
+  )
 
   // const habitId = String(route.params.params?.habitId)
 
   // const habitId = String(route.params.habitId)
-  
+
   const habitId = route.params.habitId
   const task = habitStore.habits.find((h) => h.id === habitId)
 
-
-
   // const task = habitStore.habits.find((h) => h.id === String(habitId))
 
-
   if (!task) {
-  return (
-    <Screen preset="fixed" safeAreaEdges={["top", "bottom"]} contentContainerStyle={$container}>
-      <View style={$headerContainer}>
-        <Icon icon="x" color={colors.text} onPress={() => navigation.goBack()} />
-        <Text text="Edit habit" preset="heading" size="lg" />
-      </View>
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text text="Habit not found." preset="subheading" />
-        <Button
-          text="Go Back"
-          style={$btn}
-          textStyle={{ color: colors.palette.neutral100 }}
-          onPress={() => navigation.goBack()}
-        />
-      </View>
-    </Screen>
-  )
-}
-
+    return (
+      <Screen preset="fixed" safeAreaEdges={["top", "bottom"]} contentContainerStyle={$container}>
+        <View style={$headerContainer}>
+          <Icon icon="x" color={colors.text} onPress={() => navigation.goBack()} />
+          <Text text="Edit habit" preset="heading" size="lg" />
+        </View>
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <Text text="Habit not found." preset="subheading" />
+          <Button
+            text="Go Back"
+            style={$btn}
+            textStyle={{ color: colors.palette.neutral100 }}
+            onPress={() => navigation.goBack()}
+          />
+        </View>
+      </Screen>
+    )
+  }
 
   const [open, setOpen] = React.useState(false)
   const [reminder, setReminder] = React.useState("30 minutes before")
@@ -84,22 +81,19 @@ export const EditHabitScreen: FC<EditHabitScreenProps> = observer(function EditH
   // )
 
   const [habitTime, setHabitTime] = React.useState(() => {
-  if (task?.time && task.time.includes(":")) {
-    const parsed = parseTimeStringToDate(task.time)
-    return isNaN(parsed.getTime()) ? new Date() : parsed
-  }
-  return new Date()
-})
-
-
-
+    if (task?.time && task.time.includes(":")) {
+      const parsed = parseTimeStringToDate(task.time)
+      return isNaN(parsed.getTime()) ? new Date() : parsed
+    }
+    return new Date()
+  })
 
   const [frequency, setFrequency] = React.useState(
     task?.frequency
       ? task.frequency
           .map((dayStr) => days.find((d) => d.day === dayStr))
           .filter((d): d is (typeof days)[0] => !!d)
-      : []
+      : [],
   )
 
   const bottomSheetColorRef = React.useRef<BottomSheetModal>(null)
@@ -113,7 +107,7 @@ export const EditHabitScreen: FC<EditHabitScreenProps> = observer(function EditH
   }, [])
   const renderBackdrop = React.useCallback(
     (props: any) => <BottomSheetBackdrop {...props} disappearsOnIndex={0} appearsOnIndex={1} />,
-    []
+    [],
   )
 
   const handleSelectFrequency = (day: (typeof days)[0]) => {
@@ -137,7 +131,7 @@ export const EditHabitScreen: FC<EditHabitScreenProps> = observer(function EditH
   //     // task.color = colorPicked
   //     // task.frequency = frequency.map((f) => f.day)
   //     // task.time = habitTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-      
+
   //     console.log("Updated task:", {
   //       emoji: task.emoji,
   //       color: task.color,
@@ -161,39 +155,38 @@ export const EditHabitScreen: FC<EditHabitScreenProps> = observer(function EditH
   // }
 
   const handleSave = () => {
-  console.log("Attempting to save habit...")
+    console.log("Attempting to save habit...")
 
-  if (task) {
-    console.log("Found task:", task)
+    if (task) {
+      console.log("Found task:", task)
 
-    habitStore.updateHabit(task.id, {
-      emoji: selectedEmoji,
-      color: colorPicked,
-      frequency: frequency.map(f => f.day),
-      time: habitTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    })
+      habitStore.updateHabit(task.id, {
+        emoji: selectedEmoji,
+        color: colorPicked,
+        frequency: frequency.map((f) => f.day),
+        time: habitTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      })
 
-    console.log("Updated task:", {
-      emoji: selectedEmoji,
-      color: colorPicked,
-      frequency: frequency.map(f => f.day),
-      time: habitTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    })
+      console.log("Updated task:", {
+        emoji: selectedEmoji,
+        color: colorPicked,
+        frequency: frequency.map((f) => f.day),
+        time: habitTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      })
 
-    if (habitStore.saveHabits) {
-      habitStore.saveHabits()
-      console.log("Habit store saved.")
+      if (habitStore.saveHabits) {
+        habitStore.saveHabits()
+        console.log("Habit store saved.")
+      } else {
+        console.log("habitStore.saveHabits not defined.")
+      }
     } else {
-      console.log("habitStore.saveHabits not defined.")
+      console.log("Task not found. Cannot save.")
     }
-  } else {
-    console.log("Task not found. Cannot save.")
+
+    navigation.navigate("Home")
+    console.log("Navigated to Home.")
   }
-
-  navigation.navigate("Home")
-  console.log("Navigated to Home.")
-}
-
 
   return (
     <Screen preset="scroll" safeAreaEdges={["top", "bottom"]} contentContainerStyle={$container}>
@@ -343,11 +336,7 @@ export const EditHabitScreen: FC<EditHabitScreenProps> = observer(function EditH
           </BottomSheetModal>
         </View>
 
-        <Button
-          style={$btn}
-          textStyle={{ color: colors.palette.neutral100 }}
-          onPress={handleSave}
-        >
+        <Button style={$btn} textStyle={{ color: colors.palette.neutral100 }} onPress={handleSave}>
           Save changes
         </Button>
       </BottomSheetModalProvider>
@@ -355,9 +344,7 @@ export const EditHabitScreen: FC<EditHabitScreenProps> = observer(function EditH
   )
 })
 
-
 // [styles unchanged — you can keep your existing style declarations]
-
 
 const $container: ViewStyle = {
   paddingHorizontal: spacing.md,
@@ -467,5 +454,3 @@ const $reminderBottomSheet: ViewStyle = {
 }
 
 const $separator: ViewStyle = { width: "100%", height: 2, backgroundColor: colors.background }
-
-

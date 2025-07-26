@@ -21,6 +21,7 @@ import { PersonalInfosScreen } from "app/screens/profile/personal-infos"
 import { EditPersonalInfosScreen } from "app/screens/profile/edit-personal-infos"
 import { EditPasswordScreen } from "app/screens/profile/edit-password"
 import { FakeHabitScreen } from "app/screens/fakeHabit"
+import {  Text } from 'react-native';
 
 
 /**
@@ -46,6 +47,12 @@ const exitRoutes = Config.exitRoutes
 // Documentation: https://reactnavigation.org/docs/stack-navigator/
 const Stack = createNativeStackNavigator<HomeStackParamList>()
 
+const PlaceholderScreen = () => (
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <Text>Sandbox screen removed. Nothing here for now.</Text>
+  </View>
+);
+
 const HomeStack = observer(function HomeStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false, navigationBarColor: colors.background }}>
@@ -57,7 +64,7 @@ const HomeStack = observer(function HomeStack() {
       <Stack.Screen name="CreateNewHabit" component={Screens.CreateNewHabitScreen} />
       {/* @ts-expect-error type props error */}
       <Stack.Screen name="EditHabit" component={Screens.EditHabitScreen} />
-      <Stack.Screen name="FakeHabit" component={FakeHabitScreen} />
+      <Stack.Screen name="FakeHabit" component={PlaceholderScreen} />
 
       
     </Stack.Navigator>
