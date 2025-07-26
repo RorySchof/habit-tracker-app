@@ -1281,7 +1281,7 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
         {/* 👤 Header */}
 
 
-        {/* <View style={$headerContainer}>
+        <View style={$headerContainer}>
           <View style={$imageContainer}>
             <Text
               text={format(new Date(), "EEEE, MMMM d")}
@@ -1304,7 +1304,7 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
               onPress={() => navigation.navigate("CreateHabit")}
             />
           </View>
-        </View> */}
+        </View>
 
         {/* ✅ Check-In Cards */}
         <View style={{ gap: spacing.md }}>
