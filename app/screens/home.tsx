@@ -1294,7 +1294,7 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
               name="test-tube"
               color="#FFFFFF"
               size={28}
-              onPress={() => navigation.navigate("FakeHabit")}
+              onPress={() => navigation.navigate("ExperimentalStats")}
               style={{ marginRight: 12 }}
             />
             <MaterialCommunityIcons

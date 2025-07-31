@@ -1,3 +1,5 @@
+//Types.ts
+
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs"
 import { CompositeScreenProps, NavigatorScreenParams } from "@react-navigation/native"
 import { StackScreenProps } from "@react-navigation/stack"
@@ -29,6 +31,7 @@ export type TabParamList = {
   HomeStack: NavigatorScreenParams<HomeStackParamList>
   Statistics: undefined
   SettingsStack: NavigatorScreenParams<SettingsStackParamList>
+  ExperimentalStats: undefined // ✅ This makes it work
 }
 
 export type HomeStackScreenProps<T extends keyof HomeStackParamList> = CompositeScreenProps<

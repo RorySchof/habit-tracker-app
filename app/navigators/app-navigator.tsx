@@ -22,6 +22,8 @@ import { EditPersonalInfosScreen } from "app/screens/profile/edit-personal-infos
 import { EditPasswordScreen } from "app/screens/profile/edit-password"
 import { FakeHabitScreen } from "app/screens/fakeHabit"
 import {  Text } from 'react-native';
+import { ExperimentalStatsScreen } from "app/screens/ExperimentalStatsScreen"
+
 
 
 /**
@@ -119,6 +121,9 @@ export const AppNavigator = observer(function AppNavigator(props: NavigationProp
             } else if (route.name === "SettingsStack") {
               iconName = focused ? "settings" : "settings"
             }
+            else if (route.name === "ExperimentalStats") {
+  iconName = focused ? "bar-chart" : "bar-chart"
+}
 
             return (
               <View style={$tabBarContainer}>
@@ -138,6 +143,8 @@ export const AppNavigator = observer(function AppNavigator(props: NavigationProp
         <Tab.Screen name="HomeStack" component={HomeStack} />
         <Tab.Screen name="Statistics" component={Screens.StatisticsScreen} />
         <Tab.Screen name="SettingsStack" component={SettingsStack} />
+        <Tab.Screen name="ExperimentalStats" component={ExperimentalStatsScreen} />
+
       </Tab.Navigator>
     </NavigationContainer>
   )
