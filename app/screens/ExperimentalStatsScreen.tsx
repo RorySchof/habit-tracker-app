@@ -16,23 +16,27 @@ import { getSnapshot } from "mobx-state-tree"
 
 import { Picker } from "@react-native-picker/picker"
 
+import { parseISO, } from "date-fns"
+
 // Time Range picker
 
-const filters = [
-  { title: "Day", abbr: "D", id: 1 },
-  { title: "Week", abbr: "W", id: 2 },
-  { title: "Month", abbr: "M", id: 3 },
-  { title: "Three Months", abbr: "3M", id: 4 },
-  { title: "Six Months", abbr: "6M", id: 5 },
-  { title: "Year", abbr: "Y", id: 6 },
-]
+// const filters = [
+//   { title: "Day", abbr: "D", id: 1 },
+//   { title: "Week", abbr: "W", id: 2 },
+//   { title: "Month", abbr: "M", id: 3 },
+//   { title: "Three Months", abbr: "3M", id: 4 },
+//   { title: "Six Months", abbr: "6M", id: 5 },
+//   { title: "Year", abbr: "Y", id: 6 },
+// ]
 
-const filterDaysMap = {
-  D: 1,
-  W: 7,
-  M: 30,
-  Y: 365,
-};
+// const filterDaysMap = {
+//   D: 1,
+//   W: 7,
+//   M: 30,
+//   Y: 365,
+// };
+
+//FUNCTIONS AND HELPERS BELOW
 
 
 // gets dates. today minus 7,30,etc
@@ -74,6 +78,15 @@ function isScheduledForDate(habit, date) {
 export const ExperimentalStatsScreen: FC<StatisticsScreenProps> = observer(function StatisticsScreen() {
   const [filter, setFilter] = React.useState("W")
 
+    const filters = [
+    { title: "Day", abbr: "D", id: 1 },
+    { title: "Week", abbr: "W", id: 2 },
+    { title: "Month", abbr: "M", id: 3 },
+    { title: "Three Months", abbr: "3M", id: 4 },
+    { title: "Six Months", abbr: "6M", id: 5 },
+    { title: "Year", abbr: "Y", id: 6 },
+  ]
+
   const filterDaysMap = {
     D: 1,
     W: 7,
@@ -87,7 +100,7 @@ const chartLength = filterDaysMap[filter] ?? 7
 const completions = habitStore.activityLog
 const dates = getPastDates(chartLength)
 const dailyCounts = getDailyCounts(dates, completions)
-
+const chartData = formatChartData(dailyCounts)
 console.log("Chart data:", dailyCounts)
 
 
@@ -297,32 +310,107 @@ console.log("Chart data:", dailyCounts)
 
   // Completion Summary
 
+
   const completionSummary = useMemo(() => {
-    let complete = 0
-    let partial = 0
-    let missed = 0
+  let complete = 0
+  let partial = 0
+  let missed = 0
 
-    const breakdownData = habitWeeklyBreakdown ?? {} // ✅ fallback to empty object
+  const today = new Date()
+  const days = Array.from({ length: chartLength }).map((_, i) =>
+    subDays(today, chartLength - 1 - i)
+  )
 
-    for (let i = 0; i < chartLength; i++) {
-      const date = subDays(new Date(), chartLength - 1 - i)
-      const formattedDate = format(date, "yyyy-MM-dd")
-      const breakdown = breakdownData[formattedDate]
+  days.forEach(date => {
+    const formattedDate = format(date, "yyyy-MM-dd")
+    const dayOfWeek = format(date, "EEEE")
 
-      const totalScheduled = breakdown?.target ?? 0
-      const completedCount = breakdown?.completed ?? 0
+    const scheduledHabits = habitStore.habits.filter(h =>
+      !h.paused &&
+      h.frequency.includes(dayOfWeek) &&
+      new Date(h.createdAt) <= date
+    )
 
-      if (totalScheduled === 0) {
-        missed += 1
-      } else if (completedCount === totalScheduled) {
-        complete += 1
-      } else {
-        partial += 1
-      }
+    if (scheduledHabits.length === 0) {
+      return // no scheduled habits for this day, ignore
     }
 
-    return { complete, partial, missed }
-  }, [chartLength, habitWeeklyBreakdown])
+    let completedCount = 0
+    let partialCount = 0
+
+    scheduledHabits.forEach(habit => {
+      const entry = habitStore.activityLog.find(
+        log => log.habitId === habit.id && log.date === formattedDate
+      )
+
+      if (!entry) return
+
+      if (entry.count >= habit.target) {
+        completedCount++
+      } else if (entry.count > 0) {
+        partialCount++
+      }
+    })
+
+    const total = scheduledHabits.length
+
+    if (completedCount === total) {
+      complete++
+    } else if (completedCount > 0 || partialCount > 0) {
+      partial++
+    } else {
+      missed++
+    }
+  })
+
+  console.log("📅 Completion Summary:")
+  console.log("Complete:", complete)
+  console.log("Partial:", partial)
+  console.log("Missed:", missed)
+
+  return { complete, partial, missed }
+}, [chartLength, habitStore.habits, habitStore.activityLog])
+
+
+
+
+
+
+
+
+
+//   const completionSummary = useMemo(() => {
+//     let complete = 0
+//     let partial = 0
+//     let missed = 0
+
+//     const breakdownData = habitWeeklyBreakdown ?? {} // ✅ fallback to empty object
+
+//     for (let i = 0; i < chartLength; i++) {
+//       const date = subDays(new Date(), chartLength - 1 - i)
+//       const formattedDate = format(date, "yyyy-MM-dd")
+//       const breakdown = breakdownData[formattedDate]
+
+//       const totalScheduled = breakdown?.target ?? 0
+//       const completedCount = breakdown?.completed ?? 0
+
+//       if (totalScheduled === 0) {
+//         missed += 1
+//       } else if (completedCount === totalScheduled) {
+//         complete += 1
+//       } else {
+//         partial += 1
+//       }
+//     }
+
+//     console.log("📅 Completion Summary:")
+// console.log("Complete:", complete)
+// console.log("Partial:", partial)
+// console.log("Missed:", missed)
+
+
+//     return { complete, partial, missed }
+//   }, [chartLength, habitWeeklyBreakdown])
 
 
 
@@ -539,6 +627,24 @@ console.log("Chart data:", dailyCounts)
     streaksByHabit[habit.id] = calculateStreaks(checkInDates)
   })
 
+  //Reformats dates for gifted chartd import. 
+
+  function formatChartData(dailyCounts: { dateStr: string; count: number }[]) {
+  return dailyCounts.map(({ dateStr, count }) => ({
+    label: format(parseISO(dateStr), "MMM d"), // e.g. "Jul 23"
+    value: count,
+    frontColor: "#304FFE", // optional: customize bar color
+  }))
+}
+
+
+
+
+console.log("🗓️ Final Daily Counts:", dailyCounts)
+console.log("📈 Chart Data for BarChart:", chartData)
+
+
+
   return (
     <Screen preset="scroll" safeAreaEdges={["top", "bottom"]} contentContainerStyle={$container}>
       <View style={$topContainer}>
@@ -671,6 +777,26 @@ console.log("Chart data:", dailyCounts)
 
         <View style={{ overflow: "hidden", width: "100%" }}>
           <BarChart
+  data={chartData}
+  barWidth={20}
+  spacing={10}
+  width={layout.window.width * 0.9}
+  height={180}
+  maxValue={Math.max(...chartData.map(d => d.value)) + 1}
+  barBorderRadius={6}
+  yAxisThickness={0}
+  xAxisColor="#E0E0E0"
+  xAxisType="solid"
+  xAxisLabelTextStyle={{ color: "#666", fontSize: 12 }}
+  yAxisTextStyle={{ color: "#999", fontSize: 10 }}
+  noOfSections={5}
+  showLine={false}
+/>
+
+
+
+
+          {/* <BarChart
             data={dailyPercentageData}
             barWidth={20}
             spacing={10}
@@ -687,7 +813,7 @@ console.log("Chart data:", dailyCounts)
             yAxisTextStyle={{ color: "#999", fontSize: 10 }}
             noOfSections={5}
             showLine={false}
-          />
+          /> */}
         </View>
       </View>
 
