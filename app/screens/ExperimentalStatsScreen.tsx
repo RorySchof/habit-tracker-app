@@ -569,6 +569,11 @@ const habitMatrix = useMemo(() => {
     return { label, value: percentage, frontColor: "#304FFE" }
   })
 
+
+  console.log("📊 Bar Chart Data:", dailyPercentageData)
+
+
+
  // what does this do? 
 
   habitStore.habits.forEach((habit) => {
@@ -720,7 +725,12 @@ const habitMatrix = useMemo(() => {
         {/* 👇 Add this container for alignment */}
 
         <View style={{ overflow: "hidden", width: "100%" }}>
+
+          {console.log("📊 Chart Input Data:", chartData)}
+
+
           <BarChart
+
   data={chartData}
   barWidth={20}
   spacing={10}
