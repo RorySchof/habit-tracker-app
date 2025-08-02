@@ -572,6 +572,7 @@ const habitMatrix = useMemo(() => {
 
   console.log("📊 Bar Chart Data:", dailyPercentageData)
 
+const percentageChartData = dailyPercentageData
 
 
  // what does this do? 
@@ -726,12 +727,11 @@ const habitMatrix = useMemo(() => {
 
         <View style={{ overflow: "hidden", width: "100%" }}>
 
-          {console.log("📊 Chart Input Data:", chartData)}
 
 
           <BarChart
 
-  data={chartData}
+  data={percentageChartData}
   barWidth={20}
   spacing={10}
   width={layout.window.width * 0.9}
@@ -743,7 +743,8 @@ const habitMatrix = useMemo(() => {
   xAxisType="solid"
   xAxisLabelTextStyle={{ color: "#666", fontSize: 12 }}
   yAxisTextStyle={{ color: "#999", fontSize: 10 }}
-  noOfSections={5}
+  noOfSections={4}
+    yAxisLabelTexts={["0%", "25%", "50%", "75%", "100%"]}
   showLine={false}
 />
 
