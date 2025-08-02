@@ -91,20 +91,12 @@ const chartData = formatChartData(dailyCounts)
 // MASTER MATRIX FUNCTION
 
 
-
 const habitMatrix = useMemo(() => {
   const matrix = []
 
   for (const dateStr of dates) {
     const date = parseISO(dateStr)
     const dayOfWeek = format(date, "EEEE")
-
-
-    habitStore.habits.forEach(habit => {
-      const isScheduled = habit.frequency.includes(dayOfWeek)
-      const isCreated = new Date(habit.createdAt) <= date
-      const isPaused = habit.paused
-    })
 
     const daySummary = {
       date: dateStr,
@@ -119,6 +111,8 @@ const habitMatrix = useMemo(() => {
       habit.frequency.includes(dayOfWeek) &&
       new Date(habit.createdAt) <= date
     )
+
+    console.log(`📅 ${format(date, "EEE MMM d")} — Scheduled Habits: ${scheduledHabits.length}`)
 
     for (const habit of scheduledHabits) {
       const logEntry = habitStore.activityLog.find(
@@ -140,13 +134,76 @@ const habitMatrix = useMemo(() => {
       })
 
       daySummary[status] += 1
+
+      console.log(`  🔹 ${habit.name}: ${logEntry?.count || 0}/${habit.target} → ${status}`)
     }
+
+    console.log(`  ✅ Complete: ${daySummary.complete}, 🟡 Partial: ${daySummary.partial}, ❌ Missed: ${daySummary.missed}`)
 
     matrix.push(daySummary)
   }
-  
+
   return matrix
 }, [habitStore.habits, habitStore.activityLog, chartLength])
+
+
+
+
+// const habitMatrix = useMemo(() => {
+//   const matrix = []
+
+//   for (const dateStr of dates) {
+//     const date = parseISO(dateStr)
+//     const dayOfWeek = format(date, "EEEE")
+
+
+//     habitStore.habits.forEach(habit => {
+//       const isScheduled = habit.frequency.includes(dayOfWeek)
+//       const isCreated = new Date(habit.createdAt) <= date
+//       const isPaused = habit.paused
+//     })
+
+//     const daySummary = {
+//       date: dateStr,
+//       habits: [],
+//       complete: 0,
+//       partial: 0,
+//       missed: 0,
+//     }
+
+//     const scheduledHabits = habitStore.habits.filter(habit =>
+//       !habit.paused &&
+//       habit.frequency.includes(dayOfWeek) &&
+//       new Date(habit.createdAt) <= date
+//     )
+
+//     for (const habit of scheduledHabits) {
+//       const logEntry = habitStore.activityLog.find(
+//         entry => entry.habitId === habit.id && entry.date === dateStr
+//       )
+
+//       let status = "missed"
+//       if (logEntry) {
+//         if (logEntry.count >= habit.target) status = "complete"
+//         else if (logEntry.count > 0) status = "partial"
+//       }
+
+//       daySummary.habits.push({
+//         habitId: habit.id,
+//         name: habit.name,
+//         status,
+//         count: logEntry?.count || 0,
+//         target: habit.target,
+//       })
+
+//       daySummary[status] += 1
+//     }
+
+//     matrix.push(daySummary)
+//   }
+  
+//   return matrix
+// }, [habitStore.habits, habitStore.activityLog, chartLength])
 
 
 
@@ -209,41 +266,136 @@ const habitMatrix = useMemo(() => {
 
   // Weekly completion progress calculation
 
+
   const weeklyCompletionData = useMemo(() => {
-    if (!habitStore.habits.length || !habitStore.activityLog.length) return []
+  if (!habitStore.habits.length || !habitStore.activityLog.length) return []
 
-    const today = new Date()
-    const startOfWeek = new Date(today)
-    startOfWeek.setDate(today.getDate() - today.getDay()) // Sunday start
-    const weekDatesSet = new Set(
-      eachDayOfInterval({ start: startOfWeek, end: today }).map((date) =>
-        format(date, "yyyy-MM-dd"),
-      ),
-    )
+  const today = new Date()
+  const startOfWeek = new Date(today)
+  startOfWeek.setDate(today.getDate() - today.getDay()) // Sunday start
 
-    const activityMap = new Map<string, number>()
-    for (const log of habitStore.activityLog) {
-      if (weekDatesSet.has(log.date)) {
-        const current = activityMap.get(log.habitId) || 0
-        activityMap.set(log.habitId, current + log.count)
+  const weekDates = eachDayOfInterval({ start: startOfWeek, end: today })
+
+  const activityMap = new Map<string, number>()
+  for (const log of habitStore.activityLog) {
+    const logDate = format(parseISO(log.date), "yyyy-MM-dd")
+    if (weekDates.some((d) => format(d, "yyyy-MM-dd") === logDate)) {
+      const current = activityMap.get(log.habitId) || 0
+      activityMap.set(log.habitId, current + log.count)
+    }
+  }
+
+  const activeHabits = habitStore.habits.filter((h) => !h.paused)
+
+  return activeHabits.map((habit) => {
+    let scheduledDays = 0
+
+    for (const date of weekDates) {
+      const dayOfWeek = format(date, "EEEE")
+      if (
+        habit.frequency.includes(dayOfWeek) &&
+        new Date(habit.createdAt) <= date
+      ) {
+        scheduledDays += 1
       }
     }
 
-    const activeHabits = habitStore.habits.filter((h) => !h.paused) // ✅ Skip paused
+    const totalCount = activityMap.get(habit.id) || 0
+    const expectedTotal = scheduledDays * habit.target
+    const avgProgress =
+      expectedTotal > 0 ? Math.min((totalCount / expectedTotal) * 100, 100) : 0
 
-    return activeHabits.map((habit) => {
-      const totalCount = activityMap.get(habit.id) || 0
-      const avgProgress = Math.min((totalCount / habit.target) * 100, 100)
-      return {
-        habitName: habit.name,
-        emoji: habit.emoji || "🔥",
-        avgProgress: Math.round(avgProgress),
-      }
-    })
-  }, [
-    habitStore.habits.map((h) => h.id + h.target).join(","), // depend only on ids and targets
-    habitStore.activityLog.length, // depend on log changes
-  ])
+    // 🔍 Log each habit's weekly stats
+    console.log(
+      `${habit.emoji} ${habit.name}: ScheduledDays=${scheduledDays}, Target=${habit.target}, Logged=${totalCount}, %=${Math.round(avgProgress)}`
+    )
+
+    return {
+      habitName: habit.name,
+      emoji: habit.emoji || "🔥",
+      avgProgress: Math.round(avgProgress),
+    }
+  })
+}, [
+  habitStore.habits.map((h) => h.id + h.target + h.frequency.join("")).join(","),
+  habitStore.activityLog.length,
+])
+
+
+// New chart to replace total activities with habits worked on
+
+const dailyEffortData = Array.from({ length: 7 }).map((_, idx) => {
+  const date = subDays(new Date(), 6 - idx)
+  const formattedDate = format(date, "yyyy-MM-dd")
+  const dayOfWeek = format(date, "EEEE")
+  const label = format(date, "EEE")
+
+  const scheduledHabits = habitStore.habits.filter(
+    (habit) =>
+      habit.frequency.includes(dayOfWeek) &&
+      !habit.paused &&
+      new Date(habit.createdAt) <= date
+  )
+
+  let totalTarget = 0
+  let totalLogged = 0
+
+  for (const habit of scheduledHabits) {
+    totalTarget += habit.target
+
+    const logEntry = habitStore.activityLog.find(
+      (entry) => entry.habitId === habit.id && entry.date === formattedDate
+    )
+
+    if (logEntry) {
+      totalLogged += logEntry.count
+    }
+  }
+
+  const percentage = totalTarget > 0 ? Math.round((totalLogged / totalTarget) * 100) : 0
+
+  return { label, value: percentage, frontColor: "#304FFE" }
+})
+
+
+
+
+
+  // const weeklyCompletionData = useMemo(() => {
+  //   if (!habitStore.habits.length || !habitStore.activityLog.length) return []
+
+  //   const today = new Date()
+  //   const startOfWeek = new Date(today)
+  //   startOfWeek.setDate(today.getDate() - today.getDay()) // Sunday start
+  //   const weekDatesSet = new Set(
+  //     eachDayOfInterval({ start: startOfWeek, end: today }).map((date) =>
+  //       format(date, "yyyy-MM-dd"),
+  //     ),
+  //   )
+
+  //   const activityMap = new Map<string, number>()
+  //   for (const log of habitStore.activityLog) {
+  //     if (weekDatesSet.has(log.date)) {
+  //       const current = activityMap.get(log.habitId) || 0
+  //       activityMap.set(log.habitId, current + log.count)
+  //     }
+  //   }
+
+  //   const activeHabits = habitStore.habits.filter((h) => !h.paused) // ✅ Skip paused
+
+  //   return activeHabits.map((habit) => {
+  //     const totalCount = activityMap.get(habit.id) || 0
+  //     const avgProgress = Math.min((totalCount / habit.target) * 100, 100)
+  //     return {
+  //       habitName: habit.name,
+  //       emoji: habit.emoji || "🔥",
+  //       avgProgress: Math.round(avgProgress),
+  //     }
+  //   })
+  // }, [
+  //   habitStore.habits.map((h) => h.id + h.target).join(","), // depend only on ids and targets
+  //   habitStore.activityLog.length, // depend on log changes
+  // ])
 
   // Determines complete, partial, miseed.
 
@@ -566,6 +718,8 @@ const habitMatrix = useMemo(() => {
 
     const percentage = totalScheduled > 0 ? Math.round((completedCount / totalScheduled) * 100) : 0
 
+      console.log(`${label}: Scheduled=${totalScheduled}, Completed=${completedCount}, %=${percentage}`)
+
     return { label, value: percentage, frontColor: "#304FFE" }
   })
 
@@ -718,8 +872,43 @@ const percentageChartData = dailyPercentageData
           shadowRadius: 2,
         }}
       >
+
+{/* Effort graph  */}
+
+
+      <View style={{ marginBottom: 12 }}>
+  <Text style={{ fontSize: 14, color: "#666", fontWeight: "500" }}>
+Tasks Completed  </Text>
+  <Text style={{ fontSize: 20, fontWeight: "700", color: "#304FFE" }}>
+    {/* Optional: Show today's effort % */}
+    {dailyEffortData[dailyEffortData.length - 1]?.value ?? 0}%
+  </Text>
+</View>
+
+<View style={{ overflow: "hidden", width: "100%", marginBottom: 24 }}>
+  <BarChart
+    data={dailyEffortData}
+    barWidth={20}
+    spacing={10}
+    width={layout.window.width * 0.9}
+    height={180}
+    maxValue={100}
+    barBorderRadius={6}
+    yAxisThickness={0}
+    xAxisColor="#E0E0E0"
+    xAxisType="solid"
+    xAxisLabelTextStyle={{ color: "#666", fontSize: 12 }}
+    yAxisTextStyle={{ color: "#999", fontSize: 10 }}
+    noOfSections={4}
+    yAxisLabelTexts={["0%", "25%", "50%", "75%", "100%"]}
+    showLine={false}
+  />
+</View>
+
+{/* habits completed graph  */}
+
         <View style={{ marginBottom: 12 }}>
-          <Text style={{ fontSize: 14, color: "#666", fontWeight: "500" }}>Total Activities</Text>
+          <Text style={{ fontSize: 14, color: "#666", fontWeight: "500" }}>Habits completed</Text>
           <Text style={{ fontSize: 20, fontWeight: "700", color: "#304FFE" }}>{percentage}%</Text>
         </View>
 
@@ -736,7 +925,8 @@ const percentageChartData = dailyPercentageData
   spacing={10}
   width={layout.window.width * 0.9}
   height={180}
-  maxValue={Math.max(...chartData.map(d => d.value)) + 1}
+  // maxValue={Math.max(...chartData.map(d => d.value)) + 1}
+  maxValue={Math.max(...percentageChartData.map(d => d.value)) + 1}
   barBorderRadius={6}
   yAxisThickness={0}
   xAxisColor="#E0E0E0"
@@ -746,9 +936,15 @@ const percentageChartData = dailyPercentageData
   noOfSections={4}
     yAxisLabelTexts={["0%", "25%", "50%", "75%", "100%"]}
   showLine={false}
+  
 />
-
         </View>
+
+
+
+
+
+
       </View>
 
       <View
@@ -768,6 +964,7 @@ const percentageChartData = dailyPercentageData
           shadowRadius: 2,
         }}
       >
+
         <Text preset="subheading" style={{ marginBottom: 12, textAlign: "center" }}>
           Weekly Completion %
         </Text>
