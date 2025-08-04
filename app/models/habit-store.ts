@@ -8,6 +8,33 @@ import { ActivityLogModel } from "../models/ActivityLogModel" // adjust path if 
 import { subDays, format } from "date-fns"
 
 
+// ✅ Helper function to generate dayStatuses
+function getDayStatuses(habit, chartLength, activityLog) {
+  const dateRange = Array.from({ length: chartLength }).map((_, idx) => {
+    const date = subDays(new Date(), chartLength - 1 - idx)
+    return format(date, "yyyy-MM-dd")
+  })
+
+    console.log(`🧠 [${habit.name}] chartLength:`, chartLength)
+  console.log(`📅 [${habit.name}] dateRange:`, dateRange)
+
+  return dateRange.map((date) => {
+    const log = activityLog.find(
+      (entry) => entry.habitId === habit.id && entry.date === date
+    )
+
+    if (!log) return "gray"
+    if (log.count >= habit.target) return "green"
+    if (log.count > 0) return "yellow"
+    return "gray"
+  })
+
+  console.log(`🎨 [${habit.name}] statuses:`, statuses)
+  return statuses
+  
+}
+
+
 const STORAGE_KEY = "HabitStoreSnapshot"
 
 type HabitData = {
@@ -27,6 +54,14 @@ export const HabitStoreModel = types
     habits: types.array(HabitModel),
     activityLog: types.array(ActivityLogModel),
   })
+    .views((self) => ({
+    getHabitsWithStatuses(chartLength: number) {
+      return self.habits.map((habit) => ({
+        ...habit,
+        dayStatuses: getDayStatuses(habit, chartLength, self.activityLog),
+      }))
+    }
+  }))
   .actions((self) => ({
     addHabit(habitData: HabitData) {
       const newHabit = HabitModel.create({

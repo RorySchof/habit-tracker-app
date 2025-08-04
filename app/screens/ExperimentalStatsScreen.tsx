@@ -91,6 +91,25 @@ console.log("📅 Selected filter:", filter)
 console.log("🧮 Chart length:", chartLength)
 
 
+React.useEffect(() => {
+  console.log("🧭 Filter changed:", filter)
+  console.log("📦 chartLength recalculated:", chartLength)
+
+  const habits = habitStore.getHabitsWithStatuses(chartLength)
+  console.log("📊 habits.length:", habits.length)
+  console.log("📅 dayStatuses per habit:", habits.map(h => h.dayStatuses.length))
+}, [filter])
+
+
+
+
+const habits = habitStore.getHabitsWithStatuses(chartLength)
+
+console.log("📦 chartLength:", chartLength)
+console.log("📊 habits.length:", habits.length)
+console.log("📅 dayStatuses per habit:", habits.map(h => h.dayStatuses.length))
+
+
 const completions = habitStore.activityLog
 const dates = getPastDates(chartLength)
 const dailyCounts = getDailyCounts(dates, completions)
@@ -548,45 +567,85 @@ const dailyEffortData = useMemo(() => {
 
 // Habit weekly status
 
+const habitWeeklyStatus = useMemo(() => {
+  const today = new Date()
+  const days = Array.from({ length: chartLength }).map((_, idx) => {
+    const date = subDays(today, chartLength - 1 - idx) // oldest to newest
+    return {
+      date,
+      formatted: format(date, "yyyy-MM-dd"),
+      dayOfWeek: format(date, "EEEE"),
+    }
+  })
 
-  const habitWeeklyStatus = useMemo(() => {
-    const today = new Date()
-    const days = Array.from({ length: chartLength }).map((_, idx) => {
-      const date = subDays(today, 6 - idx) // oldest to newest
+  return habitStore.habits
+    .filter((habit) => !habit.paused)
+    .map((habit) => {
+      const dayStatuses = days.map((day) => {
+        if (!habit.frequency.includes(day.dayOfWeek)) {
+          return "grey" // not scheduled
+        }
+
+        const logEntry = habitStore.activityLog.find(
+          (entry) => entry.habitId === habit.id && entry.date === day.formatted,
+        )
+
+        if (logEntry) {
+          if (logEntry.count >= habit.target) return "green"
+          if (logEntry.count > 0) return "yellow"
+          return "red"
+        }
+        return "red" // scheduled but no activity
+      })
+
       return {
-        date,
-        formatted: format(date, "yyyy-MM-dd"),
-        dayOfWeek: format(date, "EEEE"),
+        habitName: habit.name,
+        targetText: `${habit.target} ${habit.unit} per day`,
+        dayStatuses,
       }
     })
+}, [habitStore.habits, habitStore.activityLog, chartLength]) // ✅ chartLength added here
 
-    return habitStore.habits
-      .filter((habit) => !habit.paused)
-      .map((habit) => {
-        const dayStatuses = days.map((day) => {
-          if (!habit.frequency.includes(day.dayOfWeek)) {
-            return "grey" // not scheduled
-          }
 
-          const logEntry = habitStore.activityLog.find(
-            (entry) => entry.habitId === habit.id && entry.date === day.formatted,
-          )
 
-          if (logEntry) {
-            if (logEntry.count >= habit.target) return "green"
-            if (logEntry.count > 0) return "yellow"
-            return "red"
-          }
-          return "red" // scheduled but no activity
-        })
+  // const habitWeeklyStatus = useMemo(() => {
+  //   const today = new Date()
+  //   const days = Array.from({ length: chartLength }).map((_, idx) => {
+  //     const date = subDays(today, 6 - idx) // oldest to newest
+  //     return {
+  //       date,
+  //       formatted: format(date, "yyyy-MM-dd"),
+  //       dayOfWeek: format(date, "EEEE"),
+  //     }
+  //   })
 
-        return {
-          habitName: habit.name,
-          targetText: `${habit.target} ${habit.unit} per day`,
-          dayStatuses,
-        }
-      })
-  }, [habitStore.habits, habitStore.activityLog])
+  //   return habitStore.habits
+  //     .filter((habit) => !habit.paused)
+  //     .map((habit) => {
+  //       const dayStatuses = days.map((day) => {
+  //         if (!habit.frequency.includes(day.dayOfWeek)) {
+  //           return "grey" // not scheduled
+  //         }
+
+  //         const logEntry = habitStore.activityLog.find(
+  //           (entry) => entry.habitId === habit.id && entry.date === day.formatted,
+  //         )
+
+  //         if (logEntry) {
+  //           if (logEntry.count >= habit.target) return "green"
+  //           if (logEntry.count > 0) return "yellow"
+  //           return "red"
+  //         }
+  //         return "red" // scheduled but no activity
+  //       })
+
+  //       return {
+  //         habitName: habit.name,
+  //         targetText: `${habit.target} ${habit.unit} per day`,
+  //         dayStatuses,
+  //       }
+  //     })
+  // }, [habitStore.habits, habitStore.activityLog])
 
 
   // Habit Streaks
@@ -983,7 +1042,7 @@ Tasks Completed  </Text>
         ))}
       </View>
 
-       {/* habit weekly status section */}
+       {/* habit Cards Section */}
 
        {habitWeeklyStatus.map((habit, idx) => {
   const habitId = habitStore.habits[idx]?.id ?? ""
@@ -1015,7 +1074,40 @@ Tasks Completed  </Text>
 
       <View style={{ height: 1, backgroundColor: "#E0E0E0", marginVertical: 8 }} />
 
-      <View
+
+<View
+  style={{
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "flex-start",
+    gap: 8,
+  }}
+>
+  {habit.dayStatuses.map((status, dayIdx) => (
+    <View
+      key={dayIdx}
+      style={{
+        width: 36,
+        height: 36,
+        borderRadius: 6,
+        backgroundColor:
+          status === "green"
+            ? habitColor
+            : status === "yellow"
+            ? `${habitColor}80`
+            : "#BDBDBD",
+      }}
+    />
+  ))}
+</View>
+
+
+
+
+
+
+
+      {/* <View
         style={{
           flexDirection: "row",
           justifyContent: "space-between",
@@ -1038,7 +1130,10 @@ Tasks Completed  </Text>
             }}
           />
         ))}
-      </View>
+      </View> */}
+
+
+
 
       <View style={{ height: 1, backgroundColor: "#E0E0E0", marginVertical: 8 }} />
       <Text style={{ color: "#444" }}>
