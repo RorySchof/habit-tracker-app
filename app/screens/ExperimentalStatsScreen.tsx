@@ -18,9 +18,17 @@ import { Picker } from "@react-native-picker/picker"
 
 import { parseISO, } from "date-fns"
 
+import { ScrollView } from "react-native";
+
+
+
 
 
 //FUNCTIONS AND HELPERS BELOW
+
+
+
+
 
 
 // gets dates. today minus 7,30,etc
@@ -980,11 +988,6 @@ Tasks Completed  </Text>
 />
         </View>
 
-
-
-
-
-
       </View>
 
       <View
@@ -1042,7 +1045,10 @@ Tasks Completed  </Text>
         ))}
       </View>
 
+
+
        {/* habit Cards Section */}
+
 
        {habitWeeklyStatus.map((habit, idx) => {
   const habitId = habitStore.habits[idx]?.id ?? ""
@@ -1075,6 +1081,40 @@ Tasks Completed  </Text>
       <View style={{ height: 1, backgroundColor: "#E0E0E0", marginVertical: 8 }} />
 
 
+
+<View style={{ maxHeight: 200 }}>
+  <ScrollView>
+    <View
+      style={{
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 6,
+        justifyContent: "flex-start",
+      }}
+    >
+      {habit.dayStatuses.map((status, dayIdx) => (
+        <View
+          key={dayIdx}
+          style={{
+            width: 24, // fixed width
+            height: 24, // fixed height
+            borderRadius: 4,
+            backgroundColor:
+              status === "green"
+                ? habitColor
+                : status === "yellow"
+                ? `${habitColor}80`
+                : "#BDBDBD",
+          }}
+        />
+      ))}
+    </View>
+  </ScrollView>
+</View>
+
+
+
+{/* 
 <View
   style={{
     flexDirection: "row",
@@ -1084,6 +1124,7 @@ Tasks Completed  </Text>
   }}
 >
   {habit.dayStatuses.map((status, dayIdx) => (
+    
     <View
       key={dayIdx}
       style={{
@@ -1099,41 +1140,7 @@ Tasks Completed  </Text>
       }}
     />
   ))}
-</View>
-
-
-
-
-
-
-
-      {/* <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          marginBottom: 12,
-        }}
-      >
-        {habit.dayStatuses.map((status, dayIdx) => (
-          <View
-            key={dayIdx}
-            style={{
-              width: 43,
-              height: 43,
-              borderRadius: 6,
-              backgroundColor:
-                status === "green"
-                  ? habitColor
-                  : status === "yellow"
-                  ? `${habitColor}80`
-                  : "#BDBDBD",
-            }}
-          />
-        ))}
-      </View> */}
-
-
-
+</View> */}
 
       <View style={{ height: 1, backgroundColor: "#E0E0E0", marginVertical: 8 }} />
       <Text style={{ color: "#444" }}>
@@ -1195,6 +1202,8 @@ Tasks Completed  </Text>
     </View>
   )
 })}
+
+
 
     </Screen>
   )
