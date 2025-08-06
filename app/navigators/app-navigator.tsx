@@ -21,10 +21,8 @@ import { PersonalInfosScreen } from "app/screens/profile/personal-infos"
 import { EditPersonalInfosScreen } from "app/screens/profile/edit-personal-infos"
 import { EditPasswordScreen } from "app/screens/profile/edit-password"
 import { FakeHabitScreen } from "app/screens/fakeHabit"
-import {  Text } from 'react-native';
+import { Text } from "react-native"
 import { ExperimentalStatsScreen } from "app/screens/ExperimentalStatsScreen"
-
-
 
 /**
  * This type allows TypeScript to know what routes are defined in this navigator
@@ -50,10 +48,10 @@ const exitRoutes = Config.exitRoutes
 const Stack = createNativeStackNavigator<HomeStackParamList>()
 
 const PlaceholderScreen = () => (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+  <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
     <Text>Sandbox screen removed. Nothing here for now.</Text>
   </View>
-);
+)
 
 const HomeStack = observer(function HomeStack() {
   return (
@@ -67,8 +65,6 @@ const HomeStack = observer(function HomeStack() {
       {/* @ts-expect-error type props error */}
       <Stack.Screen name="EditHabit" component={Screens.EditHabitScreen} />
       <Stack.Screen name="FakeHabit" component={PlaceholderScreen} />
-
-      
     </Stack.Navigator>
   )
 })
@@ -117,13 +113,11 @@ export const AppNavigator = observer(function AppNavigator(props: NavigationProp
             if (route.name === "HomeStack") {
               iconName = focused ? "home-filled" : "home"
             } else if (route.name === "Statistics") {
-              iconName = focused ? "data-usage" : "data-usage"
-            } else if (route.name === "SettingsStack") {
+  iconName = "format-list-bulleted"            } else if (route.name === "SettingsStack") {
               iconName = focused ? "settings" : "settings"
+            } else if (route.name === "ExperimentalStats") {
+              iconName = focused ? "bar-chart" : "bar-chart"
             }
-            else if (route.name === "ExperimentalStats") {
-  iconName = focused ? "bar-chart" : "bar-chart"
-}
 
             return (
               <View style={$tabBarContainer}>
@@ -141,10 +135,22 @@ export const AppNavigator = observer(function AppNavigator(props: NavigationProp
         })}
       >
         <Tab.Screen name="HomeStack" component={HomeStack} />
-        <Tab.Screen name="Statistics" component={Screens.StatisticsScreen} />
-        <Tab.Screen name="SettingsStack" component={SettingsStack} />
         <Tab.Screen name="ExperimentalStats" component={ExperimentalStatsScreen} />
 
+      <Tab.Screen
+  name="CreateHabit"
+  component={Screens.CreateNewHabitScreen}
+  options={{
+    tabBarIcon: ({ color }) => (
+      <View style={$tabBarContainer}>
+        <MaterialIcons name="add-circle" size={32} color={color} />
+      </View>
+    ),
+    tabBarLabel: "",
+  }}
+/>
+        <Tab.Screen name="Statistics" component={Screens.CreateHabitScreen} />
+<Tab.Screen name="SettingsStack" component={SettingsStack} />        
       </Tab.Navigator>
     </NavigationContainer>
   )

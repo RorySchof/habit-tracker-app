@@ -77,11 +77,11 @@ const $topContainer: ViewStyle = {
 }
 
 const $middleContainer: ViewStyle = {
-  gap: 20,
+  gap: 5,
 }
 
 const $bottomContainer: ViewStyle = {
-  gap: 10,
+  gap: 1,
 }
 
 const $headerContainer: ViewStyle = {
@@ -331,7 +331,7 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
   markedDates[selected] = {
     ...(markedDates[selected] || {}),
     selected: true,
-    selectedColor: "#3399ff",
+    selectedColor: '#304FFE',
   }
 
   const checkIns = filteredHabits
@@ -375,25 +375,29 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
       .join(","),
   ])
 
-  const $checkInCardStyle: ViewStyle = {
-    backgroundColor: colors.palette.neutral100,
-    borderRadius: 12,
-    padding: spacing.sm, // Smaller padding to keep size tight
-    marginRight: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.palette.neutral200,
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 4, // Slightly smaller shadow
-    shadowOffset: { width: 0, height: 1 },
-    width: layout.window.width * 0.5, // Re-introduce fixed width if needed
-    height: layout.window.height * 0.32, // Matches your original $cardContainer
+const $checkInCardStyle: ViewStyle = {
+  backgroundColor: colors.palette.neutral100,
+  borderRadius: 12,
+  padding: spacing.sm,
+  marginRight: spacing.sm,
 
-    overflow: "hidden",
+  // 🟦 Manual border
+  borderWidth: 1,
+  borderColor: colors.palette.neutral400,
 
-    justifyContent: "space-between",
-  }
+  // 🌫️ Optional subtle shadow
+  elevation: 2,
+  shadowColor: "#000",
+  shadowOpacity: 0.05,
+  shadowRadius: 2,
+  shadowOffset: { width: 0, height: 1 },
+
+  width: layout.window.width * 0.5,
+  height: layout.window.height * 0.32,
+  overflow: "hidden",
+  justifyContent: "space-between",
+}
+
 
 
 
@@ -401,43 +405,71 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
 
 
   return (
-  <SafeAreaView edges={["top", "bottom"]} style={{ flex: 1, backgroundColor: "#fff" }}>
+  <SafeAreaView edges={["top", "bottom"]} style={{ flex: 1, backgroundColor: "#fff"   }}>
+
+
 
     {/* ⬆️ Calendar as navbar */}
-    <View style={{ 
-      height: 100, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, backgroundColor: colors.palette.neutral200,
-      }}>
-      <CalendarProvider date={selected} onDateChanged={setSelected}>
-        <WeekCalendar
-          current={selected}
-          onDayPress={(day) => setSelected(day.dateString)}
-          markedDates={markedDates}
-          firstDay={1}
-          disableWeekScroll
-          calendarWidth={layout.window.width - spacing.md * 2}
-          theme={{
-            todayTextColor: "#304FFE",
-            selectedDayBackgroundColor: "#FF69B4",
-            selectedDayTextColor: "#FFFFFF",
-            textDayHeaderFontSize: 12,
-            textDayFontSize: 16,
-          }}
-          style={{
-            backgroundColor: "#fff",
-            borderRadius: 8,
-          }}
-        />
-      </CalendarProvider>
+
+<View
+  style={{
+    height: 100,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.palette.neutral200,
+    borderWidth: 0,
+    overflow: 'hidden',
+  }}
+>
+  <CalendarProvider date={selected}>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: 'transparent',
+        borderWidth: 0,
+        elevation: 0,
+        shadowOpacity: 0,
+      }}
+    >
+      <WeekCalendar
+        current={selected}
+        onDayPress={(day) => setSelected(day.dateString)}
+        markedDates={markedDates}
+        firstDay={1}
+        disableWeekScroll
+        calendarWidth={layout.window.width - spacing.md * 2}
+        theme={{
+  calendarBackground: 'transparent',
+  backgroundColor: 'transparent',
+  borderColor: 'transparent',
+  textSectionTitleColor: colors.text,
+  dayTextColor: colors.text,
+  todayTextColor: "#304FFE", // ✅ Your primary blue
+  selectedDayBackgroundColor: "#304FFE", // ✅ Your primary blue
+  selectedDayTextColor: "#FFFFFF", // White text for contrast
+}}
+        style={{
+          backgroundColor: 'transparent',
+          borderWidth: 0,
+          elevation: 0,
+          shadowOpacity: 0,
+        }}
+      />
     </View>
+  </CalendarProvider>
+</View>
+
 
     {/* 👇 Scrollable main content */}
+
+
     <Screen preset="scroll" safeAreaEdges={["bottom"]} contentContainerStyle={$container}>
       <BottomSheetModalProvider>
 
         {/* 👤 Header */}
 
 
-        <View style={$headerContainer}>
+        {/* <View style={$headerContainer}>
           <View style={$imageContainer}>
             <Text
               text={format(new Date(), "EEEE, MMMM d")}
@@ -460,9 +492,11 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
               onPress={() => navigation.navigate("CreateHabit")}
             />
           </View>
-        </View>
+        </View> */}
 
         {/* ✅ Check-In Cards */}
+
+        
         <View style={{ gap: spacing.md }}>
           <Text tx="homeScreen.check_in" preset="subheading" />
           <ScrollView
