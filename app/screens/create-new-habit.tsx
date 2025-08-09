@@ -1,3 +1,5 @@
+// Create new habit screen
+
 import { observer } from "mobx-react-lite"
 import React, { FC } from "react"
 import { View, ViewStyle, TouchableOpacity, TextStyle } from "react-native"
@@ -18,7 +20,6 @@ import { HomeStackScreenProps } from "../navigators/types"
 import { colors, spacing } from "../theme"
 
 import { habitStore } from "app/models/habit-store"
-
 
 export const days = [
   {
@@ -82,23 +83,19 @@ export const CreateNewHabitScreen: FC<CreateNewHabitScreenProps> = observer(
     const [reminder, setReminder] = React.useState("")
     const [selectedEmoji, setSelectedEmoji] = React.useState("📚")
     const [colorPicked, setColorPicked] = React.useState("#ff0000")
+    // const [colorOpen, setColorOpen] = useState(false) 
     const [habitTime, setHabitTime] = React.useState(new Date())
 
-    const [habitDate, setHabitDate] = React.useState(new Date());
-
-
+    const [habitDate, setHabitDate] = React.useState(new Date())
 
     // const [frequency, setFrequency] = React.useState<(typeof days)[0][]>([])
 
     const [frequency, setFrequency] = React.useState<string[]>([])
 
-
-
     const [name, setName] = React.useState("")
-const [category, setCategory] = React.useState("health") // double check health here, Why? seems sketchy
-const [target, setTarget] = React.useState(1)
-const [unit, setUnit] = React.useState("times")
-
+    const [category, setCategory] = React.useState("health") // double check health here, Why? seems sketchy
+    const [target, setTarget] = React.useState(1)
+    const [unit, setUnit] = React.useState("times")
 
     const bottomSheetColorRef = React.useRef<BottomSheetModal>(null)
     const bottomSheetReminderRef = React.useRef<BottomSheetModal>(null)
@@ -116,296 +113,240 @@ const [unit, setUnit] = React.useState("times")
     )
 
     const handleSelectFrequency = (day: (typeof days)[0]) => {
-  if (frequency.includes(day.day)) {
-    setFrequency(frequency.filter((d) => d !== day.day))
-  } else {
-    setFrequency([...frequency, day.day])
-  }
-}
+      if (frequency.includes(day.day)) {
+        setFrequency(frequency.filter((d) => d !== day.day))
+      } else {
+        setFrequency([...frequency, day.day])
+      }
+    }
 
 
-// const handleCreateHabit = () => {
-//   habitStore.addHabit({
-//     name,
-//     emoji: selectedEmoji,
-//     time: habitTime.toISOString(),
-//     category,
-//     target,
-//     unit,
-//     color: colorPicked,
-//     frequency, // ✅ no .map needed — it's already an array of strings
-//     // reminder,
-//   })
-//   navigation.navigate("Home")
-// }
-
-const handleCreateHabit = () => {
-  habitStore.addHabit({
-    name,
-    emoji: selectedEmoji,
-    date: habitDate.toISOString(),  // <-- add this
-    time: habitTime.toISOString(),
-    category,
-    target,
-    unit,
-    color: colorPicked,
-    frequency,
-    // reminder,
-  })
-  navigation.navigate("Home")
-}
-
+    const handleCreateHabit = () => {
+      habitStore.addHabit({
+        name,
+        emoji: selectedEmoji,
+        date: habitDate.toISOString(), // <-- add this
+        time: habitTime.toISOString(),
+        category,
+        target,
+        unit,
+        color: colorPicked,
+        frequency,
+        // reminder,
+      })
+      navigation.navigate("Home")
+    }
 
     return (
       <Screen preset="scroll" safeAreaEdges={["top", "bottom"]} contentContainerStyle={$container}>
         <BottomSheetModalProvider>
-          <View style={$headerContainer}>
-            <Icon icon="back" color={colors.text} onPress={() => navigation.goBack()} />
-            <Text text="Create personal habit" preset="heading" size="lg" />
-          </View>
-          <View style={$subheaderContainer}>
-            <TouchableOpacity style={$pillContainer} onPress={() => setOpen(!open)}>
-              <Text text={selectedEmoji} />
-              <Text text="icon" preset="formLabel" size="md" />
-            </TouchableOpacity>
-
-
-            {/* <EmojiPicker
-              onEmojiSelected={(selected) => setSelectedEmoji(selected.emoji)}
-              open={open}
-              onClose={() => setOpen(!open)}
-            /> */}
-
-            <EmojiPicker
-  onEmojiSelected={(selected) => {
-    setSelectedEmoji(selected.emoji);
-    setOpen(false);  // close immediately on select
-  }}
-  open={open}
-  onClose={() => setOpen(false)}
-/>
-
-            <TouchableOpacity style={$pillContainer} onPress={handleOpenColorSheet}>
-              <View style={[$pickedColor, { backgroundColor: colorPicked }]} />
-              <Text text="color" preset="formLabel" size="md" />
-            </TouchableOpacity>
-            <BottomSheetModal
-              ref={bottomSheetColorRef}
-              snapPoints={[300, "50%"]}
-              backdropComponent={renderBackdrop}
-              style={$bottomSheetContainer}
-            >
-              <BottomSheetView style={$bottomSheet}>
-
-
-                <ColorPicker
-                  style={$colorPicker}
-                  value="red"
-                  onComplete={({ hex }) => setColorPicked(hex)}
-                >
-                  <Panel1 />
-                  <HueSlider />
-                  <Preview />
-                </ColorPicker>
-              </BottomSheetView>
-            </BottomSheetModal>
-          </View>
-
-          <View style={$inputsContainer}>
-            {/* <TextField label="Habit Name" placeholder="Go to the GYM" required /> */}
-
-
-            <TextField
-  label="Habit Name"
-  placeholder="Go to the GYM"
-  value={name}
-  onChangeText={setName}
-  required
-/>
-
-
-            <TextField label="Description" placeholder="Extra details" />
-
-            <TextField
-  label="Target"
-  placeholder="1"
-  value={target.toString()}
-  onChangeText={(text) => setTarget(Number(text) || 1)}
-  keyboardType="numeric"
-/>
-
-<TextField
-  label="Unit"
-  placeholder="times"
-  value={unit}
-  onChangeText={setUnit}
-/>
-          </View>
-
-          <View style={$gap}>
-            <View style={$frequencyContainer}>
-              <Text preset="formLabel" text="Frequency" style={$labelStyle} />
-              <Text text="*" style={$labelRequired} />
+          <View style={$cardContainer}>
+            <View style={$headerContainer}>
+              <Icon icon="back" color={colors.text} onPress={() => navigation.goBack()} />
+              <Text text="Create Habit" preset="heading" size="lg" />
             </View>
-            <View style={$daysContainer}>
-              {days.map((d, idx) => (
-                <TouchableOpacity
-                  key={`day-${d.day}-${idx}`}
-                  style={[
-                    $dayContainerStyle,
-                    {
-                      // backgroundColor: frequency.find((f) => f.day === d.day)
-                      backgroundColor: frequency.includes(d.day)
-
-                        ? colors.palette.primary600
-                        : colors.palette.neutral100,
-                    },
-                  ]}
-                  onPress={() => handleSelectFrequency(d)}
-                >
-                  <Text
-                    text={d.abbr}
-                    style={[
-                      $dayStyle,
-                      {
-                        // color: frequency.find((f) => f.day === d.day)
-                        color: frequency.includes(d.day)
-
-                          ? colors.palette.neutral100
-                          : colors.text,
-                      },
-                    ]}
-                    size="md"
-                  />
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-          <View style={$gap}>
-            <View style={$frequencyContainer}>
-              <Text preset="formLabel" text="Habit time" style={$labelStyle} />
-              <Text text="*" style={$labelRequired} />
-            </View>
-
-            <DateTimePicker
-              testID="dateTimePicker"
-              style={$dateTimePicker}
-              value={habitTime}
-              mode="time"
-              is24Hour={false}
-              locale="en-US"
-              accentColor={colors.palette.neutral100}
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              onChange={(_, selectedDate) => setHabitTime(new Date(selectedDate!))}
-            />
-          </View>
-
-          <View style={$gap}>
-  <View style={$frequencyContainer}>
-    <Text preset="formLabel" text="Habit date" style={$labelStyle} />
-    <Text text="*" style={$labelRequired} />
-  </View>
-  <DateTimePicker
-    testID="datePicker"
-    style={$dateTimePicker}
-    value={habitDate}
-    mode="date"
-    locale="en-US"
-    accentColor={colors.palette.neutral100}
-    onChange={(_, selectedDate) => {
-      if (selectedDate) {
-        console.log("Date selected:", selectedDate);
-        setHabitDate(new Date(selectedDate));
-      }
-    }}
-  />
-</View>
-
-          <View style={$gap}>
-            <View style={$remindersContainer}>
-              <Text preset="formLabel" text="Reminders" style={$labelStyle} />
-              <Toggle
-                variant="switch"
-                value={!!reminder}
-                onValueChange={() => setReminder(reminder ? "" : "30 minutes before")}
-                inputInnerStyle={{
-                  backgroundColor: reminder ? colors.success : colors.palette.neutral100,
+            <View style={$subheaderContainer}>
+              <TouchableOpacity style={$pillContainer} onPress={() => setOpen(!open)}>
+                <Text text={selectedEmoji} />
+                <Text text="icon" preset="formLabel" size="md" />
+              </TouchableOpacity>
+              <EmojiPicker
+                onEmojiSelected={(selected) => {
+                  setSelectedEmoji(selected.emoji)
+                  setOpen(false) // close immediately on select
                 }}
-                inputOuterStyle={{
-                  backgroundColor: colors.palette.neutral400,
+                open={open}
+                onClose={() => setOpen(false)}
+              />
+
+              {/* <TouchableOpacity style={$pillContainer} onPress={handleOpenColorSheet}>
+                <View style={[$pickedColor, { backgroundColor: colorPicked }]} />
+                <Text text="color" preset="formLabel" size="md" />
+              </TouchableOpacity> */}
+
+           <TouchableOpacity
+  style={$pillContainer}
+  activeOpacity={0.7}
+  onPress={handleOpenColorSheet}
+>
+  <View style={[$pickedColor, { backgroundColor: colorPicked }]} />
+  <Text text="color" preset="formLabel" size="md" />
+</TouchableOpacity>
+              <BottomSheetModal
+                ref={bottomSheetColorRef}
+                snapPoints={[300, "50%"]}
+                backdropComponent={renderBackdrop}
+                style={$bottomSheetContainer}
+              >
+                <BottomSheetView style={$bottomSheet}>
+                  <ColorPicker
+                    style={$colorPicker}
+                    value="red"
+                    onComplete={({ hex }) => setColorPicked(hex)}
+                  >
+                    <Panel1 />
+                    <HueSlider />
+                    <Preview />
+                  </ColorPicker>
+                </BottomSheetView>
+              </BottomSheetModal>
+            </View>
+
+            <View style={$inputsContainer}>
+              {/* <TextField label="Habit Name" placeholder="Go to the GYM" required /> */}
+
+              <TextField
+                label="Habit Name"
+                placeholder="Go to the GYM"
+                value={name}
+                onChangeText={setName}
+                required
+              />
+
+              <TextField label="Description" placeholder="Extra details" />
+
+              <TextField
+                label="Target"
+                placeholder="1"
+                value={target.toString()}
+                onChangeText={(text) => setTarget(Number(text) || 1)}
+                keyboardType="numeric"
+              />
+
+              <TextField label="Unit" placeholder="times" value={unit} onChangeText={setUnit} />
+            </View>
+
+            <View style={$gap}>
+              <View style={$frequencyContainer}>
+                <Text preset="formLabel" text="Frequency" style={$labelStyle} />
+                <Text text="*" style={$labelRequired} />
+              </View>
+              <View style={$daysContainer}>
+                {days.map((d, idx) => (
+                 <TouchableOpacity
+  key={`day-${d.day}-${idx}`}
+  style={[
+    $dayContainerStyle,
+    {
+      backgroundColor: frequency.includes(d.day)
+        ? colors.palette.primary500
+        : colors.palette.neutral100,
+       borderWidth: 1,
+    borderColor: colors.palette.primary500,
+    },
+  ]}
+  onPress={() => handleSelectFrequency(d)}
+>
+  <Text
+    text={d.abbr}
+    style={[
+      $dayStyle,
+      {
+        color: frequency.includes(d.day)
+          ? colors.palette.neutral100
+          : colors.text,
+      },
+    ]}
+    size="md"
+  />
+</TouchableOpacity>
+
+                ))}
+              </View>
+            </View>
+            <View style={$gap}>
+              <View style={$frequencyContainer}>
+                <Text preset="formLabel" text="Habit time" style={$labelStyle} />
+                <Text text="*" style={$labelRequired} />
+              </View>
+
+              <DateTimePicker
+                testID="dateTimePicker"
+                style={$dateTimePicker}
+                value={habitTime}
+                mode="time"
+                is24Hour={false}
+                locale="en-US"
+                accentColor={colors.palette.neutral100}
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                onChange={(_, selectedDate) => setHabitTime(new Date(selectedDate!))}
+              />
+            </View>
+
+            <View style={$gap}>
+
+              
+              <View style={$frequencyContainer}>
+                <Text preset="formLabel" text="Habit date" style={$labelStyle} />
+                <Text text="*" style={$labelRequired} />
+              </View>
+              <DateTimePicker
+                testID="datePicker"
+                style={$dateTimePicker}
+                value={habitDate}
+                mode="date"
+                locale="en-US"
+                accentColor={colors.palette.neutral100}
+                onChange={(_, selectedDate) => {
+                  if (selectedDate) {
+                    console.log("Date selected:", selectedDate)
+                    setHabitDate(new Date(selectedDate))
+                  }
                 }}
               />
             </View>
-            {reminder && (
-              <TouchableOpacity style={$reminder} onPress={() => handleOpenReminderSheet()}>
-                <Text text={reminder} size="md" />
-                <Icon icon="caretRight" />
-              </TouchableOpacity>
-            )}
-            {/* <BottomSheetModal
-              ref={bottomSheetReminderRef}
-              snapPoints={[200, "50%"]}
-              backdropComponent={renderBackdrop}
-            >
-              <BottomSheetView style={$reminderBottomSheet}>
-                {reminders.map((r, idx) => (
-                  <TouchableOpacity
-                    key={`reminder-${r.id}-${idx}`}
-                    style={$gap}
-                    onPress={() => {
-                      setReminder(r.name)
-                      bottomSheetReminderRef.current?.close()
-                    }}
+
+
+              <View style={{ marginTop: spacing.lg, marginBottom: spacing.md }}>
+              <View style={$remindersContainer}>
+                <Text preset="formLabel" text="Reminders" style={$labelStyle} />
+                <Toggle
+                  variant="switch"
+                  value={!!reminder}
+                  onValueChange={() => setReminder(reminder ? "" : "30 minutes before")}
+                  inputInnerStyle={{
+                    backgroundColor: reminder ? colors.success : colors.palette.neutral100,
+                  }}
+                  inputOuterStyle={{
+                    backgroundColor: colors.palette.neutral400,
+                  }}
+                />
+              </View>
+              {reminder && (
+                <TouchableOpacity style={$reminder} onPress={() => handleOpenReminderSheet()}>
+                  <Text text={reminder} size="md" />
+                  <Icon icon="caretRight" />
+                </TouchableOpacity>
+              )}
+              <BottomSheetModal
+                ref={bottomSheetColorRef}
+                snapPoints={["70%",300]} // Replace [300, "50%"] with ["50%"]
+                backdropComponent={renderBackdrop}
+              >
+                <BottomSheetView style={$bottomSheet}>
+                  <ColorPicker
+                    style={$colorPicker}
+                    value={colorPicked}
+                    onComplete={({ hex }) => setColorPicked(hex)}
                   >
-                    <Text text={r.name} size="md" style={{ marginLeft: spacing.md }} />
-                    <View style={$separator} />
-                  </TouchableOpacity>
-                ))}
-              </BottomSheetView>
-            </BottomSheetModal> */}
+                    <Panel1 />
+                    <HueSlider />
+                    <Preview />
+                  </ColorPicker>
+                </BottomSheetView>
+              </BottomSheetModal>
+            </View>
 
-
-            <BottomSheetModal
-  ref={bottomSheetColorRef}
-  snapPoints={[200,"50%"]} // Replace [300, "50%"] with ["50%"]
-  backdropComponent={renderBackdrop}
->
-  <BottomSheetView style={$bottomSheet}>
-    <ColorPicker
-      style={$colorPicker}
-      value={colorPicked}
-      onComplete={({ hex }) => setColorPicked(hex)}
-    >
-      <Panel1 />
-      <HueSlider />
-      <Preview />
-    </ColorPicker>
-  </BottomSheetView>
-</BottomSheetModal>
-
-
-
-
-
+            <View>
+              <Button
+                style={[$btn, { marginTop: spacing.lg }]}
+                textStyle={{ color: colors.palette.neutral100 }}
+                onPress={handleCreateHabit}
+              >
+                Create habit
+              </Button>
+            </View>
           </View>
-
-{/* 
-          <Button
-            style={$btn}
-            textStyle={{ color: colors.palette.neutral100 }}
-            onPress={() => navigation.navigate("Home")}
-          >
-            Create habit
-          </Button> */}
-
-          <Button
-  style={$btn}
-  textStyle={{ color: colors.palette.neutral100 }}
-  onPress={handleCreateHabit}
->
-  Create habit
-</Button>
-
         </BottomSheetModalProvider>
       </Screen>
     )
@@ -425,7 +366,7 @@ const $headerContainer: ViewStyle = {
 }
 
 const $btn: ViewStyle = {
-  backgroundColor: colors.palette.primary600,
+  backgroundColor: colors.palette.primary500,
   borderWidth: 0,
   borderRadius: spacing.xs,
 }
@@ -438,14 +379,31 @@ const $pillContainer: ViewStyle = {
   alignItems: "center",
   justifyContent: "space-around",
   width: layout.window.width * 0.25,
+  borderWidth: 1,
+  borderColor: colors.palette.neutral300,
+  elevation: 2,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.05,
+  shadowRadius: 2,
 }
+
 
 const $subheaderContainer: ViewStyle = {
   flexDirection: "row",
-  gap: 24,
+  justifyContent: "flex-start",
+  flexWrap: "wrap",
+  gap: spacing.md, // ⬅️ new: add horizontal spacing
+  marginVertical: spacing.md, // ⬅️ new: add vertical breathing room
 }
-
-const $pickedColor: ViewStyle = { width: 18, height: 18, borderRadius: 99 }
+const $pickedColor: ViewStyle = {
+  width: 18,
+  height: 18,
+  borderRadius: 99,
+  marginRight: spacing.xs, // spacing between the swatch and the label
+  borderWidth: 1,
+  borderColor: colors.palette.neutral300, // give it a subtle outline
+}
 
 const $bottomSheet: ViewStyle = {
   flex: 1,
@@ -467,7 +425,7 @@ const $frequencyContainer: ViewStyle = {
 const $labelStyle: TextStyle = { marginBottom: spacing.xs }
 
 const $labelRequired: TextStyle = {
-  color: colors.error,
+  color: colors.palette.primary500, // or any blue from your palette
 }
 
 const $daysContainer: ViewStyle = {
@@ -532,3 +490,15 @@ const $bottomSheetContainer: ViewStyle = {
   elevation: 24,
 }
 
+const $cardContainer: ViewStyle = {
+  backgroundColor: colors.palette.neutral100, // white card
+  borderRadius: spacing.sm,
+  padding: spacing.md,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.1,
+  shadowRadius: 8,
+  elevation: 6, // Android drop shadow
+  marginBottom: spacing.lg,
+  paddingBottom: spacing.xxl,
+}

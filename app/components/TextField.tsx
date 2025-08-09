@@ -248,8 +248,9 @@ const $labelStyle: TextStyle = {
 const $labelContainerStyle: ViewStyle = { flexDirection: "row", gap: 2 }
 
 const $labelRequiredText: TextStyle = {
-  color: colors.error,
+  color: colors.palette.primary500, // or any blue you prefer
 }
+
 
 const $inputWrapperStyle: ViewStyle = {
   flexDirection: "row",
