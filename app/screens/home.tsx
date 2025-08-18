@@ -1,4 +1,4 @@
-// //Home.tsx
+//Home.tsx
 
 import { observer } from "mobx-react-lite"
 import React, { FC, useMemo, useState, useCallback, useEffect, useRef } from "react"
@@ -38,6 +38,8 @@ import { format } from "date-fns"
 import { WeekCalendar, CalendarProvider } from "react-native-calendars"
 
 import { SafeAreaView } from "react-native-safe-area-context"
+
+import { useFocusEffect } from "@react-navigation/native"
 
 
 interface HabitType {
@@ -272,6 +274,13 @@ export const HomeScreen: FC<HomeScreenProps> = observer(function HomeScreen({ na
 
   const [selected, setSelected] = useState(formattedToday)
 
+  useFocusEffect(
+  useCallback(() => {
+    setSelected((prev) => prev) // 👈 triggers layout refresh
+  }, [])
+)
+
+
   function parseLocalDate(dateString: string): Date {
     const [year, month, day] = dateString.split("-").map(Number)
     return new Date(year, month - 1, day)
@@ -411,27 +420,30 @@ const $checkInCardStyle: ViewStyle = {
 
     {/* ⬆️ Calendar as navbar */}
 
+    {/* ⬆️ Calendar as navbar */}
 <View
   style={{
-    height: 100,
+    height: 75,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    backgroundColor: colors.palette.neutral200,
-    borderWidth: 0,
-    overflow: 'hidden',
+    paddingVertical: 0,
+    backgroundColor: "#FFFFFF", // ⬜️ Clean white background    
+    borderWidth: 1,
+    borderColor: colors.palette.neutral300, // Optional subtle divider
+    overflow: "hidden",
   }}
 >
   <CalendarProvider date={selected}>
     <View
       style={{
         flex: 1,
-        backgroundColor: 'transparent',
+        backgroundColor: "transparent",
         borderWidth: 0,
         elevation: 0,
         shadowOpacity: 0,
       }}
     >
       <WeekCalendar
+        key={`calendar-${selected}`} // 👈 forces remount
         current={selected}
         onDayPress={(day) => setSelected(day.dateString)}
         markedDates={markedDates}
@@ -439,17 +451,17 @@ const $checkInCardStyle: ViewStyle = {
         disableWeekScroll
         calendarWidth={layout.window.width - spacing.md * 2}
         theme={{
-  calendarBackground: 'transparent',
-  backgroundColor: 'transparent',
-  borderColor: 'transparent',
-  textSectionTitleColor: colors.text,
-  dayTextColor: colors.text,
-  todayTextColor: "#304FFE", // ✅ Your primary blue
-  selectedDayBackgroundColor: "#304FFE", // ✅ Your primary blue
-  selectedDayTextColor: "#FFFFFF", // White text for contrast
-}}
+          calendarBackground: "transparent",
+          backgroundColor: "transparent",
+          borderColor: "transparent",
+            textSectionTitleColor: colors.palette.neutral800, // ⬛️ Darker section titles
+            dayTextColor: colors.palette.neutral800,  
+          todayTextColor: "#304FFE", // ✅ Your primary blue
+          selectedDayBackgroundColor: "#304FFE", // ✅ Your primary blue
+          selectedDayTextColor: "#FFFFFF", // White text for contrast
+        }}
         style={{
-          backgroundColor: 'transparent',
+          backgroundColor: "transparent",
           borderWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
@@ -458,6 +470,9 @@ const $checkInCardStyle: ViewStyle = {
     </View>
   </CalendarProvider>
 </View>
+
+
+
 
 
     {/* 👇 Scrollable main content */}
