@@ -1,38 +1,95 @@
-// // habit store ts
+// habit store ts
 
 import { types, onSnapshot, applySnapshot } from "mobx-state-tree"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { HabitModel } from "../models/HabitModel"
 import { ActivityLogModel } from "../models/ActivityLogModel" // adjust path if needed
 
-import { subDays, format } from "date-fns"
+import { subDays, format, parseISO, getDay } from "date-fns"
 
+const dayNameToNumber = {
+  Sunday: 0,
+  Monday: 1,
+  Tuesday: 2,
+  Wednesday: 3,
+  Thursday: 4,
+  Friday: 5,
+  Saturday: 6,
+}
 
 // ✅ Helper function to generate dayStatuses
+
 function getDayStatuses(habit, chartLength, activityLog) {
+  // 🔁 Convert day names to numbers
+  const scheduledDays = habit.frequency.map((day) => dayNameToNumber[day])
+
   const dateRange = Array.from({ length: chartLength }).map((_, idx) => {
     const date = subDays(new Date(), chartLength - 1 - idx)
     return format(date, "yyyy-MM-dd")
   })
 
-    console.log(`🧠 [${habit.name}] chartLength:`, chartLength)
+  console.log(`🧠 [${habit.name}] chartLength:`, chartLength)
   console.log(`📅 [${habit.name}] dateRange:`, dateRange)
+  console.log(`📆 [${habit.name}] frequency:`, habit.frequency)
+  console.log(`📆 [${habit.name}] scheduledDays:`, scheduledDays)
+  console.log(`📊 [${habit.name}] activityLog:`, activityLog)
 
-  return dateRange.map((date) => {
+  const statuses = dateRange.map((date) => {
+    const dayOfWeek = getDay(parseISO(date)) // 0 (Sun) to 6 (Sat)
+
+    if (!scheduledDays.includes(dayOfWeek)) {
+      console.log(`🔘 ${date} is unscheduled`)
+      return "unscheduled"
+    }
+
     const log = activityLog.find(
       (entry) => entry.habitId === habit.id && entry.date === date
     )
 
-    if (!log) return "gray"
+    if (!log) {
+      console.log(`⚫ ${date} is scheduled but missed`)
+      return "missed"
+    }
+
     if (log.count >= habit.target) return "green"
     if (log.count > 0) return "yellow"
-    return "gray"
+    
+console.log(`⚫ ${date} is scheduled but missed`)
+return "missed"
   })
 
   console.log(`🎨 [${habit.name}] statuses:`, statuses)
   return statuses
-  
 }
+
+
+
+
+
+
+
+// function getDayStatuses(habit, chartLength, activityLog) {
+//   const dateRange = Array.from({ length: chartLength }).map((_, idx) => {
+//     const date = subDays(new Date(), chartLength - 1 - idx)
+//     return format(date, "yyyy-MM-dd")
+//   })
+
+//     console.log(`🧠 [${habit.name}] chartLength:`, chartLength)
+//   console.log(`📅 [${habit.name}] dateRange:`, dateRange)
+
+//   return dateRange.map((date) => {
+//     const log = activityLog.find(
+//       (entry) => entry.habitId === habit.id && entry.date === date
+//     )
+
+//     if (!log) return "gray"
+//     if (log.count >= habit.target) return "green"
+//     if (log.count > 0) return "yellow"
+//     return "gray"
+//   })
+//   console.log(`🎨 [${habit.name}] statuses:`, statuses)
+//   return statuses
+// }
 
 
 const STORAGE_KEY = "HabitStoreSnapshot"

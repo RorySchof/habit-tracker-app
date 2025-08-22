@@ -1092,13 +1092,70 @@ Tasks Completed  </Text>
         justifyContent: "flex-start",
       }}
     >
-      {habit.dayStatuses.map((status, dayIdx) => (
+
+{/* {habit.dayStatuses.map((status, dayIdx) => {
+  console.log(`📦 Box ${dayIdx}:`, status)
+  return (
+    <View
+      key={dayIdx}
+      style={{
+        width: 24,
+        height: 24,
+        borderRadius: 4,
+
+
+        backgroundColor:
+  status === "green"
+    ? habitColor
+    : status === "yellow"
+    ? `${habitColor}80`
+    : status === "missed"
+    ? "#000000"
+    : status === "unscheduled"
+    ? "#BDBDBD"
+    : "#FFFFFF"
+      }}
+    />
+  )
+})} */}
+
+{habit.dayStatuses.map((status, dayIdx) => {
+  console.log(`🎨 Rendering box ${dayIdx}:`, status)
+  return (
+    <View
+      key={dayIdx}
+      style={{
+        width: 24,
+        height: 24,
+        borderRadius: 4,
+
+
+   backgroundColor:
+  status === "green"
+    ? habitColor
+    : status === "yellow"
+    ? `${habitColor}30`
+    : status === "red"
+    ? "#616161"
+    : status === "grey"
+    ? "#BDBDBD"
+    : "#FFFFFF"
+
+      }}
+    />
+  )
+})}
+      
+      {/* {habit.dayStatuses.map((status, dayIdx) => (
+        
         <View
           key={dayIdx}
           style={{
             width: 24, // fixed width
             height: 24, // fixed height
             borderRadius: 4,
+
+            
             backgroundColor:
               status === "green"
                 ? habitColor
@@ -1107,7 +1164,9 @@ Tasks Completed  </Text>
                 : "#BDBDBD",
           }}
         />
-      ))}
+      ))} */}
+
+
     </View>
   </ScrollView>
 </View>
@@ -1202,12 +1261,11 @@ Tasks Completed  </Text>
     </View>
   )
 })}
-
-
-
     </Screen>
   )
 })
+
+
 
 const $container: ViewStyle = {
   paddingHorizontal: spacing.lg,

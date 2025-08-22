@@ -289,44 +289,142 @@ export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function Sta
 
 
 
-  const habitWeeklyStatus = useMemo(() => {
-    const today = new Date()
-    const days = Array.from({ length: chartLength }).map((_, idx) => {
-      const date = subDays(today, 6 - idx) // oldest to newest
-      return {
-        date,
-        formatted: format(date, "yyyy-MM-dd"),
-        dayOfWeek: format(date, "EEEE"),
-      }
-    })
+// Habit weekly status
 
-    return habitStore.habits
-      .filter((habit) => !habit.paused)
-      .map((habit) => {
-        const dayStatuses = days.map((day) => {
-          if (!habit.frequency.includes(day.dayOfWeek)) {
-            return "grey" // not scheduled
-          }
+// const habitWeeklyStatus = useMemo(() => {
+//   const today = new Date()
+//   const days = Array.from({ length: chartLength }).map((_, idx) => {
+//     const date = subDays(today, 6 - idx) // oldest to newest
+//     return {
+//       date,
+//       formatted: format(date, "yyyy-MM-dd"),
+//       dayOfWeek: format(date, "EEEE"),
+//     }
+//   })
 
-          const logEntry = habitStore.activityLog.find(
-            (entry) => entry.habitId === habit.id && entry.date === day.formatted,
-          )
+//   return habitStore.habits
+//     .filter((habit) => !habit.paused)
+//     .map((habit) => {
+//       console.log("📍 Running dayStatuses.map() for", habit.name)
 
-          if (logEntry) {
-            if (logEntry.count >= habit.target) return "green"
-            if (logEntry.count > 0) return "yellow"
-            return "red"
-          }
-          return "red" // scheduled but no activity
-        })
+//       const dayStatuses = days.map((day) => {
+//         let status = "unscheduled"
 
-        return {
-          habitName: habit.name,
-          targetText: `${habit.target} ${habit.unit} per day`,
-          dayStatuses,
-        }
-      })
-  }, [habitStore.habits, habitStore.activityLog])
+//         if (habit.frequency.includes(day.dayOfWeek)) {
+//           const logEntry = habitStore.activityLog.find(
+//             (entry) => entry.habitId === habit.id && entry.date === day.formatted,
+//           )
+
+//           if (logEntry) {
+//             if (logEntry.count >= habit.target) status = "green"
+//             else if (logEntry.count > 0) status = "yellow"
+//             else status = "missed"
+//           } else {
+//             status = "missed"
+//           }
+//         }
+
+//         console.log(`[${habit.name}] ${day.formatted} →`, status)
+//         return status
+//       })
+
+//       return {
+//         habitName: habit.name,
+//         targetText: `${habit.target} ${habit.unit} per day`,
+//         dayStatuses,
+//       }
+//     })
+// }, [habitStore.habits, habitStore.activityLog, chartLength])
+
+
+
+
+
+// const habitWeeklyStatus = useMemo(() => {
+//   const today = new Date()
+//   const days = Array.from({ length: chartLength }).map((_, idx) => {
+//     const date = subDays(today, 6 - idx) // oldest to newest
+//     return {
+//       date,
+//       formatted: format(date, "yyyy-MM-dd"),
+//       dayOfWeek: format(date, "EEEE"),
+//     }
+//   })
+// console.log("📍 Running dayStatuses.map() for", habit.name)
+//   return habitStore.habits
+//     .filter((habit) => !habit.paused)
+//     .map((habit) => {
+
+
+//       const dayStatuses = days.map((day) => {
+//   let status = "unscheduled"
+
+//   if (habit.frequency.includes(day.dayOfWeek)) {
+//     const logEntry = habitStore.activityLog.find(
+//       (entry) => entry.habitId === habit.id && entry.date === day.formatted,
+//     )
+
+//     if (logEntry) {
+//       if (logEntry.count >= habit.target) status = "green"
+//       else if (logEntry.count > 0) status = "yellow"
+//       else status = "missed"
+//     } else {
+//       status = "missed"
+//     }
+//   }
+
+//   console.log(`[${habit.name}] ${day.formatted} →`, status)
+//   return status
+// })
+//       return {
+//         habitName: habit.name,
+//         targetText: `${habit.target} ${habit.unit} per day`,
+//         dayStatuses,
+//       }
+//     })
+// }, [habitStore.habits, habitStore.activityLog])
+
+
+  // const habitWeeklyStatus = useMemo(() => {
+  //   const today = new Date()
+  //   const days = Array.from({ length: chartLength }).map((_, idx) => {
+  //     const date = subDays(today, 6 - idx) // oldest to newest
+  //     return {
+  //       date,
+  //       formatted: format(date, "yyyy-MM-dd"),
+  //       dayOfWeek: format(date, "EEEE"),
+  //     }
+  //   })
+
+  //   return habitStore.habits
+  //     .filter((habit) => !habit.paused)
+  //     .map((habit) => {
+
+
+  //       const dayStatuses = days.map((day) => {
+  //         if (!habit.frequency.includes(day.dayOfWeek)) {
+  //           return "grey" // not scheduled
+  //         }
+
+  //         const logEntry = habitStore.activityLog.find(
+  //           (entry) => entry.habitId === habit.id && entry.date === day.formatted,
+  //         )
+
+  //         if (logEntry) {
+  //           if (logEntry.count >= habit.target) return "green"
+  //           if (logEntry.count > 0) return "yellow"
+  //           return "red"
+  //         }
+  //         return "red" // scheduled but no activity
+  //       })
+
+  //       return {
+  //         habitName: habit.name,
+  //         targetText: `${habit.target} ${habit.unit} per day`,
+  //         dayStatuses,
+  //       }
+  //     })
+  // }, [habitStore.habits, habitStore.activityLog])
 
 
 
@@ -705,6 +803,8 @@ export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function Sta
         ))}
       </View>
 
+      
+
        {/* habit weekly status section */}
 
        {habitWeeklyStatus.map((habit, idx) => {
@@ -751,12 +851,30 @@ export const StatisticsScreen: FC<StatisticsScreenProps> = observer(function Sta
               width: 43,
               height: 43,
               borderRadius: 6,
-              backgroundColor:
-                status === "green"
-                  ? habitColor
-                  : status === "yellow"
-                  ? `${habitColor}80`
-                  : "#BDBDBD",
+
+              // backgroundColor:
+              //   status === "green"
+              //     ? habitColor
+              //     : status === "yellow"
+              //     ? `${habitColor}80`
+              //     : "#BDBDBD",
+
+        backgroundColor:
+  status === "green"
+    ? habitColor
+    : status === "yellow"
+    ? `${habitColor}33` // lighter partial
+    : status === "missed"
+    ? "#000000" // missed = black
+    : status === "unscheduled"
+    ? "#BDBDBD" // not scheduled
+    : "#FFFFFF" // fallback
+
+
+
+
+
+
             }}
           />
         ))}
