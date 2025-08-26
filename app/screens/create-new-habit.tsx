@@ -289,7 +289,7 @@ export const CreateNewHabitScreen: FC<CreateNewHabitScreenProps> = observer(
                 accentColor={colors.palette.neutral100}
                 onChange={(_, selectedDate) => {
                   if (selectedDate) {
-                    console.log("Date selected:", selectedDate)
+                  
                     setHabitDate(new Date(selectedDate))
                   }
                 }}

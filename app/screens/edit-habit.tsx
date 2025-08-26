@@ -36,20 +36,9 @@ export const EditHabitScreen: FC<EditHabitScreenProps> = observer(function EditH
   navigation,
   route,
 }) {
-  console.log("route.params:", route.params)
-  console.log(
-    "habitStore.habits ids:",
-    habitStore.habits.map((h) => h.id),
-  )
-
-  // const habitId = String(route.params.params?.habitId)
-
-  // const habitId = String(route.params.habitId)
-
   const habitId = route.params.habitId
   const task = habitStore.habits.find((h) => h.id === habitId)
 
-  // const task = habitStore.habits.find((h) => h.id === String(habitId))
 
   if (!task) {
     return (
@@ -154,39 +143,28 @@ export const EditHabitScreen: FC<EditHabitScreenProps> = observer(function EditH
   //   console.log("Navigated to Home.")
   // }
 
+  //Handle Save
+
+
+
   const handleSave = () => {
-    console.log("Attempting to save habit...")
+  if (task) {
+    habitStore.updateHabit(task.id, {
+      emoji: selectedEmoji,
+      color: colorPicked,
+      frequency: frequency.map((f) => f.day),
+      time: habitTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    })
 
-    if (task) {
-      console.log("Found task:", task)
-
-      habitStore.updateHabit(task.id, {
-        emoji: selectedEmoji,
-        color: colorPicked,
-        frequency: frequency.map((f) => f.day),
-        time: habitTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      })
-
-      console.log("Updated task:", {
-        emoji: selectedEmoji,
-        color: colorPicked,
-        frequency: frequency.map((f) => f.day),
-        time: habitTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      })
-
-      if (habitStore.saveHabits) {
-        habitStore.saveHabits()
-        console.log("Habit store saved.")
-      } else {
-        console.log("habitStore.saveHabits not defined.")
-      }
-    } else {
-      console.log("Task not found. Cannot save.")
+    if (habitStore.saveHabits) {
+      habitStore.saveHabits()
     }
-
-    navigation.navigate("Home")
-    console.log("Navigated to Home.")
   }
+
+  navigation.navigate("Home")
+}
+
+// Rendering Code below. 
 
   return (
     <Screen preset="scroll" safeAreaEdges={["top", "bottom"]} contentContainerStyle={$container}>

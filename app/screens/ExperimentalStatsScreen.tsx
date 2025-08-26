@@ -1,4 +1,3 @@
-
 // Experimental Statistics.tsx
 
 import { observer } from "mobx-react-lite"
@@ -16,20 +15,11 @@ import { getSnapshot } from "mobx-state-tree"
 
 import { Picker } from "@react-native-picker/picker"
 
-import { parseISO, } from "date-fns"
+import { parseISO } from "date-fns"
 
-import { ScrollView } from "react-native";
-
-
-
-
+import { ScrollView } from "react-native"
 
 //FUNCTIONS AND HELPERS BELOW
-
-
-
-
-
 
 // gets dates. today minus 7,30,etc
 function getPastDates(chartLength: number): string[] {
@@ -46,1054 +36,972 @@ function getPastDates(chartLength: number): string[] {
 }
 
 function getDailyCounts(dates: string[], completions: { date: string }[]) {
-  const counts: { dateStr: string, count: number }[] = []
+  const counts: { dateStr: string; count: number }[] = []
 
   for (const dateStr of dates) {
-    const count = completions.filter(c => c.date === dateStr).length
+    const count = completions.filter((c) => c.date === dateStr).length
     counts.push({ dateStr, count })
   }
 
   return counts
 }
 
-
-
 function isScheduledForDate(habit, date) {
-  const dayOfWeek = format(date, "EEEE");
-  const createdAt = new Date(habit.createdAt);
-  return habit.frequency.includes(dayOfWeek) && date >= createdAt;
+  const dayOfWeek = format(date, "EEEE")
+  const createdAt = new Date(habit.createdAt)
+  return habit.frequency.includes(dayOfWeek) && date >= createdAt
 }
 
 // const chartLength = filter === "M" ? 30 : 7;
 // const [filter, setFilter] = useState<"D" | "W" | "M" | "3M" | "6M" | "Y">("D");
 
-type FilterKey = 'D' | 'W' | 'M' | '3M' | '6M' | 'Y'
+type FilterKey = "D" | "W" | "M" | "3M" | "6M" | "Y"
 
-
-export const ExperimentalStatsScreen: FC<StatisticsScreenProps> = observer(function StatisticsScreen() {
+export const ExperimentalStatsScreen: FC<StatisticsScreenProps> = observer(
+  function StatisticsScreen() {
     const [filter, setFilter] = React.useState<FilterKey>("W")
 
-  console.log("Selected filter:", filter)
-
     const filters = [
-    { title: "Day", abbr: "D", id: 1 },
-    { title: "Week", abbr: "W", id: 2 },
-    { title: "Month", abbr: "M", id: 3 },
-    { title: "Three Months", abbr: "3M", id: 4 },
-    { title: "Six Months", abbr: "6M", id: 5 },
-    { title: "Year", abbr: "Y", id: 6 },
-  ]
+      { title: "Day", abbr: "D", id: 1 },
+      { title: "Week", abbr: "W", id: 2 },
+      { title: "Month", abbr: "M", id: 3 },
+      { title: "Three Months", abbr: "3M", id: 4 },
+      { title: "Six Months", abbr: "6M", id: 5 },
+      { title: "Year", abbr: "Y", id: 6 },
+    ]
 
- const filterDaysMap: Record<FilterKey, number> = {
-    D: 1,
-    W: 7,
-    M: 30,
-    "3M": 90,
-    "6M": 180,
-    Y: 365,
-  }
-
-const chartLength = filterDaysMap[filter] ?? 7
-
-console.log("📅 Selected filter:", filter)
-console.log("🧮 Chart length:", chartLength)
-
-
-React.useEffect(() => {
-  console.log("🧭 Filter changed:", filter)
-  console.log("📦 chartLength recalculated:", chartLength)
-
-  const habits = habitStore.getHabitsWithStatuses(chartLength)
-  console.log("📊 habits.length:", habits.length)
-  console.log("📅 dayStatuses per habit:", habits.map(h => h.dayStatuses.length))
-}, [filter])
-
-
-
-
-const habits = habitStore.getHabitsWithStatuses(chartLength)
-
-console.log("📦 chartLength:", chartLength)
-console.log("📊 habits.length:", habits.length)
-console.log("📅 dayStatuses per habit:", habits.map(h => h.dayStatuses.length))
-
-
-const completions = habitStore.activityLog
-const dates = getPastDates(chartLength)
-const dailyCounts = getDailyCounts(dates, completions)
-const chartData = formatChartData(dailyCounts)
-
-
-
-// MASTER MATRIX FUNCTION
-
-
-const habitMatrix = useMemo(() => {
-  const matrix = []
-
-  for (const dateStr of dates) {
-    const date = parseISO(dateStr)
-    const dayOfWeek = format(date, "EEEE")
-
-    const daySummary = {
-      date: dateStr,
-      habits: [],
-      complete: 0,
-      partial: 0,
-      missed: 0,
+    const filterDaysMap: Record<FilterKey, number> = {
+      D: 1,
+      W: 7,
+      M: 30,
+      "3M": 90,
+      "6M": 180,
+      Y: 365,
     }
 
-    const scheduledHabits = habitStore.habits.filter(habit =>
-      !habit.paused &&
-      habit.frequency.includes(dayOfWeek) &&
-      new Date(habit.createdAt) <= date
-    )
+    const chartLength = filterDaysMap[filter] ?? 7
 
-    console.log(`📅 ${format(date, "EEE MMM d")} — Scheduled Habits: ${scheduledHabits.length}`)
+    React.useEffect(() => {
+      const habits = habitStore.getHabitsWithStatuses(chartLength)
+    }, [filter])
 
-    for (const habit of scheduledHabits) {
-      const logEntry = habitStore.activityLog.find(
-        entry => entry.habitId === habit.id && entry.date === dateStr
+    const habits = habitStore.getHabitsWithStatuses(chartLength)
+    const completions = habitStore.activityLog
+    const dates = getPastDates(chartLength)
+    const dailyCounts = getDailyCounts(dates, completions)
+    const chartData = formatChartData(dailyCounts)
+
+    // MASTER MATRIX FUNCTION
+
+    const habitMatrix = useMemo(() => {
+      const matrix = []
+
+      for (const dateStr of dates) {
+        const date = parseISO(dateStr)
+        const dayOfWeek = format(date, "EEEE")
+
+        const daySummary = {
+          date: dateStr,
+          habits: [],
+          complete: 0,
+          partial: 0,
+          missed: 0,
+        }
+
+        const scheduledHabits = habitStore.habits.filter(
+          (habit) =>
+            !habit.paused &&
+            habit.frequency.includes(dayOfWeek) &&
+            new Date(habit.createdAt) <= date,
+        )
+
+        for (const habit of scheduledHabits) {
+          const logEntry = habitStore.activityLog.find(
+            (entry) => entry.habitId === habit.id && entry.date === dateStr,
+          )
+
+          let status = "missed"
+          if (logEntry) {
+            if (logEntry.count >= habit.target) status = "complete"
+            else if (logEntry.count > 0) status = "partial"
+          }
+
+          daySummary.habits.push({
+            habitId: habit.id,
+            name: habit.name,
+            status,
+            count: logEntry?.count || 0,
+            target: habit.target,
+          })
+
+          daySummary[status] += 1
+        }
+
+        matrix.push(daySummary)
+      }
+
+      return matrix
+    }, [habitStore.habits, habitStore.activityLog, chartLength])
+
+    // Longest streak
+
+    const { activityLog } = habitStore
+
+    function calculateStreaks(dates: string[]): {
+      currentStreak: number
+      longestStreak: number
+    } {
+      if (!dates.length) return { currentStreak: 0, longestStreak: 0 }
+
+      const sortedDates = dates
+        .map((date) => new Date(date))
+        .sort((a, b) => a.getTime() - b.getTime())
+
+      let longestStreak = 1
+      let currentStreak = 1
+      let tempStreak = 1
+
+      for (let i = 1; i < sortedDates.length; i++) {
+        const prev = sortedDates[i - 1]
+        const curr = sortedDates[i]
+
+        const diffInDays = Math.floor((curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24))
+
+        if (diffInDays === 1) {
+          tempStreak++
+        } else if (diffInDays > 1) {
+          tempStreak = 1
+        }
+
+        longestStreak = Math.max(longestStreak, tempStreak)
+      }
+
+      // Check if the last date is today or yesterday
+
+      const lastDate = sortedDates[sortedDates.length - 1]
+      const today = new Date()
+      const diffFromToday = Math.floor(
+        (today.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24),
       )
 
-      let status = "missed"
-      if (logEntry) {
-        if (logEntry.count >= habit.target) status = "complete"
-        else if (logEntry.count > 0) status = "partial"
+      currentStreak = diffFromToday <= 1 ? tempStreak : 0
+
+      return { currentStreak, longestStreak }
+    }
+
+    // streaks cont...
+
+    const streaksByHabit: Record<string, { currentStreak: number; longestStreak: number }> = {}
+
+    habitStore.habits.forEach((habit) => {
+      const checkInDates = activityLog
+        .filter((log) => log.habitId === habit.id)
+        .map((log) => log.date)
+
+      streaksByHabit[habit.id] = calculateStreaks(checkInDates)
+    })
+
+    // Weekly completion progress calculation
+
+    const weeklyCompletionData = useMemo(() => {
+      if (!habitStore.habits.length || !habitStore.activityLog.length) return []
+
+      const today = new Date()
+      const startDate = subDays(today, chartLength - 1)
+      const dateRange = eachDayOfInterval({ start: startDate, end: today })
+
+      const activityMap = new Map<string, number>()
+      for (const log of habitStore.activityLog) {
+        const logDate = format(parseISO(log.date), "yyyy-MM-dd")
+        if (dateRange.some((d) => format(d, "yyyy-MM-dd") === logDate)) {
+          const current = activityMap.get(log.habitId) || 0
+          activityMap.set(log.habitId, current + log.count)
+        }
       }
 
-      daySummary.habits.push({
-        habitId: habit.id,
-        name: habit.name,
-        status,
-        count: logEntry?.count || 0,
-        target: habit.target,
-      })
+      const activeHabits = habitStore.habits.filter((h) => !h.paused)
 
-      daySummary[status] += 1
+      return activeHabits.map((habit) => {
+        let scheduledDays = 0
 
-      console.log(`  🔹 ${habit.name}: ${logEntry?.count || 0}/${habit.target} → ${status}`)
-    }
-
-    console.log(`  ✅ Complete: ${daySummary.complete}, 🟡 Partial: ${daySummary.partial}, ❌ Missed: ${daySummary.missed}`)
-
-    matrix.push(daySummary)
-  }
-
-  return matrix
-}, [habitStore.habits, habitStore.activityLog, chartLength])
-
-
-
-
-// const habitMatrix = useMemo(() => {
-//   const matrix = []
-
-//   for (const dateStr of dates) {
-//     const date = parseISO(dateStr)
-//     const dayOfWeek = format(date, "EEEE")
-
-
-//     habitStore.habits.forEach(habit => {
-//       const isScheduled = habit.frequency.includes(dayOfWeek)
-//       const isCreated = new Date(habit.createdAt) <= date
-//       const isPaused = habit.paused
-//     })
-
-//     const daySummary = {
-//       date: dateStr,
-//       habits: [],
-//       complete: 0,
-//       partial: 0,
-//       missed: 0,
-//     }
-
-//     const scheduledHabits = habitStore.habits.filter(habit =>
-//       !habit.paused &&
-//       habit.frequency.includes(dayOfWeek) &&
-//       new Date(habit.createdAt) <= date
-//     )
-
-//     for (const habit of scheduledHabits) {
-//       const logEntry = habitStore.activityLog.find(
-//         entry => entry.habitId === habit.id && entry.date === dateStr
-//       )
-
-//       let status = "missed"
-//       if (logEntry) {
-//         if (logEntry.count >= habit.target) status = "complete"
-//         else if (logEntry.count > 0) status = "partial"
-//       }
-
-//       daySummary.habits.push({
-//         habitId: habit.id,
-//         name: habit.name,
-//         status,
-//         count: logEntry?.count || 0,
-//         target: habit.target,
-//       })
-
-//       daySummary[status] += 1
-//     }
-
-//     matrix.push(daySummary)
-//   }
-  
-//   return matrix
-// }, [habitStore.habits, habitStore.activityLog, chartLength])
-
-
-
-  // Longest streak
-
-  const { activityLog } = habitStore
-
-  function calculateStreaks(dates: string[]): {
-    currentStreak: number
-    longestStreak: number
-  } {
-    if (!dates.length) return { currentStreak: 0, longestStreak: 0 }
-
-    const sortedDates = dates
-      .map((date) => new Date(date))
-      .sort((a, b) => a.getTime() - b.getTime())
-
-    let longestStreak = 1
-    let currentStreak = 1
-    let tempStreak = 1
-
-    for (let i = 1; i < sortedDates.length; i++) {
-      const prev = sortedDates[i - 1]
-      const curr = sortedDates[i]
-
-      const diffInDays = Math.floor((curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24))
-
-      if (diffInDays === 1) {
-        tempStreak++
-      } else if (diffInDays > 1) {
-        tempStreak = 1
-      }
-
-      longestStreak = Math.max(longestStreak, tempStreak)
-    }
-
-    // Check if the last date is today or yesterday
-
-    const lastDate = sortedDates[sortedDates.length - 1]
-    const today = new Date()
-    const diffFromToday = Math.floor((today.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24))
-
-    currentStreak = diffFromToday <= 1 ? tempStreak : 0
-
-    return { currentStreak, longestStreak }
-  }
-
-  // streaks cont...
-
-  const streaksByHabit: Record<string, { currentStreak: number; longestStreak: number }> = {}
-
-  habitStore.habits.forEach((habit) => {
-    const checkInDates = activityLog
-      .filter((log) => log.habitId === habit.id)
-      .map((log) => log.date)
-
-    streaksByHabit[habit.id] = calculateStreaks(checkInDates)
-  })
-
-
-  // Weekly completion progress calculation
-
-  const weeklyCompletionData = useMemo(() => {
-  if (!habitStore.habits.length || !habitStore.activityLog.length) return []
-
-  const today = new Date()
-  const startDate = subDays(today, chartLength - 1)
-  const dateRange = eachDayOfInterval({ start: startDate, end: today })
-
-  const activityMap = new Map<string, number>()
-  for (const log of habitStore.activityLog) {
-    const logDate = format(parseISO(log.date), "yyyy-MM-dd")
-    if (dateRange.some((d) => format(d, "yyyy-MM-dd") === logDate)) {
-      const current = activityMap.get(log.habitId) || 0
-      activityMap.set(log.habitId, current + log.count)
-    }
-  }
-
-  const activeHabits = habitStore.habits.filter((h) => !h.paused)
-
-  return activeHabits.map((habit) => {
-    let scheduledDays = 0
-
-    for (const date of dateRange) {
-      const dayOfWeek = format(date, "EEEE")
-      if (
-        habit.frequency.includes(dayOfWeek) &&
-        new Date(habit.createdAt) <= date
-      ) {
-        scheduledDays += 1
-      }
-    }
-
-    const totalCount = activityMap.get(habit.id) || 0
-    const expectedTotal = scheduledDays * habit.target
-    const avgProgress =
-      expectedTotal > 0 ? Math.min((totalCount / expectedTotal) * 100, 100) : 0
-
-        // 🔍 Debug log for each habit
-  console.log(
-    `${habit.emoji || "🔥"} ${habit.name}: ScheduledDays=${scheduledDays}, Target=${habit.target}, Logged=${totalCount}, ExpectedTotal=${expectedTotal}, %=${Math.round(avgProgress)}`
-  )
-
-    return {
-      habitName: habit.name,
-      emoji: habit.emoji || "🔥",
-      avgProgress: Math.round(avgProgress),
-    }
-  })
-}, [
-  chartLength,
-  habitStore.habits.map((h) => h.id + h.target + h.frequency.join("")).join(","),
-  habitStore.activityLog.length,
-])
-
-
-
-//   const weeklyCompletionData = useMemo(() => {
-//   if (!habitStore.habits.length || !habitStore.activityLog.length) return []
-
-//   const today = new Date()
-//   const startOfWeek = new Date(today)
-//   startOfWeek.setDate(today.getDate() - today.getDay()) // Sunday start
-
-//   const weekDates = eachDayOfInterval({ start: startOfWeek, end: today })
-
-//   const activityMap = new Map<string, number>()
-//   for (const log of habitStore.activityLog) {
-//     const logDate = format(parseISO(log.date), "yyyy-MM-dd")
-//     if (weekDates.some((d) => format(d, "yyyy-MM-dd") === logDate)) {
-//       const current = activityMap.get(log.habitId) || 0
-//       activityMap.set(log.habitId, current + log.count)
-//     }
-//   }
-
-//   const activeHabits = habitStore.habits.filter((h) => !h.paused)
-
-//   return activeHabits.map((habit) => {
-//     let scheduledDays = 0
-
-//     for (const date of weekDates) {
-//       const dayOfWeek = format(date, "EEEE")
-//       if (
-//         habit.frequency.includes(dayOfWeek) &&
-//         new Date(habit.createdAt) <= date
-//       ) {
-//         scheduledDays += 1
-//       }
-//     }
-
-//     const totalCount = activityMap.get(habit.id) || 0
-//     const expectedTotal = scheduledDays * habit.target
-//     const avgProgress =
-//       expectedTotal > 0 ? Math.min((totalCount / expectedTotal) * 100, 100) : 0
-
-//     // 🔍 Log each habit's weekly stats
-//     console.log(
-//       `${habit.emoji} ${habit.name}: ScheduledDays=${scheduledDays}, Target=${habit.target}, Logged=${totalCount}, %=${Math.round(avgProgress)}`
-//     )
-
-//     return {
-//       habitName: habit.name,
-//       emoji: habit.emoji || "🔥",
-//       avgProgress: Math.round(avgProgress),
-//     }
-//   })
-// }, [
-//   habitStore.habits.map((h) => h.id + h.target + h.frequency.join("")).join(","),
-//   habitStore.activityLog.length,
-// ])
-
-
-// New chart to replace total activities with task completed
-
-
-const dailyEffortData = useMemo(() => {
-  return Array.from({ length: chartLength }).map((_, idx) => {
-    const date = subDays(new Date(), chartLength - 1 - idx)
-    const formattedDate = format(date, "yyyy-MM-dd")
-    const dayOfWeek = format(date, "EEEE")
-    const label = format(date, "EEE") // or "MMM d" for monthly
-
-    const scheduledHabits = habitStore.habits.filter(
-      (habit) =>
-        habit.frequency.includes(dayOfWeek) &&
-        !habit.paused &&
-        new Date(habit.createdAt) <= date
-    )
-
-    let totalTarget = 0
-    let totalLogged = 0
-
-    for (const habit of scheduledHabits) {
-      totalTarget += habit.target
-
-      const logEntry = habitStore.activityLog.find(
-        (entry) => entry.habitId === habit.id && entry.date === formattedDate
-      )
-
-      if (logEntry) {
-        totalLogged += logEntry.count
-      }
-    }
-
-    const percentage = totalTarget > 0 ? Math.round((totalLogged / totalTarget) * 100) : 0
-
-    return { label, value: percentage, frontColor: "#304FFE" }
-  })
-}, [chartLength, habitStore.habits, habitStore.activityLog])
-
-
-// WEEKLY HABIT BREAKDOWN
-
-
-  const habitWeeklyBreakdown = useMemo(() => {
-    const today = new Date()
-
-    // const startOfWeek = new Date(today)
-    // startOfWeek.setDate(today.getDate() - today.getDay()) // Sunday start
-
-    // const days = eachDayOfInterval({ start: startOfWeek, end: today })
-
-    const days = Array.from({ length: chartLength }).map((_, idx) =>
-      subDays(today, chartLength - 1 - idx),
-    )
-
-    const breakdown: Record<string, { completed: number; partial: number; missed: number }> = {}
-
-    habitStore.habits
-      .filter((habit) => !habit.paused)
-      .forEach((habit) => {
-        let completed = 0
-        let partial = 0
-        let missed = 0
-
-        days.forEach((date) => {
-          const formattedDate = format(date, "yyyy-MM-dd")
+        for (const date of dateRange) {
           const dayOfWeek = format(date, "EEEE")
+          if (habit.frequency.includes(dayOfWeek) && new Date(habit.createdAt) <= date) {
+            scheduledDays += 1
+          }
+        }
 
-          // if (!habit.frequency.includes(dayOfWeek)) {
-          //   return // not scheduled that day
-          // }
+        const totalCount = activityMap.get(habit.id) || 0
+        const expectedTotal = scheduledDays * habit.target
+        const avgProgress =
+          expectedTotal > 0 ? Math.min((totalCount / expectedTotal) * 100, 100) : 0
 
-          if (!isScheduledForDate(habit, date)) return
+        return {
+          habitName: habit.name,
+          emoji: habit.emoji || "🔥",
+          avgProgress: Math.round(avgProgress),
+        }
+      })
+    }, [
+      chartLength,
+      habitStore.habits.map((h) => h.id + h.target + h.frequency.join("")).join(","),
+      habitStore.activityLog.length,
+    ])
+
+    //   const weeklyCompletionData = useMemo(() => {
+    //   if (!habitStore.habits.length || !habitStore.activityLog.length) return []
+
+    //   const today = new Date()
+    //   const startOfWeek = new Date(today)
+    //   startOfWeek.setDate(today.getDate() - today.getDay()) // Sunday start
+
+    //   const weekDates = eachDayOfInterval({ start: startOfWeek, end: today })
+
+    //   const activityMap = new Map<string, number>()
+    //   for (const log of habitStore.activityLog) {
+    //     const logDate = format(parseISO(log.date), "yyyy-MM-dd")
+    //     if (weekDates.some((d) => format(d, "yyyy-MM-dd") === logDate)) {
+    //       const current = activityMap.get(log.habitId) || 0
+    //       activityMap.set(log.habitId, current + log.count)
+    //     }
+    //   }
+
+    //   const activeHabits = habitStore.habits.filter((h) => !h.paused)
+
+    //   return activeHabits.map((habit) => {
+    //     let scheduledDays = 0
+
+    //     for (const date of weekDates) {
+    //       const dayOfWeek = format(date, "EEEE")
+    //       if (
+    //         habit.frequency.includes(dayOfWeek) &&
+    //         new Date(habit.createdAt) <= date
+    //       ) {
+    //         scheduledDays += 1
+    //       }
+    //     }
+
+    //     const totalCount = activityMap.get(habit.id) || 0
+    //     const expectedTotal = scheduledDays * habit.target
+    //     const avgProgress =
+    //       expectedTotal > 0 ? Math.min((totalCount / expectedTotal) * 100, 100) : 0
+
+    //     // 🔍 Log each habit's weekly stats
+    //     console.log(
+    //       `${habit.emoji} ${habit.name}: ScheduledDays=${scheduledDays}, Target=${habit.target}, Logged=${totalCount}, %=${Math.round(avgProgress)}`
+    //     )
+
+    //     return {
+    //       habitName: habit.name,
+    //       emoji: habit.emoji || "🔥",
+    //       avgProgress: Math.round(avgProgress),
+    //     }
+    //   })
+    // }, [
+    //   habitStore.habits.map((h) => h.id + h.target + h.frequency.join("")).join(","),
+    //   habitStore.activityLog.length,
+    // ])
+
+    // New chart to replace total activities with task completed
+
+    const dailyEffortData = useMemo(() => {
+      return Array.from({ length: chartLength }).map((_, idx) => {
+        const date = subDays(new Date(), chartLength - 1 - idx)
+        const formattedDate = format(date, "yyyy-MM-dd")
+        const dayOfWeek = format(date, "EEEE")
+        const label = format(date, "EEE") // or "MMM d" for monthly
+
+        const scheduledHabits = habitStore.habits.filter(
+          (habit) =>
+            habit.frequency.includes(dayOfWeek) &&
+            !habit.paused &&
+            new Date(habit.createdAt) <= date,
+        )
+
+        let totalTarget = 0
+        let totalLogged = 0
+
+        for (const habit of scheduledHabits) {
+          totalTarget += habit.target
 
           const logEntry = habitStore.activityLog.find(
             (entry) => entry.habitId === habit.id && entry.date === formattedDate,
           )
 
           if (logEntry) {
-            if (logEntry.count >= habit.target) {
-              completed += 1
-            } else if (logEntry.count > 0) {
-              partial += 1
+            totalLogged += logEntry.count
+          }
+        }
+
+        const percentage = totalTarget > 0 ? Math.round((totalLogged / totalTarget) * 100) : 0
+
+        return { label, value: percentage, frontColor: "#304FFE" }
+      })
+    }, [chartLength, habitStore.habits, habitStore.activityLog])
+
+    // WEEKLY HABIT BREAKDOWN
+
+    const habitWeeklyBreakdown = useMemo(() => {
+      const today = new Date()
+
+      // const startOfWeek = new Date(today)
+      // startOfWeek.setDate(today.getDate() - today.getDay()) // Sunday start
+
+      // const days = eachDayOfInterval({ start: startOfWeek, end: today })
+
+      const days = Array.from({ length: chartLength }).map((_, idx) =>
+        subDays(today, chartLength - 1 - idx),
+      )
+
+      const breakdown: Record<string, { completed: number; partial: number; missed: number }> = {}
+
+      habitStore.habits
+        .filter((habit) => !habit.paused)
+        .forEach((habit) => {
+          let completed = 0
+          let partial = 0
+          let missed = 0
+
+          days.forEach((date) => {
+            const formattedDate = format(date, "yyyy-MM-dd")
+            const dayOfWeek = format(date, "EEEE")
+
+            // if (!habit.frequency.includes(dayOfWeek)) {
+            //   return // not scheduled that day
+            // }
+
+            if (!isScheduledForDate(habit, date)) return
+
+            const logEntry = habitStore.activityLog.find(
+              (entry) => entry.habitId === habit.id && entry.date === formattedDate,
+            )
+
+            if (logEntry) {
+              if (logEntry.count >= habit.target) {
+                completed += 1
+              } else if (logEntry.count > 0) {
+                partial += 1
+              } else {
+                missed += 1
+              }
             } else {
               missed += 1
             }
-          } else {
-            missed += 1
+          })
+
+          breakdown[habit.id] = { completed, partial, missed }
+        })
+
+      return breakdown
+    }, [habitStore.habits, habitStore.activityLog])
+
+    // Completion Summary
+
+    const completionSummary = useMemo(() => {
+      let complete = 0
+      let partial = 0
+      let missed = 0
+
+      const today = new Date()
+      const days = Array.from({ length: chartLength }).map((_, i) =>
+        subDays(today, chartLength - 1 - i),
+      )
+
+      days.forEach((date) => {
+        const formattedDate = format(date, "yyyy-MM-dd")
+        const dayOfWeek = format(date, "EEEE")
+
+        const scheduledHabits = habitStore.habits.filter(
+          (h) => !h.paused && h.frequency.includes(dayOfWeek) && new Date(h.createdAt) <= date,
+        )
+
+        if (scheduledHabits.length === 0) {
+          return // no scheduled habits for this day, ignore
+        }
+
+        let completedCount = 0
+        let partialCount = 0
+
+        scheduledHabits.forEach((habit) => {
+          const entry = habitStore.activityLog.find(
+            (log) => log.habitId === habit.id && log.date === formattedDate,
+          )
+
+          if (!entry) return
+
+          if (entry.count >= habit.target) {
+            completedCount++
+          } else if (entry.count > 0) {
+            partialCount++
           }
         })
 
-        breakdown[habit.id] = { completed, partial, missed }
+        const total = scheduledHabits.length
+
+        if (completedCount === total) {
+          complete++
+        } else if (completedCount > 0 || partialCount > 0) {
+          partial++
+        } else {
+          missed++
+        }
       })
 
-    return breakdown
-  }, [habitStore.habits, habitStore.activityLog])
+      return { complete, partial, missed }
+    }, [chartLength, habitStore.habits, habitStore.activityLog])
 
+    // Habit weekly status
 
-  // Completion Summary
+    const habitWeeklyStatus = useMemo(() => {
+      const today = new Date()
+      const days = Array.from({ length: chartLength }).map((_, idx) => {
+        const date = subDays(today, chartLength - 1 - idx) // oldest to newest
+        return {
+          date,
+          formatted: format(date, "yyyy-MM-dd"),
+          dayOfWeek: format(date, "EEEE"),
+        }
+      })
 
+      return habitStore.habits
+        .filter((habit) => !habit.paused)
+        .map((habit) => {
+          const dayStatuses = days.map((day) => {
+            const isScheduled = habit.frequency.includes(day.dayOfWeek)
+            const isBeforeCreation = new Date(day.date) < new Date(habit.createdAt)
 
-  const completionSummary = useMemo(() => {
-  let complete = 0
-  let partial = 0
-  let missed = 0
+            if (!isScheduled || isBeforeCreation) {
+              return "grey" // not scheduled or not yet created
+            }
 
-  const today = new Date()
-  const days = Array.from({ length: chartLength }).map((_, i) =>
-    subDays(today, chartLength - 1 - i)
-  )
+            const logEntry = habitStore.activityLog.find(
+              (entry) => entry.habitId === habit.id && entry.date === day.formatted,
+            )
 
-  days.forEach(date => {
-    const formattedDate = format(date, "yyyy-MM-dd")
-    const dayOfWeek = format(date, "EEEE")
+            if (logEntry) {
+              if (logEntry.count >= habit.target) {
+                return "green"
+              }
+              if (logEntry.count > 0) {
+                return "yellow"
+              }
+              return "red"
+            }
 
-    const scheduledHabits = habitStore.habits.filter(h =>
-      !h.paused &&
-      h.frequency.includes(dayOfWeek) &&
-      new Date(h.createdAt) <= date
-    )
+            return "red" // scheduled but no activity
+          })
 
-    if (scheduledHabits.length === 0) {
-      return // no scheduled habits for this day, ignore
-    }
+          const completedCount = dayStatuses.filter((s) => s === "green").length
+          const partialCount = dayStatuses.filter((s) => s === "yellow").length
+          const missedCount = dayStatuses.filter((s) => s === "red").length
 
-    let completedCount = 0
-    let partialCount = 0
+          return {
+            habitName: habit.name,
+            targetText: `${habit.target} ${habit.unit} per day`,
+            dayStatuses,
+            completedCount,
+            partialCount,
+            missedCount,
+          }
+        })
+    }, [habitStore.habits, habitStore.activityLog, chartLength])
 
-    scheduledHabits.forEach(habit => {
-      const entry = habitStore.activityLog.find(
-        log => log.habitId === habit.id && log.date === formattedDate
+    // const habitWeeklyStatus = useMemo(() => {
+    //   const today = new Date()
+    //   const days = Array.from({ length: chartLength }).map((_, idx) => {
+    //     const date = subDays(today, chartLength - 1 - idx) // oldest to newest
+    //     return {
+    //       date,
+    //       formatted: format(date, "yyyy-MM-dd"),
+    //       dayOfWeek: format(date, "EEEE"),
+    //     }
+    //   })
+
+    //   return habitStore.habits
+    //     .filter((habit) => !habit.paused)
+    //     .map((habit) => {
+    //       const dayStatuses = days.map((day) => {
+
+    //         console.log("🧠 Habit:", habit.name)
+    // console.log("📅 Day:", day.formatted, "| Day of Week:", day.dayOfWeek)
+    // console.log("⏰ Scheduled:", habit.frequency.includes(day.dayOfWeek))
+
+    //         if (!habit.frequency.includes(day.dayOfWeek)) {
+    //           return "grey" // not scheduled
+    //         }
+
+    //         const logEntry = habitStore.activityLog.find(
+    //           (entry) => entry.habitId === habit.id && entry.date === day.formatted,
+    //         )
+
+    //         if (logEntry) {
+    //           if (logEntry.count >= habit.target) return "green"
+    //           if (logEntry.count > 0) return "yellow"
+    //           return "red"
+    //         }
+    //         return "red" // scheduled but no activity
+    //       })
+
+    //       return {
+    //         habitName: habit.name,
+    //         targetText: `${habit.target} ${habit.unit} per day`,
+    //         dayStatuses,
+    //       }
+    //     })
+    // }, [habitStore.habits, habitStore.activityLog, chartLength])
+
+    // const habitWeeklyStatus = useMemo(() => {
+    //   const today = new Date()
+    //   const days = Array.from({ length: chartLength }).map((_, idx) => {
+    //     const date = subDays(today, 6 - idx) // oldest to newest
+    //     return {
+    //       date,
+    //       formatted: format(date, "yyyy-MM-dd"),
+    //       dayOfWeek: format(date, "EEEE"),
+    //     }
+    //   })
+
+    //   return habitStore.habits
+    //     .filter((habit) => !habit.paused)
+    //     .map((habit) => {
+    //       const dayStatuses = days.map((day) => {
+    //         if (!habit.frequency.includes(day.dayOfWeek)) {
+    //           return "grey" // not scheduled
+    //         }
+
+    //         const logEntry = habitStore.activityLog.find(
+    //           (entry) => entry.habitId === habit.id && entry.date === day.formatted,
+    //         )
+
+    //         if (logEntry) {
+    //           if (logEntry.count >= habit.target) return "green"
+    //           if (logEntry.count > 0) return "yellow"
+    //           return "red"
+    //         }
+    //         return "red" // scheduled but no activity
+    //       })
+
+    //       return {
+    //         habitName: habit.name,
+    //         targetText: `${habit.target} ${habit.unit} per day`,
+    //         dayStatuses,
+    //       }
+    //     })
+    // }, [habitStore.habits, habitStore.activityLog])
+
+    // Habit Streaks
+
+    const habitStreaks = useMemo(() => {
+      const streaks: Record<string, number> = {}
+
+      habitStore.habits
+        .filter((habit) => !habit.paused)
+        .forEach((habit) => {
+          // Call your store's helper function instead of inline logic
+          streaks[habit.id] = habitStore.calculateHabitStreak(habit)
+        })
+
+      return streaks
+    }, [habitStore.habits, habitStore.activityLog])
+
+    const habitWeeklyTotals = useMemo(() => {
+      const today = new Date()
+      const startOfWeek = new Date(today)
+      startOfWeek.setDate(today.getDate() - today.getDay()) // Sunday start
+
+      const weekDatesSet = new Set(
+        eachDayOfInterval({ start: startOfWeek, end: today }).map((date) =>
+          format(date, "yyyy-MM-dd"),
+        ),
       )
 
-      if (!entry) return
+      const totals: Record<string, number> = {}
 
-      if (entry.count >= habit.target) {
-        completedCount++
-      } else if (entry.count > 0) {
-        partialCount++
-      }
-    })
+      habitStore.habits
+        .filter((habit) => !habit.paused)
+        .forEach((habit) => {
+          const totalCount = habitStore.activityLog
+            .filter((log) => log.habitId === habit.id && weekDatesSet.has(log.date))
+            .reduce((acc, log) => acc + log.count, 0)
 
-    const total = scheduledHabits.length
+          totals[habit.id] = totalCount
+        })
 
-    if (completedCount === total) {
-      complete++
-    } else if (completedCount > 0 || partialCount > 0) {
-      partial++
-    } else {
-      missed++
-    }
-  })
+      return totals
+    }, [habitStore.habits, habitStore.activityLog])
 
-  return { complete, partial, missed }
-}, [chartLength, habitStore.habits, habitStore.activityLog])
+    // const filteredHabits = habitStore.habits
 
+    const filteredHabits = habitStore.habits.filter((habit) => !habit.paused)
 
+    const totalCompleted = filteredHabits.reduce((acc, habit) => acc + habit.current, 0)
+    const totalTarget = filteredHabits.reduce((acc, habit) => acc + habit.target, 0)
+    const percentage = totalTarget > 0 ? Math.round((totalCompleted / totalTarget) * 100) : 0
 
+    const data: barDataItem[] = filteredHabits.map((habit) => ({
+      value: habit.current,
+      label: habit.name,
+      frontColor: colors.palette.primary600,
+      gradientColor: colors.palette.primary100,
+    }))
 
+    const pieData: pieDataItem[] = [
+      { value: 80, color: colors.palette.secondary500, focused: true },
+      { value: 20, color: colors.palette.accent500 },
+    ]
 
+    const renderDot = (color: string) => <View style={[$dotStyle, { backgroundColor: color }]} />
 
-// Habit weekly status
+    const renderLegendComponent = () => (
+      <View style={$legendContainer}>
+        <View style={$legend}>
+          {renderDot(colors.palette.secondary500)}
+          <Text>Excellent: 80%</Text>
+        </View>
+        <View style={$legend}>
+          {renderDot(colors.palette.accent500)}
+          <Text>Okay: 20%</Text>
+        </View>
+      </View>
+    )
 
-const habitWeeklyStatus = useMemo(() => {
-  const today = new Date()
-  const days = Array.from({ length: chartLength }).map((_, idx) => {
-    const date = subDays(today, chartLength - 1 - idx) // oldest to newest
-    return {
-      date,
-      formatted: format(date, "yyyy-MM-dd"),
-      dayOfWeek: format(date, "EEEE"),
-    }
-  })
+    // Daily percentage data
 
-  return habitStore.habits
-    .filter((habit) => !habit.paused)
-    .map((habit) => {
-      const dayStatuses = days.map((day) => {
-        if (!habit.frequency.includes(day.dayOfWeek)) {
-          return "grey" // not scheduled
-        }
+    const dailyPercentageData = Array.from({ length: chartLength }).map((_, idx) => {
+      // const date = subDays(new Date(), 6 - idx) // oldest to newest
+      const date = subDays(new Date(), chartLength - 1 - idx)
 
+      const formattedDate = format(date, "yyyy-MM-dd")
+      const dayOfWeek = format(date, "EEEE")
+      const label = format(date, "EEE") // "Mon", "Tue", ...
+
+      // Habits scheduled that day
+
+      const scheduledHabits = habitStore.habits.filter(
+        (habit) => habit.frequency.includes(dayOfWeek) && !habit.paused,
+      )
+
+      const totalScheduled = scheduledHabits.length
+
+      const completedCount = scheduledHabits.reduce((sum, habit) => {
         const logEntry = habitStore.activityLog.find(
-          (entry) => entry.habitId === habit.id && entry.date === day.formatted,
+          (entry) => entry.habitId === habit.id && entry.date === formattedDate,
         )
-
-        if (logEntry) {
-          if (logEntry.count >= habit.target) return "green"
-          if (logEntry.count > 0) return "yellow"
-          return "red"
+        if (logEntry && logEntry.count >= habit.target) {
+          return sum + 1
         }
-        return "red" // scheduled but no activity
-      })
+        return sum
+      }, 0)
 
-      return {
-        habitName: habit.name,
-        targetText: `${habit.target} ${habit.unit} per day`,
-        dayStatuses,
-      }
+      const percentage =
+        totalScheduled > 0 ? Math.round((completedCount / totalScheduled) * 100) : 0
+
+      return { label, value: percentage, frontColor: "#304FFE" }
     })
-}, [habitStore.habits, habitStore.activityLog, chartLength]) // ✅ chartLength added here
 
+    const percentageChartData = dailyPercentageData
 
+    // what does this do?
 
-  // const habitWeeklyStatus = useMemo(() => {
-  //   const today = new Date()
-  //   const days = Array.from({ length: chartLength }).map((_, idx) => {
-  //     const date = subDays(today, 6 - idx) // oldest to newest
-  //     return {
-  //       date,
-  //       formatted: format(date, "yyyy-MM-dd"),
-  //       dayOfWeek: format(date, "EEEE"),
-  //     }
-  //   })
+    habitStore.habits.forEach((habit) => {
+      const checkInDates = habitStore.activityLog
+        .filter((log) => log.habitId === habit.id)
+        .map((log) => log.date)
 
-  //   return habitStore.habits
-  //     .filter((habit) => !habit.paused)
-  //     .map((habit) => {
-  //       const dayStatuses = days.map((day) => {
-  //         if (!habit.frequency.includes(day.dayOfWeek)) {
-  //           return "grey" // not scheduled
-  //         }
+      streaksByHabit[habit.id] = calculateStreaks(checkInDates)
+    })
 
-  //         const logEntry = habitStore.activityLog.find(
-  //           (entry) => entry.habitId === habit.id && entry.date === day.formatted,
-  //         )
+    //Reformats dates for gifted chartd import.
 
-  //         if (logEntry) {
-  //           if (logEntry.count >= habit.target) return "green"
-  //           if (logEntry.count > 0) return "yellow"
-  //           return "red"
-  //         }
-  //         return "red" // scheduled but no activity
-  //       })
+    function formatChartData(dailyCounts: { dateStr: string; count: number }[]) {
+      return dailyCounts.map(({ dateStr, count }) => ({
+        label: format(parseISO(dateStr), "MMM d"), // e.g. "Jul 23"
+        value: count,
+        frontColor: "#304FFE", // optional: customize bar color
+      }))
+    }
 
-  //       return {
-  //         habitName: habit.name,
-  //         targetText: `${habit.target} ${habit.unit} per day`,
-  //         dayStatuses,
-  //       }
-  //     })
-  // }, [habitStore.habits, habitStore.activityLog])
+    return (
+      <Screen preset="scroll" safeAreaEdges={["top", "bottom"]} contentContainerStyle={$container}>
+        <View style={$topContainer}>
+          <Text text="Stats experimental" preset="heading" />
+          <MaterialCommunityIcons name="export-variant" size={24} />
+        </View>
 
+        {/* range selction 37/30/90 */}
 
-  // Habit Streaks
-
-  const habitStreaks = useMemo(() => {
-    const streaks: Record<string, number> = {}
-
-    habitStore.habits
-      .filter((habit) => !habit.paused)
-      .forEach((habit) => {
-        // Call your store's helper function instead of inline logic
-        streaks[habit.id] = habitStore.calculateHabitStreak(habit)
-      })
-
-    return streaks
-  }, [habitStore.habits, habitStore.activityLog])
-
-  const habitWeeklyTotals = useMemo(() => {
-    const today = new Date()
-    const startOfWeek = new Date(today)
-    startOfWeek.setDate(today.getDate() - today.getDay()) // Sunday start
-
-    const weekDatesSet = new Set(
-      eachDayOfInterval({ start: startOfWeek, end: today }).map((date) =>
-        format(date, "yyyy-MM-dd"),
-      ),
-    )
-
-    const totals: Record<string, number> = {}
-
-    habitStore.habits
-      .filter((habit) => !habit.paused)
-      .forEach((habit) => {
-        const totalCount = habitStore.activityLog
-          .filter((log) => log.habitId === habit.id && weekDatesSet.has(log.date))
-          .reduce((acc, log) => acc + log.count, 0)
-
-        totals[habit.id] = totalCount
-      })
-
-    return totals
-  }, [habitStore.habits, habitStore.activityLog])
-
-
-
-  // const filteredHabits = habitStore.habits
-
-  const filteredHabits = habitStore.habits.filter((habit) => !habit.paused)
-
-  const totalCompleted = filteredHabits.reduce((acc, habit) => acc + habit.current, 0)
-  const totalTarget = filteredHabits.reduce((acc, habit) => acc + habit.target, 0)
-  const percentage = totalTarget > 0 ? Math.round((totalCompleted / totalTarget) * 100) : 0
-
-  const data: barDataItem[] = filteredHabits.map((habit) => ({
-    value: habit.current,
-    label: habit.name,
-    frontColor: colors.palette.primary600,
-    gradientColor: colors.palette.primary100,
-  }))
-
-  const pieData: pieDataItem[] = [
-    { value: 80, color: colors.palette.secondary500, focused: true },
-    { value: 20, color: colors.palette.accent500 },
-  ]
-
-  const renderDot = (color: string) => <View style={[$dotStyle, { backgroundColor: color }]} />
-
-  const renderLegendComponent = () => (
-    <View style={$legendContainer}>
-      <View style={$legend}>
-        {renderDot(colors.palette.secondary500)}
-        <Text>Excellent: 80%</Text>
-      </View>
-      <View style={$legend}>
-        {renderDot(colors.palette.accent500)}
-        <Text>Okay: 20%</Text>
-      </View>
-    </View>
-  )
-
-  // Daily percentage data
-
-  const dailyPercentageData = Array.from({ length: chartLength }).map((_, idx) => {
-    // const date = subDays(new Date(), 6 - idx) // oldest to newest
-    const date = subDays(new Date(), chartLength - 1 - idx)
-
-    const formattedDate = format(date, "yyyy-MM-dd")
-    const dayOfWeek = format(date, "EEEE")
-    const label = format(date, "EEE") // "Mon", "Tue", ...
-
-
-
-    // Habits scheduled that day
-
-    const scheduledHabits = habitStore.habits.filter(
-      (habit) => habit.frequency.includes(dayOfWeek) && !habit.paused,
-    )
-
-    const totalScheduled = scheduledHabits.length
-
-    const completedCount = scheduledHabits.reduce((sum, habit) => {
-      const logEntry = habitStore.activityLog.find(
-        (entry) => entry.habitId === habit.id && entry.date === formattedDate,
-      )
-      if (logEntry && logEntry.count >= habit.target) {
-        return sum + 1
-      }
-      return sum
-    }, 0)
-
-    const percentage = totalScheduled > 0 ? Math.round((completedCount / totalScheduled) * 100) : 0
-
-      console.log(`${label}: Scheduled=${totalScheduled}, Completed=${completedCount}, %=${percentage}`)
-
-    return { label, value: percentage, frontColor: "#304FFE" }
-  })
-
-
-  console.log("📊 Bar Chart Data:", dailyPercentageData)
-
-const percentageChartData = dailyPercentageData
-
-
- // what does this do? 
-
-  habitStore.habits.forEach((habit) => {
-    const checkInDates = habitStore.activityLog
-      .filter((log) => log.habitId === habit.id)
-      .map((log) => log.date)
-
-    streaksByHabit[habit.id] = calculateStreaks(checkInDates)
-  })
-
-  //Reformats dates for gifted chartd import. 
-
-  function formatChartData(dailyCounts: { dateStr: string; count: number }[]) {
-  return dailyCounts.map(({ dateStr, count }) => ({
-    label: format(parseISO(dateStr), "MMM d"), // e.g. "Jul 23"
-    value: count,
-    frontColor: "#304FFE", // optional: customize bar color
-  }))
-}
-
-  return (
-    <Screen preset="scroll" safeAreaEdges={["top", "bottom"]} contentContainerStyle={$container}>
-      <View style={$topContainer}>
-        <Text text="Stats experimental" preset="heading" />
-        <MaterialCommunityIcons name="export-variant" size={24} />
-      </View>
-
-      {/* range selction 37/30/90 */}
-
-      <View style={$filtersContainer}>
-        {/* // const chartLength = filter === "M" ? 30 : 7;
+        <View style={$filtersContainer}>
+          {/* // const chartLength = filter === "M" ? 30 : 7;
 // const [filter, setFilter] = useState<"D" | "W" | "M" | "3M" | "6M" | "Y">("D"); */}
 
-        {filters.map((f, idx) => (
-          <View key={`${f.id}-${f.abbr}`} style={{ flexDirection: "row", alignItems: "center" }}>
-            <TouchableOpacity
-              style={filter === f.abbr ? $activeFilter : {}}
-              onPress={() => setFilter(f.abbr)}
-            >
-              <Text text={f.abbr} preset="bold" style={filter === f.abbr ? $activeText : {}} />
-            </TouchableOpacity>
-            {filters.length > idx + 1 && (
-              <Text text="•" preset="bold" style={{ marginHorizontal: 4 }} />
-            )}
-          </View>
-        ))}
-      </View>
-
-      <View
-        style={{
-          flexDirection: "row",
-          flex: 1,
-          borderWidth: 1,
-          borderColor: "#ccc",
-          borderRadius: 8,
-          backgroundColor: "#fff",
-          paddingVertical: 16,
-          marginTop: 16,
-
-          // 👇 Drop shadow styling
-          elevation: 2, // Android
-          shadowColor: "#000", // iOS
-          shadowOffset: { width: 0, height: 1 },
-          shadowOpacity: 0.1,
-          shadowRadius: 2,
-        }}
-      >
-        {/* Perfect */}
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-          <View
-            style={{
-              width: 12,
-              height: 12,
-              borderRadius: 6,
-              backgroundColor: "#304FFE",
-              marginBottom: 8,
-            }}
-          />
-          <Text style={{ fontSize: 16, fontWeight: "500", color: "#444" }}>Complete</Text>
-          <Text style={{ fontSize: 24, fontWeight: "700", color: "#000", marginTop: 4 }}>
-            {completionSummary.complete} days
-          </Text>
-        </View>
-
-        {/* Divider */}
-        <View style={{ width: 1, backgroundColor: "#ccc" }} />
-
-        {/* Partial */}
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-          <View
-            style={{
-              width: 12,
-              height: 12,
-              borderRadius: 6,
-              backgroundColor: "#8C9EFF",
-              marginBottom: 8,
-            }}
-          />
-          <Text style={{ fontSize: 16, fontWeight: "500", color: "#444" }}>Partial</Text>
-          <Text style={{ fontSize: 24, fontWeight: "700", color: "#000", marginTop: 4 }}>
-            {completionSummary.partial} days
-          </Text>
-        </View>
-
-        {/* Divider */}
-        <View style={{ width: 1, backgroundColor: "#ccc" }} />
-
-        {/* Missed */}
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-          <View
-            style={{
-              width: 12,
-              height: 12,
-              borderRadius: 6,
-              backgroundColor: "#BDBDBD",
-              marginBottom: 8,
-            }}
-          />
-          <Text style={{ fontSize: 16, fontWeight: "500", color: "#444" }}>Missed</Text>
-          <Text style={{ fontSize: 24, fontWeight: "700", color: "#000", marginTop: 4 }}>
-            {completionSummary.missed} days
-          </Text>
-        </View>
-      </View>
-
-      <View
-        style={{
-          flexDirection: "column",
-          flex: 1,
-          borderWidth: 1,
-          borderColor: "#ccc",
-          borderRadius: 8,
-          backgroundColor: "#fff",
-          paddingVertical: 16,
-          paddingHorizontal: 16,
-          marginTop: 24,
-          elevation: 2,
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 1 },
-          shadowOpacity: 0.1,
-          shadowRadius: 2,
-        }}
-      >
-
-{/* Taks completed */}
-
-
-      <View style={{ marginBottom: 12 }}>
-  <Text style={{ fontSize: 14, color: "#666", fontWeight: "500" }}>
-Tasks Completed  </Text>
-  <Text style={{ fontSize: 20, fontWeight: "700", color: "#304FFE" }}>
-    {/* Optional: Show today's effort % */}
-    {dailyEffortData[dailyEffortData.length - 1]?.value ?? 0}%
-  </Text>
-</View>
-
-<View style={{ overflow: "hidden", width: "100%", marginBottom: 24 }}>
-  <BarChart
-    data={dailyEffortData}
-    barWidth={20}
-    spacing={10}
-    width={layout.window.width * 0.9}
-    height={180}
-    maxValue={100}
-    barBorderRadius={6}
-    yAxisThickness={0}
-    xAxisColor="#E0E0E0"
-    xAxisType="solid"
-    xAxisLabelTextStyle={{ color: "#666", fontSize: 12 }}
-    yAxisTextStyle={{ color: "#999", fontSize: 10 }}
-    noOfSections={4}
-    yAxisLabelTexts={["0%", "25%", "50%", "75%", "100%"]}
-    showLine={false}
-  />
-</View>
-
-{/* habits completed graph  */}
-
-        <View style={{ marginBottom: 12 }}>
-          <Text style={{ fontSize: 14, color: "#666", fontWeight: "500" }}>Habits completed</Text>
-          <Text style={{ fontSize: 20, fontWeight: "700", color: "#304FFE" }}>{percentage}%</Text>
-        </View>
-
-        {/* 👇 Add this container for alignment */}
-
-        <View style={{ overflow: "hidden", width: "100%" }}>
-
-
-
-          <BarChart
-
-  data={percentageChartData}
-  barWidth={20}
-  spacing={10}
-  width={layout.window.width * 0.9}
-  height={180}
-  // maxValue={Math.max(...chartData.map(d => d.value)) + 1}
-  maxValue={Math.max(...percentageChartData.map(d => d.value)) + 1}
-  barBorderRadius={6}
-  yAxisThickness={0}
-  xAxisColor="#E0E0E0"
-  xAxisType="solid"
-  xAxisLabelTextStyle={{ color: "#666", fontSize: 12 }}
-  yAxisTextStyle={{ color: "#999", fontSize: 10 }}
-  noOfSections={4}
-    yAxisLabelTexts={["0%", "25%", "50%", "75%", "100%"]}
-  showLine={false}
-  
-/>
-        </View>
-
-      </View>
-
-      <View
-        style={{
-          flexDirection: "column",
-          flex: 1,
-          borderWidth: 1,
-          borderColor: "#ccc",
-          borderRadius: 8,
-          backgroundColor: "#fff",
-          paddingVertical: 16,
-          marginTop: 16,
-          elevation: 2, // Android
-          shadowColor: "#000", // iOS
-          shadowOffset: { width: 0, height: 1 },
-          shadowOpacity: 0.1,
-          shadowRadius: 2,
-        }}
-      >
-
-        <Text preset="subheading" style={{ marginBottom: 12, textAlign: "center" }}>
-          Weekly Completion %
-        </Text>
-
-        {weeklyCompletionData.map((habit, idx) => (
-          <View
-            key={`${habit.habitName}-${idx}`}
-            style={{ marginVertical: 12, paddingHorizontal: 16 }}
-          >
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              {/* <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: '#304FFE', marginRight: 8 }} /> */}
-              <Text text={habit.emoji} style={{ fontSize: 18, marginRight: 8 }} />
-              <Text text={habit.habitName} style={{ flex: 1, fontSize: 16, color: "#444" }} />
-              <Text text={`${habit.avgProgress}%`} style={{ fontWeight: "600", color: "#000" }} />
+          {filters.map((f, idx) => (
+            <View key={`${f.id}-${f.abbr}`} style={{ flexDirection: "row", alignItems: "center" }}>
+              <TouchableOpacity
+                style={filter === f.abbr ? $activeFilter : {}}
+                onPress={() => setFilter(f.abbr)}
+              >
+                <Text text={f.abbr} preset="bold" style={filter === f.abbr ? $activeText : {}} />
+              </TouchableOpacity>
+              {filters.length > idx + 1 && (
+                <Text text="•" preset="bold" style={{ marginHorizontal: 4 }} />
+              )}
             </View>
+          ))}
+        </View>
 
+        <View
+          style={{
+            flexDirection: "row",
+            flex: 1,
+            borderWidth: 1,
+            borderColor: "#ccc",
+            borderRadius: 8,
+            backgroundColor: "#fff",
+            paddingVertical: 16,
+            marginTop: 16,
+
+            // 👇 Drop shadow styling
+            elevation: 2, // Android
+            shadowColor: "#000", // iOS
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.1,
+            shadowRadius: 2,
+          }}
+        >
+          {/* Perfect */}
+          <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
             <View
               style={{
-                height: 8,
-                backgroundColor: "#ddd",
-                borderRadius: 4,
-                overflow: "hidden",
-                marginTop: 4,
+                width: 12,
+                height: 12,
+                borderRadius: 6,
+                backgroundColor: "#304FFE",
+                marginBottom: 8,
               }}
+            />
+            <Text style={{ fontSize: 16, fontWeight: "500", color: "#444" }}>Complete</Text>
+            <Text style={{ fontSize: 24, fontWeight: "700", color: "#000", marginTop: 4 }}>
+              {completionSummary.complete} days
+            </Text>
+          </View>
+
+          {/* Divider */}
+          <View style={{ width: 1, backgroundColor: "#ccc" }} />
+
+          {/* Partial */}
+          <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+            <View
+              style={{
+                width: 12,
+                height: 12,
+                borderRadius: 6,
+                backgroundColor: "#8C9EFF",
+                marginBottom: 8,
+              }}
+            />
+            <Text style={{ fontSize: 16, fontWeight: "500", color: "#444" }}>Partial</Text>
+            <Text style={{ fontSize: 24, fontWeight: "700", color: "#000", marginTop: 4 }}>
+              {completionSummary.partial} days
+            </Text>
+          </View>
+
+          {/* Divider */}
+          <View style={{ width: 1, backgroundColor: "#ccc" }} />
+
+          {/* Missed */}
+          <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+            <View
+              style={{
+                width: 12,
+                height: 12,
+                borderRadius: 6,
+                backgroundColor: "#616161",
+                marginBottom: 8,
+              }}
+            />
+            <Text style={{ fontSize: 16, fontWeight: "500", color: "#444" }}>Missed</Text>
+            <Text style={{ fontSize: 24, fontWeight: "700", color: "#000", marginTop: 4 }}>
+              {completionSummary.missed} days
+            </Text>
+          </View>
+        </View>
+
+        <View
+          style={{
+            flexDirection: "column",
+            flex: 1,
+            borderWidth: 1,
+            borderColor: "#ccc",
+            borderRadius: 8,
+            backgroundColor: "#fff",
+            paddingVertical: 16,
+            paddingHorizontal: 16,
+            marginTop: 24,
+            elevation: 2,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.1,
+            shadowRadius: 2,
+          }}
+        >
+          {/* Taks completed */}
+
+          <View style={{ marginBottom: 12 }}>
+            <Text style={{ fontSize: 14, color: "#666", fontWeight: "500" }}>Tasks Completed </Text>
+            <Text style={{ fontSize: 20, fontWeight: "700", color: "#304FFE" }}>
+              {/* Optional: Show today's effort % */}
+              {dailyEffortData[dailyEffortData.length - 1]?.value ?? 0}%
+            </Text>
+          </View>
+
+          <View style={{ overflow: "hidden", width: "100%", marginBottom: 24 }}>
+            <BarChart
+              data={dailyEffortData}
+              barWidth={20}
+              spacing={10}
+              width={layout.window.width * 0.9}
+              height={180}
+              maxValue={100}
+              barBorderRadius={6}
+              yAxisThickness={0}
+              xAxisColor="#E0E0E0"
+              xAxisType="solid"
+              xAxisLabelTextStyle={{ color: "#666", fontSize: 12 }}
+              yAxisTextStyle={{ color: "#999", fontSize: 10 }}
+              noOfSections={4}
+              yAxisLabelTexts={["0%", "25%", "50%", "75%", "100%"]}
+              showLine={false}
+            />
+          </View>
+
+          {/* habits completed graph  */}
+
+          <View style={{ marginBottom: 12 }}>
+            <Text style={{ fontSize: 14, color: "#666", fontWeight: "500" }}>Habits completed</Text>
+            <Text style={{ fontSize: 20, fontWeight: "700", color: "#304FFE" }}>{percentage}%</Text>
+          </View>
+
+          {/* 👇 Add this container for alignment */}
+
+          <View style={{ overflow: "hidden", width: "100%" }}>
+            <BarChart
+              data={percentageChartData}
+              barWidth={20}
+              spacing={10}
+              width={layout.window.width * 0.9}
+              height={180}
+              // maxValue={Math.max(...chartData.map(d => d.value)) + 1}
+              maxValue={Math.max(...percentageChartData.map((d) => d.value)) + 1}
+              barBorderRadius={6}
+              yAxisThickness={0}
+              xAxisColor="#E0E0E0"
+              xAxisType="solid"
+              xAxisLabelTextStyle={{ color: "#666", fontSize: 12 }}
+              yAxisTextStyle={{ color: "#999", fontSize: 10 }}
+              noOfSections={4}
+              yAxisLabelTexts={["0%", "25%", "50%", "75%", "100%"]}
+              showLine={false}
+            />
+          </View>
+        </View>
+
+        <View
+          style={{
+            flexDirection: "column",
+            flex: 1,
+            borderWidth: 1,
+            borderColor: "#ccc",
+            borderRadius: 8,
+            backgroundColor: "#fff",
+            paddingVertical: 16,
+            marginTop: 16,
+            elevation: 2, // Android
+            shadowColor: "#000", // iOS
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.1,
+            shadowRadius: 2,
+          }}
+        >
+          <Text preset="subheading" style={{ marginBottom: 12, textAlign: "center" }}>
+            Weekly Completion %
+          </Text>
+
+          {weeklyCompletionData.map((habit, idx) => (
+            <View
+              key={`${habit.habitName}-${idx}`}
+              style={{ marginVertical: 12, paddingHorizontal: 16 }}
             >
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                {/* <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: '#304FFE', marginRight: 8 }} /> */}
+                <Text text={habit.emoji} style={{ fontSize: 18, marginRight: 8 }} />
+                <Text text={habit.habitName} style={{ flex: 1, fontSize: 16, color: "#444" }} />
+                <Text text={`${habit.avgProgress}%`} style={{ fontWeight: "600", color: "#000" }} />
+              </View>
+
               <View
                 style={{
-                  width: `${habit.avgProgress}%`,
-                  backgroundColor: "#304FFE",
-                  height: "100%",
+                  height: 8,
+                  backgroundColor: "#ddd",
+                  borderRadius: 4,
+                  overflow: "hidden",
+                  marginTop: 4,
                 }}
-              />
+              >
+                <View
+                  style={{
+                    width: `${habit.avgProgress}%`,
+                    backgroundColor: "#304FFE",
+                    height: "100%",
+                  }}
+                />
+              </View>
             </View>
-          </View>
-        ))}
-      </View>
+          ))}
+        </View>
 
+        {/* habit Cards Section */}
 
+        {habitWeeklyStatus.map((habit, idx) => {
+          const habitId = habitStore.habits[idx]?.id ?? ""
+          const habitColor = habitStore.habits[idx]?.color ?? "#304FFE"
 
-       {/* habit Cards Section */}
+          return (
+            <View
+              key={`${habit.habitName}-${idx}`}
+              style={{
+                flex: 1,
+                borderWidth: 1,
+                borderColor: "#ccc",
+                borderRadius: 8,
+                backgroundColor: "#fff",
+                paddingVertical: 16,
+                marginTop: 16,
+                elevation: 2,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.1,
+                shadowRadius: 2,
+                paddingHorizontal: 16,
+              }}
+            >
+              <Text style={{ fontWeight: "700", fontSize: 16, marginBottom: 2 }}>
+                {habit.habitName}
+              </Text>
+              <Text style={{ color: "#666", marginBottom: 6 }}>{habit.targetText}</Text>
 
+              <View style={{ height: 1, backgroundColor: "#E0E0E0", marginVertical: 8 }} />
 
-       {habitWeeklyStatus.map((habit, idx) => {
-  const habitId = habitStore.habits[idx]?.id ?? ""
-  const habitColor = habitStore.habits[idx]?.color ?? "#304FFE"
-
-  return (
-    <View
-      key={`${habit.habitName}-${idx}`}
-      style={{
-        flex: 1,
-        borderWidth: 1,
-        borderColor: "#ccc",
-        borderRadius: 8,
-        backgroundColor: "#fff",
-        paddingVertical: 16,
-        marginTop: 16,
-        elevation: 2,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        paddingHorizontal: 16,
-      }}
-    >
-      <Text style={{ fontWeight: "700", fontSize: 16, marginBottom: 2 }}>
-        {habit.habitName}
-      </Text>
-      <Text style={{ color: "#666", marginBottom: 6 }}>{habit.targetText}</Text>
-
-      <View style={{ height: 1, backgroundColor: "#E0E0E0", marginVertical: 8 }} />
-
-
-
-<View style={{ maxHeight: 200 }}>
-  <ScrollView>
-    <View
-      style={{
-        flexDirection: "row",
-        flexWrap: "wrap",
-        gap: 6,
-        justifyContent: "flex-start",
-      }}
-    >
-
-{/* {habit.dayStatuses.map((status, dayIdx) => {
+              <View style={{ maxHeight: 200 }}>
+                <ScrollView>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      flexWrap: "wrap",
+                      gap: 6,
+                      justifyContent: "flex-start",
+                    }}
+                  >
+                    {/* {habit.dayStatuses.map((status, dayIdx) => {
   console.log(`📦 Box ${dayIdx}:`, status)
   return (
     <View
@@ -1119,34 +1027,31 @@ Tasks Completed  </Text>
   )
 })} */}
 
-{habit.dayStatuses.map((status, dayIdx) => {
-  console.log(`🎨 Rendering box ${dayIdx}:`, status)
-  return (
-    <View
-      key={dayIdx}
-      style={{
-        width: 24,
-        height: 24,
-        borderRadius: 4,
+                    {habit.dayStatuses.map((status, dayIdx) => {
+                      return (
+                        <View
+                          key={dayIdx}
+                          style={{
+                            width: 24,
+                            height: 24,
+                            borderRadius: 4,
 
+                            backgroundColor:
+                              status === "green"
+                                ? habitColor
+                                : status === "yellow"
+                                ? `${habitColor}30`
+                                : status === "red"
+                                ? "#616161"
+                                : status === "grey"
+                                ? "#BDBDBD"
+                                : "#FFFFFF",
+                          }}
+                        />
+                      )
+                    })}
 
-   backgroundColor:
-  status === "green"
-    ? habitColor
-    : status === "yellow"
-    ? `${habitColor}30`
-    : status === "red"
-    ? "#616161"
-    : status === "grey"
-    ? "#BDBDBD"
-    : "#FFFFFF"
-
-      }}
-    />
-  )
-})}
-      
-      {/* {habit.dayStatuses.map((status, dayIdx) => (
+                    {/* {habit.dayStatuses.map((status, dayIdx) => (
         
         <View
           key={dayIdx}
@@ -1165,15 +1070,11 @@ Tasks Completed  </Text>
           }}
         />
       ))} */}
+                  </View>
+                </ScrollView>
+              </View>
 
-
-    </View>
-  </ScrollView>
-</View>
-
-
-
-{/* 
+              {/* 
 <View
   style={{
     flexDirection: "row",
@@ -1201,71 +1102,65 @@ Tasks Completed  </Text>
   ))}
 </View> */}
 
-      <View style={{ height: 1, backgroundColor: "#E0E0E0", marginVertical: 8 }} />
-      <Text style={{ color: "#444" }}>
-        🔥 Current Streak: {streaksByHabit[habitId]?.currentStreak ?? 0} days
-      </Text>
+              <View style={{ height: 1, backgroundColor: "#E0E0E0", marginVertical: 8 }} />
+              <Text style={{ color: "#444" }}>
+                🔥 Current Streak: {streaksByHabit[habitId]?.currentStreak ?? 0} days
+              </Text>
 
-      <View style={{ height: 1, backgroundColor: "#E0E0E0", marginVertical: 8 }} />
-      <Text style={{ color: "#444", marginTop: 2 }}>
-        🏆 Longest Streak: {streaksByHabit[habitId]?.longestStreak ?? 0} days
-      </Text>
+              <View style={{ height: 1, backgroundColor: "#E0E0E0", marginVertical: 8 }} />
+              <Text style={{ color: "#444", marginTop: 2 }}>
+                🏆 Longest Streak: {streaksByHabit[habitId]?.longestStreak ?? 0} days
+              </Text>
 
-      <View style={{ height: 1, backgroundColor: "#E0E0E0", marginVertical: 8 }} />
-      <View style={{ flexDirection: "row", alignItems: "center", marginTop: 2 }}>
-        <View
-          style={{
-            width: 8,
-            height: 8,
-            borderRadius: 4,
-            backgroundColor: habitColor,
-            marginRight: 8,
-          }}
-        />
-        <Text style={{ color: "#444" }}>
-          Completed: {habitWeeklyBreakdown[habitId]?.completed ?? 0} days
-        </Text>
-      </View>
+              <View style={{ height: 1, backgroundColor: "#E0E0E0", marginVertical: 8 }} />
+              <View style={{ flexDirection: "row", alignItems: "center", marginTop: 2 }}>
+                <View
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 4,
+                    backgroundColor: habitColor,
+                    marginRight: 8,
+                  }}
+                />
 
-      <View style={{ height: 1, backgroundColor: "#E0E0E0", marginVertical: 8 }} />
-      <View style={{ flexDirection: "row", alignItems: "center", marginTop: 2 }}>
-        <View
-          style={{
-            width: 8,
-            height: 8,
-            borderRadius: 4,
-            backgroundColor: `${habitColor}80`,
-            marginRight: 8,
-          }}
-        />
-        <Text style={{ color: "#444" }}>
-          Partial: {habitWeeklyBreakdown[habitId]?.partial ?? 0} days
-        </Text>
-      </View>
+                <Text>Completed: {habit.completedCount} days</Text>
+              </View>
 
-      <View style={{ height: 1, backgroundColor: "#E0E0E0", marginVertical: 8 }} />
-      <View style={{ flexDirection: "row", alignItems: "center", marginTop: 2 }}>
-        <View
-          style={{
-            width: 8,
-            height: 8,
-            borderRadius: 4,
-            backgroundColor: "#BDBDBD",
-            marginRight: 8,
-          }}
-        />
-        <Text style={{ color: "#444" }}>
-          Missed: {habitWeeklyBreakdown[habitId]?.missed ?? 0} days
-        </Text>
-      </View>
-    </View>
-  )
-})}
-    </Screen>
-  )
-})
+              <View style={{ height: 1, backgroundColor: "#E0E0E0", marginVertical: 8 }} />
+              <View style={{ flexDirection: "row", alignItems: "center", marginTop: 2 }}>
+                <View
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 4,
+                    backgroundColor: `${habitColor}30`,
+                    marginRight: 8,
+                  }}
+                />
+                <Text>Partial: {habit.partialCount} days</Text>
+              </View>
 
-
+              <View style={{ height: 1, backgroundColor: "#E0E0E0", marginVertical: 8 }} />
+              <View style={{ flexDirection: "row", alignItems: "center", marginTop: 2 }}>
+                <View
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 4,
+                    backgroundColor: `#616161`,
+                    marginRight: 8,
+                  }}
+                />
+                <Text>Missed: {habit.missedCount} days</Text>
+              </View>
+            </View>
+          )
+        })}
+      </Screen>
+    )
+  },
+)
 
 const $container: ViewStyle = {
   paddingHorizontal: spacing.lg,
@@ -1295,6 +1190,15 @@ const $filtersContainer: ViewStyle = {
   flexDirection: "row",
   justifyContent: "space-between",
   alignItems: "center",
+
+  // 🆕 Add these for visual consistency
+  borderWidth: 1,
+  borderColor: "#ccc",
+  elevation: 2, // Android
+  shadowColor: "#000", // iOS
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.1,
+  shadowRadius: 2,
 }
 
 const $activeFilter: ViewStyle = {

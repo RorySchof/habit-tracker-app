@@ -28,17 +28,10 @@ function getDayStatuses(habit, chartLength, activityLog) {
     return format(date, "yyyy-MM-dd")
   })
 
-  console.log(`🧠 [${habit.name}] chartLength:`, chartLength)
-  console.log(`📅 [${habit.name}] dateRange:`, dateRange)
-  console.log(`📆 [${habit.name}] frequency:`, habit.frequency)
-  console.log(`📆 [${habit.name}] scheduledDays:`, scheduledDays)
-  console.log(`📊 [${habit.name}] activityLog:`, activityLog)
-
   const statuses = dateRange.map((date) => {
     const dayOfWeek = getDay(parseISO(date)) // 0 (Sun) to 6 (Sat)
 
     if (!scheduledDays.includes(dayOfWeek)) {
-      console.log(`🔘 ${date} is unscheduled`)
       return "unscheduled"
     }
 
@@ -47,25 +40,16 @@ function getDayStatuses(habit, chartLength, activityLog) {
     )
 
     if (!log) {
-      console.log(`⚫ ${date} is scheduled but missed`)
       return "missed"
     }
 
     if (log.count >= habit.target) return "green"
     if (log.count > 0) return "yellow"
     
-console.log(`⚫ ${date} is scheduled but missed`)
 return "missed"
   })
-
-  console.log(`🎨 [${habit.name}] statuses:`, statuses)
   return statuses
 }
-
-
-
-
-
 
 
 // function getDayStatuses(habit, chartLength, activityLog) {
@@ -145,7 +129,6 @@ incrementHabit(id: string, dateStr: string) {
 
   // ✅ Prevent incrementing if paused
   if (habit.paused) {
-    console.log(`Habit "${habit.name}" is paused; skipping increment.`);
     return;
   }
 
@@ -176,7 +159,6 @@ decrementHabit(id: string, dateStr: string) {
 
   // ✅ Prevent decrementing if paused
   if (habit.paused) {
-    console.log(`Habit "${habit.name}" is paused; skipping decrement.`);
     return;
   }
 
@@ -199,9 +181,7 @@ togglePauseHabit(habitId: string) {
   const habit = self.habits.find(h => h.id === habitId);
   if (habit) {
     habit.paused = !habit.paused;
-    console.log(`Toggled pause for "${habit.name}" (${habit.id}). Now paused: ${habit.paused}`);
   } else {
-    console.log(`Habit with ID ${habitId} not found.`);
   }
 },
 
