@@ -136,6 +136,7 @@ export const EditHabitScreen: FC<EditHabitScreenProps> = observer(function EditH
   return (
     <Screen preset="scroll" safeAreaEdges={["top", "bottom"]} contentContainerStyle={$container}>
       <BottomSheetModalProvider>
+        <View style={$cardContainer}> 
         <View style={$headerContainer}>
           <Icon icon="x" color={colors.text} onPress={() => navigation.goBack()} />
           <Text text="Edit habit" preset="heading" size="lg" />
@@ -295,6 +296,7 @@ export const EditHabitScreen: FC<EditHabitScreenProps> = observer(function EditH
         <Button style={$btn} textStyle={{ color: colors.palette.neutral100 }} onPress={handleSave}>
           Save changes
         </Button>
+        </View>
       </BottomSheetModalProvider>
     </Screen>
   )
@@ -328,6 +330,17 @@ const $pillContainer: ViewStyle = {
   alignItems: "center",
   justifyContent: "space-around",
   width: layout.window.width * 0.25,
+
+  // 👇 Add these to match Create screen
+  borderWidth: 1,
+  borderColor: colors.palette.neutral300,
+  elevation: 2,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.05,
+  shadowRadius: 2
+
+
 }
 
 const $subheaderContainer: ViewStyle = {
@@ -335,7 +348,10 @@ const $subheaderContainer: ViewStyle = {
   gap: 24,
 }
 
-const $pickedColor: ViewStyle = { width: 18, height: 18, borderRadius: 99 }
+const $pickedColor: ViewStyle = { 
+  width: 18, 
+  height: 18, 
+  borderRadius: 99 }
 
 const $bottomSheet: ViewStyle = {
   flex: 1,
@@ -407,6 +423,19 @@ const $reminderBottomSheet: ViewStyle = {
   padding: spacing.sm,
   marginTop: spacing.xs,
   backgroundColor: colors.palette.neutral100,
+}
+
+const $cardContainer: ViewStyle = {
+  backgroundColor: colors.palette.neutral100,
+  borderRadius: spacing.sm,
+  padding: spacing.md,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.1,
+  shadowRadius: 8,
+  elevation: 6,
+  marginBottom: spacing.lg,
+  paddingBottom: spacing.xxl,
 }
 
 const $separator: ViewStyle = { width: "100%", height: 2, backgroundColor: colors.background }
