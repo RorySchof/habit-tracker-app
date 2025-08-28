@@ -2,7 +2,7 @@
 
 import { observer } from "mobx-react-lite"
 import React, { FC } from "react"
-import { View, ViewStyle, TouchableOpacity, TextStyle } from "react-native"
+import { View, ViewStyle, TextInput, TouchableOpacity, TextStyle } from "react-native"
 import EmojiPicker from "rn-emoji-keyboard"
 import ColorPicker, { HueSlider, Panel1, Preview } from "reanimated-color-picker"
 import {
@@ -38,7 +38,6 @@ export const EditHabitScreen: FC<EditHabitScreenProps> = observer(function EditH
 }) {
   const habitId = route.params.habitId
   const task = habitStore.habits.find((h) => h.id === habitId)
-
 
   if (!task) {
     return (
@@ -85,6 +84,8 @@ export const EditHabitScreen: FC<EditHabitScreenProps> = observer(function EditH
       : [],
   )
 
+  const [target, setTarget] = React.useState<number>(task?.target ?? 1)
+
   const bottomSheetColorRef = React.useRef<BottomSheetModal>(null)
   const bottomSheetReminderRef = React.useRef<BottomSheetModal>(null)
 
@@ -110,61 +111,27 @@ export const EditHabitScreen: FC<EditHabitScreenProps> = observer(function EditH
     setFrequency(newFrequency)
   }
 
-  // const handleSave = () => {
-  //   console.log("Attempting to save habit...")
-
-  //   if (task) {
-  //     console.log("Found task:", task)
-
-  //     // task.emoji = selectedEmoji
-  //     // task.color = colorPicked
-  //     // task.frequency = frequency.map((f) => f.day)
-  //     // task.time = habitTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-
-  //     console.log("Updated task:", {
-  //       emoji: task.emoji,
-  //       color: task.color,
-  //       frequency: task.frequency,
-  //       time: task.time,
-  //     })
-
-  //     // If you have persistence
-  //     if (habitStore.saveHabits) {
-  //       habitStore.saveHabits()
-  //       console.log("Habit store saved.")
-  //     } else {
-  //       console.log("habitStore.saveHabits not defined.")
-  //     }
-  //   } else {
-  //     console.log("Task not found. Cannot save.")
-  //   }
-
-  //   navigation.navigate("Home")
-  //   console.log("Navigated to Home.")
-  // }
-
   //Handle Save
 
-
-
   const handleSave = () => {
-  if (task) {
-    habitStore.updateHabit(task.id, {
-      emoji: selectedEmoji,
-      color: colorPicked,
-      frequency: frequency.map((f) => f.day),
-      time: habitTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    })
+    if (task) {
+      habitStore.updateHabit(task.id, {
+        emoji: selectedEmoji,
+        color: colorPicked,
+        frequency: frequency.map((f) => f.day),
+        time: habitTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        target,
+      })
 
-    if (habitStore.saveHabits) {
-      habitStore.saveHabits()
+      if (habitStore.saveHabits) {
+        habitStore.saveHabits()
+      }
     }
+
+    navigation.navigate("Home")
   }
 
-  navigation.navigate("Home")
-}
-
-// Rendering Code below. 
+  // Rendering Code below.
 
   return (
     <Screen preset="scroll" safeAreaEdges={["top", "bottom"]} contentContainerStyle={$container}>
@@ -214,13 +181,23 @@ export const EditHabitScreen: FC<EditHabitScreenProps> = observer(function EditH
             value={task?.name}
             // Optionally add onChangeText and bind to local state + task.name
           />
-          <TextField label="Description" placeholder="Extra details" />
+          {/* <TextField label="Description" placeholder="Extra details" /> */}
         </View>
 
+        {/* <Text style={$labelStyle}>Target</Text> */}
+        <TextField
+          label="Target"
+          placeholder="e.g. 2"
+          required
+          value={String(target)}
+          keyboardType="numeric"
+          onChangeText={(text) => setTarget(Number(text))}
+        />
         <View style={$gap}>
           <View style={$frequencyContainer}>
-            <Text preset="formLabel" text="Frequency" style={$labelStyle} />
-            <Text text="*" style={$labelRequired} />
+            <Text preset="formLabel" style={$labelStyle}>
+              Frequency <Text style={{ color: colors.palette.primary600 }}>*</Text>
+            </Text>
           </View>
           <View style={$daysContainer}>
             {days.map((d, idx) => (
@@ -255,8 +232,9 @@ export const EditHabitScreen: FC<EditHabitScreenProps> = observer(function EditH
 
         <View style={$gap}>
           <View style={$frequencyContainer}>
-            <Text preset="formLabel" text="Habit time" style={$labelStyle} />
-            <Text text="*" style={$labelRequired} />
+            <Text preset="formLabel" style={$labelStyle}>
+              Habit Time <Text style={{ color: colors.palette.primary600 }}>*</Text>
+            </Text>
           </View>
           <DateTimePicker
             testID="dateTimePicker"

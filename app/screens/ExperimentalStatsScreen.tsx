@@ -143,7 +143,9 @@ export const ExperimentalStatsScreen: FC<StatisticsScreenProps> = observer(
       return matrix
     }, [habitStore.habits, habitStore.activityLog, chartLength])
 
-    // Longest streak
+    // Longest streak see line 720
+
+    
 
     const { activityLog } = habitStore
 
@@ -194,7 +196,12 @@ export const ExperimentalStatsScreen: FC<StatisticsScreenProps> = observer(
     const streaksByHabit: Record<string, { currentStreak: number; longestStreak: number }> = {}
 
     habitStore.habits.forEach((habit) => {
+
+ const logsForHabit = activityLog.filter(log => log.habitId === habit.id)
+
       const checkInDates = activityLog
+
+      
         .filter((log) => log.habitId === habit.id)
         .map((log) => log.date)
 
@@ -224,12 +231,29 @@ export const ExperimentalStatsScreen: FC<StatisticsScreenProps> = observer(
       return activeHabits.map((habit) => {
         let scheduledDays = 0
 
+        // OLD DATE RANGE - NEW BELOW 
+
+        // for (const date of dateRange) {
+        //   const dayOfWeek = format(date, "EEEE")
+        //   if (habit.frequency.includes(dayOfWeek) && new Date(habit.createdAt) <= date) {
+        //     scheduledDays += 1
+        //   }
+        // }
+
         for (const date of dateRange) {
-          const dayOfWeek = format(date, "EEEE")
-          if (habit.frequency.includes(dayOfWeek) && new Date(habit.createdAt) <= date) {
-            scheduledDays += 1
-          }
-        }
+  const dayOfWeek = format(date, "EEEE").toLowerCase()
+  const habitDate = new Date(habit.createdAt).toDateString()
+  const currentDate = date.toDateString()
+
+  const normalizedFrequency = habit.frequency?.map((d) => d.toLowerCase()) || []
+
+  if (normalizedFrequency.includes(dayOfWeek) && habitDate <= currentDate) {
+    scheduledDays += 1
+  }
+}
+
+
+        
 
         const totalCount = activityMap.get(habit.id) || 0
         const expectedTotal = scheduledDays * habit.target
@@ -248,59 +272,7 @@ export const ExperimentalStatsScreen: FC<StatisticsScreenProps> = observer(
       habitStore.activityLog.length,
     ])
 
-    //   const weeklyCompletionData = useMemo(() => {
-    //   if (!habitStore.habits.length || !habitStore.activityLog.length) return []
 
-    //   const today = new Date()
-    //   const startOfWeek = new Date(today)
-    //   startOfWeek.setDate(today.getDate() - today.getDay()) // Sunday start
-
-    //   const weekDates = eachDayOfInterval({ start: startOfWeek, end: today })
-
-    //   const activityMap = new Map<string, number>()
-    //   for (const log of habitStore.activityLog) {
-    //     const logDate = format(parseISO(log.date), "yyyy-MM-dd")
-    //     if (weekDates.some((d) => format(d, "yyyy-MM-dd") === logDate)) {
-    //       const current = activityMap.get(log.habitId) || 0
-    //       activityMap.set(log.habitId, current + log.count)
-    //     }
-    //   }
-
-    //   const activeHabits = habitStore.habits.filter((h) => !h.paused)
-
-    //   return activeHabits.map((habit) => {
-    //     let scheduledDays = 0
-
-    //     for (const date of weekDates) {
-    //       const dayOfWeek = format(date, "EEEE")
-    //       if (
-    //         habit.frequency.includes(dayOfWeek) &&
-    //         new Date(habit.createdAt) <= date
-    //       ) {
-    //         scheduledDays += 1
-    //       }
-    //     }
-
-    //     const totalCount = activityMap.get(habit.id) || 0
-    //     const expectedTotal = scheduledDays * habit.target
-    //     const avgProgress =
-    //       expectedTotal > 0 ? Math.min((totalCount / expectedTotal) * 100, 100) : 0
-
-    //     // 🔍 Log each habit's weekly stats
-    //     console.log(
-    //       `${habit.emoji} ${habit.name}: ScheduledDays=${scheduledDays}, Target=${habit.target}, Logged=${totalCount}, %=${Math.round(avgProgress)}`
-    //     )
-
-    //     return {
-    //       habitName: habit.name,
-    //       emoji: habit.emoji || "🔥",
-    //       avgProgress: Math.round(avgProgress),
-    //     }
-    //   })
-    // }, [
-    //   habitStore.habits.map((h) => h.id + h.target + h.frequency.join("")).join(","),
-    //   habitStore.activityLog.length,
-    // ])
 
     // New chart to replace total activities with task completed
 
@@ -701,11 +673,13 @@ export const ExperimentalStatsScreen: FC<StatisticsScreenProps> = observer(
 
     const percentageChartData = dailyPercentageData
 
-    // what does this do?
+    // what does this do? STREAKS
 
     habitStore.habits.forEach((habit) => {
+
+      
       const checkInDates = habitStore.activityLog
-        .filter((log) => log.habitId === habit.id)
+        .filter((log) => log.habitId === habit.id && log.count >= habit.target)
         .map((log) => log.date)
 
       streaksByHabit[habit.id] = calculateStreaks(checkInDates)
@@ -959,11 +933,45 @@ export const ExperimentalStatsScreen: FC<StatisticsScreenProps> = observer(
           ))}
         </View>
 
+
+
         {/* habit Cards Section */}
 
+        {/* THIS IS THE SECTION IM WORKING ON       
+          Match by name for color only — habitId may be undefined or misaligned*/}
+
+
         {habitWeeklyStatus.map((habit, idx) => {
+  // const habitId = habitStore.habits[idx]?.id ?? ""
+
+  // const habitColor = habitStore.habits[idx]?.color ?? "#304FFE"
+
+const habitFromStore = habitStore.habits.find(h => h.name === habit.habitName)  
+  const habitId = habitFromStore?.id ?? ""
+
+  const habitColor = habitFromStore?.color ?? "#304FFE"
+
+
+  // this works
+
+
+        {/* {habitWeeklyStatus.map((habit, idx) => {
           const habitId = habitStore.habits[idx]?.id ?? ""
-          const habitColor = habitStore.habits[idx]?.color ?? "#304FFE"
+
+
+          // const habitColor = habitStore.habits[idx]?.color ?? "#304FFE"
+
+          const habitFromStore = habitStore.habits.find(h => h.id === habit.habitId)
+const habitColor = habitFromStore?.color ?? "#304FFE"
+
+           console.log("🧪 Stats Card:", {
+    habitName: habit.habitName,
+    habitId,
+    habitColor,
+    matchedHabit: habitStore.habits[idx],
+  }) */}
+
+  
 
           return (
             <View

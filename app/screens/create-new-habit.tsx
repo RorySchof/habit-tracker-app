@@ -120,22 +120,59 @@ export const CreateNewHabitScreen: FC<CreateNewHabitScreenProps> = observer(
       }
     }
 
+    // Create habut function
+
 
     const handleCreateHabit = () => {
-      habitStore.addHabit({
-        name,
-        emoji: selectedEmoji,
-        date: habitDate.toISOString(), // <-- add this
-        time: habitTime.toISOString(),
-        category,
-        target,
-        unit,
-        color: colorPicked,
-        frequency,
-        // reminder,
-      })
-      navigation.navigate("Home")
-    }
+  console.log("🧪 Creating Habit:", {
+    name,
+    emoji: selectedEmoji,
+    date: habitDate.toISOString(),
+    time: habitTime.toISOString(),
+    category,
+    target,
+    unit,
+    color: colorPicked,
+    frequency,
+    // reminder,
+  })
+
+  habitStore.addHabit({
+    name,
+    emoji: selectedEmoji,
+    date: habitDate.toISOString(), // <-- add this
+    time: habitTime.toISOString(),
+    category,
+    target,
+    unit,
+    color: colorPicked,
+    frequency,
+    // reminder,
+  })
+  navigation.navigate("Home")
+}
+
+
+
+    // const handleCreateHabit = () => {
+    //   habitStore.addHabit({
+    //     name,
+    //     emoji: selectedEmoji,
+    //     date: habitDate.toISOString(), // <-- add this
+    //     time: habitTime.toISOString(),
+    //     category,
+    //     target,
+    //     unit,
+    //     color: colorPicked,
+    //     frequency,
+    //     // reminder,
+    //   })
+    //   navigation.navigate("Home")
+    // }
+
+
+
+
 
     return (
       <Screen preset="scroll" safeAreaEdges={["top", "bottom"]} contentContainerStyle={$container}>
