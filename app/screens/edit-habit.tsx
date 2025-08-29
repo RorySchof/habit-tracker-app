@@ -64,6 +64,8 @@ export const EditHabitScreen: FC<EditHabitScreenProps> = observer(function EditH
   const [selectedEmoji, setSelectedEmoji] = React.useState(task?.emoji ?? "😂")
   const [colorPicked, setColorPicked] = React.useState(task?.color ?? "#ff0000")
 
+  const [unit, setUnit] = React.useState(task?.unit ?? "times")
+
   // const [habitTime, setHabitTime] = React.useState(
   //   task?.time ? parseTimeStringToDate(task.time) : new Date()
   // )
@@ -121,6 +123,7 @@ export const EditHabitScreen: FC<EditHabitScreenProps> = observer(function EditH
         frequency: frequency.map((f) => f.day),
         time: habitTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         target,
+        unit,
       })
 
       if (habitStore.saveHabits) {
@@ -186,6 +189,8 @@ export const EditHabitScreen: FC<EditHabitScreenProps> = observer(function EditH
         </View>
 
         {/* <Text style={$labelStyle}>Target</Text> */}
+
+
         <TextField
           label="Target"
           placeholder="e.g. 2"
@@ -194,6 +199,16 @@ export const EditHabitScreen: FC<EditHabitScreenProps> = observer(function EditH
           keyboardType="numeric"
           onChangeText={(text) => setTarget(Number(text))}
         />
+
+        <TextField
+  label="Unit"
+  placeholder="e.g. times"
+  required
+  value={unit}
+  onChangeText={setUnit}
+/>
+
+
         <View style={$gap}>
           <View style={$frequencyContainer}>
             <Text preset="formLabel" style={$labelStyle}>
@@ -307,6 +322,7 @@ export const EditHabitScreen: FC<EditHabitScreenProps> = observer(function EditH
 const $container: ViewStyle = {
   paddingHorizontal: spacing.md,
   gap: spacing.xl,
+  paddingBottom: 70,
   flex: 1,
 }
 
@@ -345,7 +361,10 @@ const $pillContainer: ViewStyle = {
 
 const $subheaderContainer: ViewStyle = {
   flexDirection: "row",
-  gap: 24,
+  justifyContent: "flex-start",
+  flexWrap: "wrap",
+  gap: spacing.md,
+  marginVertical: spacing.md,
 }
 
 const $pickedColor: ViewStyle = { 
@@ -436,6 +455,7 @@ const $cardContainer: ViewStyle = {
   elevation: 6,
   marginBottom: spacing.lg,
   paddingBottom: spacing.xxl,
+  gap: spacing.md
 }
 
 const $separator: ViewStyle = { width: "100%", height: 2, backgroundColor: colors.background }
