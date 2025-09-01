@@ -208,7 +208,11 @@ export const ExperimentalStatsScreen: FC<StatisticsScreenProps> = observer(
       streaksByHabit[habit.id] = calculateStreaks(checkInDates)
     })
 
+
+
     // Weekly completion progress calculation
+
+
 
     const weeklyCompletionData = useMemo(() => {
       if (!habitStore.habits.length || !habitStore.activityLog.length) return []
@@ -228,51 +232,81 @@ export const ExperimentalStatsScreen: FC<StatisticsScreenProps> = observer(
 
       const activeHabits = habitStore.habits.filter((h) => !h.paused)
 
-      return activeHabits.map((habit) => {
-        let scheduledDays = 0
+//       return activeHabits.map((habit) => {
+//         let scheduledDays = 0
 
-        // OLD DATE RANGE - NEW BELOW 
+//         for (const date of dateRange) {
+//   const dayOfWeek = format(date, "EEEE").toLowerCase()
+//   const habitDate = new Date(habit.createdAt).toDateString()
+//   const currentDate = date.toDateString()
 
-        // for (const date of dateRange) {
-        //   const dayOfWeek = format(date, "EEEE")
-        //   if (habit.frequency.includes(dayOfWeek) && new Date(habit.createdAt) <= date) {
-        //     scheduledDays += 1
-        //   }
-        // }
+//   const normalizedFrequency = habit.frequency?.map((d) => d.toLowerCase()) || []
 
-        for (const date of dateRange) {
-  const dayOfWeek = format(date, "EEEE").toLowerCase()
-  const habitDate = new Date(habit.createdAt).toDateString()
-  const currentDate = date.toDateString()
+//   if (normalizedFrequency.includes(dayOfWeek) && habitDate <= currentDate) {
+//     scheduledDays += 1
+//   }
+// }
 
-  const normalizedFrequency = habit.frequency?.map((d) => d.toLowerCase()) || []
+// const totalCount = activityMap.get(habit.id) || 0
+// const expectedTotal = scheduledDays * habit.target
+// const avgProgress =
+//   expectedTotal > 0 ? Math.min((totalCount / expectedTotal) * 100, 100) : 0
 
-  if (normalizedFrequency.includes(dayOfWeek) && habitDate <= currentDate) {
-    scheduledDays += 1
-  }
+// return {
+//   habitName: habit.name,
+//   emoji: habit.emoji || "🔥",
+//   avgProgress: Math.round(avgProgress),
+// }
+// })
+
+return activeHabits.map((habit) => {
+  let scheduledDays = 0
+
+  for (const date of dateRange) {
+    const dayOfWeek = format(date, "EEEE").toLowerCase()
+
+    // const habitDate = new Date(habit.createdAt).toDateString()
+    // const currentDate = date.toDateString()
+
+    const normalizedFrequency = habit.frequency?.map((d) => d.toLowerCase()) || []
+
+    // if (normalizedFrequency.includes(dayOfWeek) && habitDate <= currentDate) {
+    //   scheduledDays += 1
+    // }
+
+    const habitDate = new Date(habit.createdAt)
+habitDate.setHours(0, 0, 0, 0) // strip time
+
+if (normalizedFrequency.includes(dayOfWeek) && date >= habitDate) {
+  scheduledDays += 1
 }
 
+  }
 
-        
+  const totalCount = activityMap.get(habit.id) || 0
+  const expectedTotal = scheduledDays * habit.target
+  const avgProgress =
+    expectedTotal > 0 ? Math.min((totalCount / expectedTotal) * 100, 100) : 0
 
-        const totalCount = activityMap.get(habit.id) || 0
-        const expectedTotal = scheduledDays * habit.target
-        const avgProgress =
-          expectedTotal > 0 ? Math.min((totalCount / expectedTotal) * 100, 100) : 0
+//     console.log("🧠 Habit:", habit.name)
+// console.log("📅 Created At:", habit.createdAt)
+// console.log("📆 Scheduled Days This Week:", scheduledDays)
+// console.log("✅ Total Count Logged:", totalCount)
+// console.log("🎯 Expected Total:", expectedTotal)
+// console.log("📊 Calculated %:", avgProgress)
 
-        return {
-          habitName: habit.name,
-          emoji: habit.emoji || "🔥",
-          avgProgress: Math.round(avgProgress),
-        }
-      })
-    }, [
-      chartLength,
-      habitStore.habits.map((h) => h.id + h.target + h.frequency.join("")).join(","),
-      habitStore.activityLog.length,
-    ])
+  return {
+    habitName: habit.name,
+    emoji: habit.emoji || "🔥",
+    avgProgress: Math.round(avgProgress),
+  }
+})
 
-
+}, [
+  chartLength,
+  habitStore.habits.map((h) => h.id + h.target + h.frequency.join("")).join(","),
+  habitStore.activityLog.length,
+])
 
     // New chart to replace total activities with task completed
 

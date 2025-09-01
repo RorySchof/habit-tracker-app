@@ -7,6 +7,10 @@ import { ActivityLogModel } from "../models/ActivityLogModel" // adjust path if 
 
 import { subDays, format, parseISO, getDay } from "date-fns"
 
+import { Instance } from "mobx-state-tree"
+
+
+
 const dayNameToNumber = {
   Sunday: 0,
   Monday: 1,
@@ -50,31 +54,6 @@ return "missed"
   })
   return statuses
 }
-
-
-// function getDayStatuses(habit, chartLength, activityLog) {
-//   const dateRange = Array.from({ length: chartLength }).map((_, idx) => {
-//     const date = subDays(new Date(), chartLength - 1 - idx)
-//     return format(date, "yyyy-MM-dd")
-//   })
-
-//     console.log(`🧠 [${habit.name}] chartLength:`, chartLength)
-//   console.log(`📅 [${habit.name}] dateRange:`, dateRange)
-
-//   return dateRange.map((date) => {
-//     const log = activityLog.find(
-//       (entry) => entry.habitId === habit.id && entry.date === date
-//     )
-
-//     if (!log) return "gray"
-//     if (log.count >= habit.target) return "green"
-//     if (log.count > 0) return "yellow"
-//     return "gray"
-//   })
-//   console.log(`🎨 [${habit.name}] statuses:`, statuses)
-//   return statuses
-// }
-
 
 const STORAGE_KEY = "HabitStoreSnapshot"
 
@@ -121,6 +100,33 @@ export const HabitStoreModel = types
       })
       self.habits.push(newHabit)
     },
+
+    
+
+        // This will update today's progress percentage based on the habit's new target
+
+        
+
+
+    recalculateTodayProgressForHabit(habit) {
+      const today = new Date().toISOString().split("T")[0] // e.g. "2025-08-29"
+
+      
+
+const logEntry = self.activityLog.find(
+  (log) => log.habitId === habit.id && log.date === today
+)
+
+if (!logEntry) return // No progress logged today — nothing to recalculate
+
+const target = habit.target
+const count = logEntry.count
+
+// Recalculate percentage
+logEntry.percentage = Math.min((count / target) * 100, 100)
+
+
+  },
 
 
 incrementHabit(id: string, dateStr: string) {
@@ -244,12 +250,22 @@ calculateHabitStreak(habit: Habit) {
       // @ts-ignore
       habit[key] = value
     })
+
+        self.recalculateTodayProgressForHabit(habit)
   }
 },
 
   }))
 
-export const habitStore = HabitStoreModel.create({ habits: [], activityLog: [] })
+  // EXPORTS
+
+ export interface HabitStoreType extends Instance<typeof HabitStoreModel> {
+  recalculateTodayProgressForHabit: (habit: any) => void
+} 
+
+// export const habitStore = HabitStoreModel.create({ habits: [], activityLog: [] })
+export const habitStore = HabitStoreModel.create({ habits: [], activityLog: [] }) as HabitStoreType
+
 
 habitStore.load()
 
@@ -260,3 +276,6 @@ onSnapshot(habitStore, (snapshot) => {
     .catch((error) => {
     })
 })
+
+
+

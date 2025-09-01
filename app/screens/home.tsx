@@ -722,7 +722,11 @@ export const Habit = observer(function Habit({ task, navigation }: HabitProps) {
     <>
       <TouchableOpacity
         style={[$taskContainer, { opacity: task.finished ? 0.6 : 1 }]}
-        onPress={handleOpenSheet}
+
+
+        //THIS ON PRESS DIRECTS THE TODAY Cards
+        
+        // onPress={handleOpenSheet}
       >
         {/* Left side: emoji + name */}
 
