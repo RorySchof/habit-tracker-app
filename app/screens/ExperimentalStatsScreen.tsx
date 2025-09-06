@@ -19,6 +19,9 @@ import { parseISO } from "date-fns"
 
 import { ScrollView } from "react-native"
 
+import { useFocusEffect } from "@react-navigation/native"
+import { useCallback } from "react"
+
 //FUNCTIONS AND HELPERS BELOW
 
 // gets dates. today minus 7,30,etc
@@ -59,7 +62,17 @@ type FilterKey = "D" | "W" | "M" | "3M" | "6M" | "Y"
 
 export const ExperimentalStatsScreen: FC<StatisticsScreenProps> = observer(
   function StatisticsScreen() {
+
+    const [refreshKey, setRefreshKey] = useState(0) // to reload the screen when navigated to
     const [filter, setFilter] = React.useState<FilterKey>("W")
+
+    // Reload function
+
+    useFocusEffect(
+  useCallback(() => {
+    setRefreshKey(prev => prev + 1)
+  }, [])
+)
 
     const filters = [
       { title: "Day", abbr: "D", id: 1 },
@@ -141,7 +154,7 @@ export const ExperimentalStatsScreen: FC<StatisticsScreenProps> = observer(
       }
 
       return matrix
-    }, [habitStore.habits, habitStore.activityLog, chartLength])
+    }, [refreshKey,habitStore.habits, habitStore.activityLog, chartLength])
 
     // Longest streak see line 720
 
@@ -211,8 +224,6 @@ export const ExperimentalStatsScreen: FC<StatisticsScreenProps> = observer(
 
 
     // Weekly completion progress calculation
-
-
 
     const weeklyCompletionData = useMemo(() => {
       if (!habitStore.habits.length || !habitStore.activityLog.length) return []
@@ -303,6 +314,7 @@ if (normalizedFrequency.includes(dayOfWeek) && date >= habitDate) {
 })
 
 }, [
+  refreshKey,
   chartLength,
   habitStore.habits.map((h) => h.id + h.target + h.frequency.join("")).join(","),
   habitStore.activityLog.length,
@@ -343,7 +355,7 @@ if (normalizedFrequency.includes(dayOfWeek) && date >= habitDate) {
 
         return { label, value: percentage, frontColor: "#304FFE" }
       })
-    }, [chartLength, habitStore.habits, habitStore.activityLog])
+    }, [refreshKey, chartLength, habitStore.habits, habitStore.activityLog])
 
     // WEEKLY HABIT BREAKDOWN
 
@@ -399,7 +411,7 @@ if (normalizedFrequency.includes(dayOfWeek) && date >= habitDate) {
         })
 
       return breakdown
-    }, [habitStore.habits, habitStore.activityLog])
+    }, [refreshKey, habitStore.habits, habitStore.activityLog])
 
     // Completion Summary
 
@@ -454,7 +466,7 @@ if (normalizedFrequency.includes(dayOfWeek) && date >= habitDate) {
       })
 
       return { complete, partial, missed }
-    }, [chartLength, habitStore.habits, habitStore.activityLog])
+    }, [refreshKey, chartLength, habitStore.habits, habitStore.activityLog])
 
     // Habit weekly status
 
@@ -510,7 +522,7 @@ if (normalizedFrequency.includes(dayOfWeek) && date >= habitDate) {
             missedCount,
           }
         })
-    }, [habitStore.habits, habitStore.activityLog, chartLength])
+    }, [refreshKey, habitStore.habits, habitStore.activityLog, chartLength])
 
     // const habitWeeklyStatus = useMemo(() => {
     //   const today = new Date()
@@ -608,7 +620,7 @@ if (normalizedFrequency.includes(dayOfWeek) && date >= habitDate) {
         })
 
       return streaks
-    }, [habitStore.habits, habitStore.activityLog])
+    }, [refreshKey, habitStore.habits, habitStore.activityLog])
 
     const habitWeeklyTotals = useMemo(() => {
       const today = new Date()
@@ -634,7 +646,7 @@ if (normalizedFrequency.includes(dayOfWeek) && date >= habitDate) {
         })
 
       return totals
-    }, [habitStore.habits, habitStore.activityLog])
+    }, [refreshKey, habitStore.habits, habitStore.activityLog])
 
     // const filteredHabits = habitStore.habits
 
