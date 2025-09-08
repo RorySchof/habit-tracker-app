@@ -125,7 +125,7 @@ export const ExperimentalStatsScreen: FC<StatisticsScreenProps> = observer(
           (habit) =>
             !habit.paused &&
             habit.frequency.includes(dayOfWeek) &&
-            new Date(habit.createdAt) <= date,
+            format(new Date(habit.createdAt), "yyyy-MM-dd") <= dateStr,
         )
 
         for (const habit of scheduledHabits) {
@@ -243,32 +243,7 @@ export const ExperimentalStatsScreen: FC<StatisticsScreenProps> = observer(
 
       const activeHabits = habitStore.habits.filter((h) => !h.paused)
 
-//       return activeHabits.map((habit) => {
-//         let scheduledDays = 0
 
-//         for (const date of dateRange) {
-//   const dayOfWeek = format(date, "EEEE").toLowerCase()
-//   const habitDate = new Date(habit.createdAt).toDateString()
-//   const currentDate = date.toDateString()
-
-//   const normalizedFrequency = habit.frequency?.map((d) => d.toLowerCase()) || []
-
-//   if (normalizedFrequency.includes(dayOfWeek) && habitDate <= currentDate) {
-//     scheduledDays += 1
-//   }
-// }
-
-// const totalCount = activityMap.get(habit.id) || 0
-// const expectedTotal = scheduledDays * habit.target
-// const avgProgress =
-//   expectedTotal > 0 ? Math.min((totalCount / expectedTotal) * 100, 100) : 0
-
-// return {
-//   habitName: habit.name,
-//   emoji: habit.emoji || "🔥",
-//   avgProgress: Math.round(avgProgress),
-// }
-// })
 
 return activeHabits.map((habit) => {
   let scheduledDays = 0
@@ -347,7 +322,7 @@ console.log("📆 Date Range:", dateRange.map(d => format(d, "EEEE yyyy-MM-dd"))
           (habit) =>
             habit.frequency.includes(dayOfWeek) &&
             !habit.paused &&
-            new Date(habit.createdAt) <= date,
+            format(new Date(habit.createdAt), "yyyy-MM-dd") <= formattedDate,
         )
 
         let totalTarget = 0
@@ -444,7 +419,8 @@ console.log("📆 Date Range:", dateRange.map(d => format(d, "EEEE yyyy-MM-dd"))
         const dayOfWeek = format(date, "EEEE")
 
         const scheduledHabits = habitStore.habits.filter(
-          (h) => !h.paused && h.frequency.includes(dayOfWeek) && new Date(h.createdAt) <= date,
+          (h) => !h.paused && h.frequency.includes(dayOfWeek) && format(new Date(h.createdAt), "yyyy-MM-dd") <= formattedDate
+,
         )
 
         if (scheduledHabits.length === 0) {
@@ -470,6 +446,21 @@ console.log("📆 Date Range:", dateRange.map(d => format(d, "EEEE yyyy-MM-dd"))
 
         const total = scheduledHabits.length
 
+        // ✅ Place logs here
+  console.log(`📆 ${formattedDate}`)
+  console.log(`🧠 Scheduled Habits:`, scheduledHabits.map(h => h.name))
+  console.log(`✅ Completed Count: ${completedCount}`)
+  console.log(`⚠️ Partial Count: ${partialCount}`)
+  console.log(`📊 Total Scheduled: ${scheduledHabits.length}`)
+
+
+console.log(`📆 ${formattedDate}`)
+console.log(`🧠 Scheduled Habits:`, scheduledHabits.map(h => h.name))
+console.log(`✅ Completed Count: ${completedCount}`)
+console.log(`⚠️ Partial Count: ${partialCount}`)
+console.log(`📊 Total Scheduled: ${scheduledHabits.length}`)
+
+
         if (completedCount === total) {
           complete++
         } else if (completedCount > 0 || partialCount > 0) {
@@ -478,6 +469,8 @@ console.log("📆 Date Range:", dateRange.map(d => format(d, "EEEE yyyy-MM-dd"))
           missed++
         }
       })
+
+      
 
       return { complete, partial, missed }
     }, [refreshKey, chartLength, habitStore.habits, habitStore.activityLog])
@@ -500,7 +493,7 @@ console.log("📆 Date Range:", dateRange.map(d => format(d, "EEEE yyyy-MM-dd"))
         .map((habit) => {
           const dayStatuses = days.map((day) => {
             const isScheduled = habit.frequency.includes(day.dayOfWeek)
-            const isBeforeCreation = new Date(day.date) < new Date(habit.createdAt)
+const isBeforeCreation = format(new Date(habit.createdAt), "yyyy-MM-dd") > day.formatted
 
             if (!isScheduled || isBeforeCreation) {
               return "grey" // not scheduled or not yet created
@@ -931,17 +924,9 @@ console.log(
             shadowRadius: 2,
           }}
         >
-          {/* Taks completed */}
-
-          <View style={{ marginBottom: 12 }}>
-            <Text style={{ fontSize: 14, color: "#666", fontWeight: "500" }}>Tasks Completed </Text>
-            <Text style={{ fontSize: 20, fontWeight: "700", color: "#304FFE" }}>
-              {/* Optional: Show today's effort % */}
-              {dailyEffortData[dailyEffortData.length - 1]?.value ?? 0}%
-            </Text>
-          </View>
-
-          <View style={{ overflow: "hidden", width: "100%", marginBottom: 24 }}>
+          {/* Taks completed GRAPH..!!!!!!!  KEEP THIS WHEN YOU CLEAN CODE */}
+          
+          {/* <View style={{ overflow: "hidden", width: "100%", marginBottom: 24 }}>
             <BarChart
               data={dailyEffortData}
               barWidth={20}
@@ -959,7 +944,7 @@ console.log(
               yAxisLabelTexts={["0%", "25%", "50%", "75%", "100%"]}
               showLine={false}
             />
-          </View>
+          </View> */}
 
           {/* habits completed graph  */}
 
@@ -973,9 +958,6 @@ console.log(
           {/* 👇 Add this container for alignment */}
 
           <View style={{ overflow: "hidden", width: "100%" }}>
-
-            
-
             <BarChart
               data={percentageChartData}
               barWidth={20}
@@ -1016,7 +998,7 @@ console.log(
           }}
         >
           <Text preset="subheading" style={{ marginBottom: 12, textAlign: "center" }}>
-            Weekly Completion %
+            Activity Completion
           </Text>
 
           {weeklyCompletionData.map((habit, idx) => (
