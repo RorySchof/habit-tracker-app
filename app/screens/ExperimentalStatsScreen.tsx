@@ -306,6 +306,20 @@ if (normalizedFrequency.includes(dayOfWeek) && date >= habitDate) {
 // console.log("🎯 Expected Total:", expectedTotal)
 // console.log("📊 Calculated %:", avgProgress)
 
+
+console.log("📊 Weekly Completion Debug:", {
+  name: habit.name,
+  target: habit.target,
+  scheduledDays,
+  totalCount,
+  expectedTotal,
+  avgProgress: Math.round(avgProgress),
+})
+
+console.log("📅 Chart Length:", chartLength)
+console.log("📆 Date Range:", dateRange.map(d => format(d, "EEEE yyyy-MM-dd")))
+
+
   return {
     habitName: habit.name,
     emoji: habit.emoji || "🔥",
@@ -607,6 +621,9 @@ if (normalizedFrequency.includes(dayOfWeek) && date >= habitDate) {
     //     })
     // }, [habitStore.habits, habitStore.activityLog])
 
+
+
+
     // Habit Streaks
 
     const habitStreaks = useMemo(() => {
@@ -695,9 +712,16 @@ if (normalizedFrequency.includes(dayOfWeek) && date >= habitDate) {
 
       // Habits scheduled that day
 
-      const scheduledHabits = habitStore.habits.filter(
-        (habit) => habit.frequency.includes(dayOfWeek) && !habit.paused,
-      )
+      const normalizedDay = dayOfWeek.toLowerCase()
+
+      const scheduledHabits = habitStore.habits.filter((habit) => {
+  const normalizedFrequency = habit.frequency?.map(d => d.toLowerCase()) || []
+  return normalizedFrequency.includes(normalizedDay) && !habit.paused
+})
+
+      // const scheduledHabits = habitStore.habits.filter(
+      //   (habit) => habit.frequency.includes(dayOfWeek) && !habit.paused,
+      // )
 
       const totalScheduled = scheduledHabits.length
 
@@ -714,10 +738,53 @@ if (normalizedFrequency.includes(dayOfWeek) && date >= habitDate) {
       const percentage =
         totalScheduled > 0 ? Math.round((completedCount / totalScheduled) * 100) : 0
 
+
+        if (formattedDate === format(new Date(), "yyyy-MM-dd")) {
+  console.log("📆 Today:", formattedDate)
+  console.log("📊 Total Scheduled Habits:", totalScheduled)
+
+  console.log("🧠 Scheduled Habits Today:", scheduledHabits.map(h => ({
+    name: h.name,
+    target: h.target,
+    frequency: h.frequency,
+    createdAt: h.createdAt,
+  })))
+
+    if (formattedDate === format(new Date(), "yyyy-MM-dd")) {
+    console.log("📊 Chart Data — Habits Completed Today")
+    console.log("📅 Label:", label)
+    console.log("🧠 Scheduled Habits:", scheduledHabits.map(h => h.name))
+    console.log("✅ Completed Count:", completedCount)
+    console.log("📊 Completion %:", percentage)
+  }
+
+  const completedHabits = scheduledHabits.filter((habit) => {
+    const logEntry = habitStore.activityLog.find(
+      (entry) =>
+        entry.habitId === habit.id &&
+        entry.date === formattedDate
+    )
+    const totalCount = logEntry?.count ?? 0
+    return totalCount >= habit.target
+  })
+
+  console.log("✅ Completed Habits Today:", completedHabits.map(h => h.name))
+  console.log("📊 Completion %:", completedHabits.length, "/", scheduledHabits.length)
+}
+
+
       return { label, value: percentage, frontColor: "#304FFE" }
     })
 
     const percentageChartData = dailyPercentageData
+
+    const todayPercentage = percentageChartData[percentageChartData.length - 1]?.value ?? 0
+
+    console.log("📊 Rendering Habits Completed Chart:")
+console.log(
+  "📊 percentageChartData:",
+  percentageChartData.map((d) => `${d.label}: ${d.value}%`)
+)
 
     // what does this do? STREAKS
 
@@ -897,13 +964,18 @@ if (normalizedFrequency.includes(dayOfWeek) && date >= habitDate) {
           {/* habits completed graph  */}
 
           <View style={{ marginBottom: 12 }}>
-            <Text style={{ fontSize: 14, color: "#666", fontWeight: "500" }}>Habits completed</Text>
-            <Text style={{ fontSize: 20, fontWeight: "700", color: "#304FFE" }}>{percentage}%</Text>
-          </View>
+  <Text style={{ fontSize: 14, color: "#666", fontWeight: "500" }}>Habits completed</Text>
+  <Text style={{ fontSize: 20, fontWeight: "700", color: "#304FFE" }}>
+    {todayPercentage}%
+  </Text>
+</View>
 
           {/* 👇 Add this container for alignment */}
 
           <View style={{ overflow: "hidden", width: "100%" }}>
+
+            
+
             <BarChart
               data={percentageChartData}
               barWidth={20}
@@ -911,7 +983,8 @@ if (normalizedFrequency.includes(dayOfWeek) && date >= habitDate) {
               width={layout.window.width * 0.9}
               height={180}
               // maxValue={Math.max(...chartData.map(d => d.value)) + 1}
-              maxValue={Math.max(...percentageChartData.map((d) => d.value)) + 1}
+              // maxValue={Math.max(...percentageChartData.map((d) => d.value)) + 1}
+              maxValue={100}
               barBorderRadius={6}
               yAxisThickness={0}
               xAxisColor="#E0E0E0"
