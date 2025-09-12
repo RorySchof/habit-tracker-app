@@ -1,7 +1,7 @@
 // Experimental Statistics.tsx
 
 import { observer } from "mobx-react-lite"
-import React, { FC, useMemo, useState } from "react"
+import React, { FC, useMemo, useState, useRef, useEffect } from "react"
 import { View, ViewStyle, TouchableOpacity, TextStyle } from "react-native"
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons"
 import { BarChart, barDataItem, PieChart, pieDataItem } from "react-native-gifted-charts"
@@ -98,11 +98,66 @@ export const ExperimentalStatsScreen: FC<StatisticsScreenProps> = observer(
       const habits = habitStore.getHabitsWithStatuses(chartLength)
     }, [filter])
 
+   
+
     const habits = habitStore.getHabitsWithStatuses(chartLength)
     const completions = habitStore.activityLog
     const dates = getPastDates(chartLength)
     const dailyCounts = getDailyCounts(dates, completions)
     const chartData = formatChartData(dailyCounts)
+
+     const scrollRef = useRef<ScrollView>(null)
+
+     const [layoutReady, setLayoutReady] = useState(false)
+
+const isMonthlyView = chartData.length > 7
+
+
+// useEffect(() => {
+//   if (!layoutReady || !isMonthlyView) return
+
+//   const lastActiveIndex = chartData.findLastIndex(d => d.value > 0)
+//   const chartWidth = chartData.length * (20 + 10)
+//   const shouldScroll = chartWidth > layout.window.width
+
+//   if (shouldScroll && lastActiveIndex !== -1 && scrollRef.current) {
+//     const scrollOffset = lastActiveIndex * (20 + 10)
+//     scrollRef.current.scrollTo({ x: scrollOffset, animated: true })
+//   }
+// }, [chartData, layoutReady])
+
+
+const barWidth = 20
+const spacing = 10
+const chartPadding = 16
+
+const percentageChartData = Array.isArray(dailyPercentageData) ? dailyPercentageData : []
+const chartWidth =
+  Array.isArray(percentageChartData) && percentageChartData.length > 0
+    ? percentageChartData.length * (barWidth + spacing)
+    : layout.window.width
+
+useEffect(() => {
+  const isMonthlyView = filter === "M"
+  if (!layoutReady || !isMonthlyView || !Array.isArray(chartData) || chartData.length <= 7) return
+
+  const scrollOffset = (chartData.length - 1) * (barWidth + spacing) + chartPadding
+  const scrollChartWidth = chartData.length * (barWidth + spacing)
+  const shouldScroll = scrollChartWidth > layout.window.width
+
+  if (shouldScroll && scrollRef.current) {
+    setTimeout(() => {
+      scrollRef.current?.scrollTo({ x: scrollOffset, animated: true })
+      console.log("✅ Auto-scrolled to:", scrollOffset)
+    }, 100)
+  }
+}, [chartData, layoutReady, filter])
+
+
+
+
+
+
 
     // MASTER MATRIX FUNCTION
 
@@ -769,7 +824,6 @@ const isBeforeCreation = format(new Date(habit.createdAt), "yyyy-MM-dd") > day.f
       return { label, value: percentage, frontColor: "#304FFE" }
     })
 
-    const percentageChartData = dailyPercentageData
 
     const todayPercentage = percentageChartData[percentageChartData.length - 1]?.value ?? 0
 
@@ -925,7 +979,7 @@ console.log(
           }}
         >
           {/* Taks completed GRAPH..!!!!!!!  KEEP THIS WHEN YOU CLEAN CODE */}
-          
+
           {/* <View style={{ overflow: "hidden", width: "100%", marginBottom: 24 }}>
             <BarChart
               data={dailyEffortData}
@@ -954,9 +1008,8 @@ console.log(
     {todayPercentage}%
   </Text>
 </View>
-
           {/* 👇 Add this container for alignment */}
-
+{/* 
           <View style={{ overflow: "hidden", width: "100%" }}>
             <BarChart
               data={percentageChartData}
@@ -977,7 +1030,37 @@ console.log(
               yAxisLabelTexts={["0%", "25%", "50%", "75%", "100%"]}
               showLine={false}
             />
-          </View>
+          </View> */}
+
+<ScrollView
+  horizontal
+  ref={scrollRef}
+  onLayout={() => setLayoutReady(true)}
+  showsHorizontalScrollIndicator={false}
+  contentContainerStyle={{ paddingHorizontal: chartPadding }}
+>
+  <View style={{ width: chartWidth }}>
+    <BarChart
+      data={percentageChartData}
+      barWidth={barWidth}
+      spacing={spacing}
+      width={chartWidth}
+      height={180}
+      maxValue={100}
+      barBorderRadius={6}
+      yAxisThickness={0}
+      xAxisColor="#E0E0E0"
+      xAxisType="solid"
+      xAxisLabelTextStyle={{ color: "#666", fontSize: 12 }}
+      yAxisTextStyle={{ color: "#999", fontSize: 10 }}
+      noOfSections={4}
+      yAxisLabelTexts={["0%", "25%", "50%", "75%", "100%"]}
+      showLine={false}
+    />
+  </View>
+</ScrollView>
+
+
         </View>
 
         <View
